@@ -1,0 +1,11 @@
+Styling for not due/overdue (green/red)
+Dark mode (maybe with switch)
+
+Sorting
+  Sort not-due (below line) by time to due
+  Sort due (above line) by how due they are (current score)
+
+Online sync
+  Initial version can be like sheets based
+
+Figure out namecheap too many redirects :/

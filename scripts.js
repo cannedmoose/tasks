@@ -228,7 +228,7 @@ function taskCompare(time) {
     var score2 = taskScore(task2, time);
     var diff = score2 - score1;
 
-    if (Math.abs(diff) < 0.0001) {
+    if (Math.abs(diff) < 0.001) {
       return task1.repeat - task2.repeat;
     }
     return diff;

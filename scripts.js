@@ -84,7 +84,9 @@ function displayTasks(time) {
     createElement("div", taskDiv).className = "divider";
   }
 
-  var editButton = createElement("button", taskDiv);
+  var navDiv = createElement("div", taskDiv);
+  navDiv.className = "navDiv";
+  var editButton = createElement("button", navDiv);
   editButton.textContent = "Edit Tasks";
   editButton.onclick = () => navigate("edit");
 
@@ -145,7 +147,7 @@ function editTasks() {
 
   // Navigation
   var navDiv = createElement("div", taskDiv);
-
+  navDiv.className = "navDiv";
   var button = createElement("button", navDiv);
   button.textContent = "Done";
   button.onclick = () => navigate();
@@ -162,7 +164,7 @@ function taskAdmin() {
   adminText.value = JSON.stringify({ tasks, taskHistory }, null, 2);
 
   var navDiv = createElement("div", taskDiv);
-
+  navDiv.className = "navDiv";
   var button = createElement("button", navDiv);
   button.textContent = "Done";
   button.onclick = () => navigate("edit");
@@ -252,23 +254,28 @@ function formatDelta(delta) {
   var months = weeks / 4;
 
   if (months >= 1) {
-    return Math.round(months) + " Months";
+    months = Math.round(months);
+    return Math.round(months) + " Month" + (months > 1 ? "s" : "");
   }
 
   if (weeks >= 1) {
-    return Math.round(weeks) + " Weeks";
+    weeks = Math.round(weeks);
+    return Math.round(weeks) + " Week" + (weeks > 1 ? "s" : "");
   }
 
   if (days >= 1) {
-    return Math.round(days) + " Days";
+    days = Math.round(days);
+    return Math.round(days) + " Day" + (days > 1 ? "s" : "");
   }
 
   if (hours >= 1) {
-    return Math.round(hours) + " Hours";
+    hours = Math.round(hours);
+    return Math.round(hours) + " Hour" + (hours > 1 ? "s" : "");
   }
 
   if (minutes >= 1) {
-    return Math.round(minutes) + " Minutes";
+    minutes = Math.round(minutes);
+    return Math.round(minutes) + " Minute" + (minutes > 1 ? "s" : "");
   }
 
   return "Now";

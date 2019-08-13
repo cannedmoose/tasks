@@ -75,8 +75,8 @@ function displayTasks(time) {
     var containerDiv = initTemplate("taskDisplay", taskDiv);
     var button = containerDiv.firstElementChild;
     button.onclick = () => doTask(task.name);
-    button.firstElementChild.textContent = task.name;
-    button.lastElementChild.textContent =
+    button.children[0].textContent = task.name;
+    button.children[1].textContent =
       (score > 1 ? "Overdue " : "Due in ") + formatDelta(delta);
   });
 
@@ -84,10 +84,9 @@ function displayTasks(time) {
     createElement("div", taskDiv).className = "divider";
   }
 
-  var addButton = createElement("button", taskDiv);
-  addButton.textContent = "Edit Tasks";
-  addButton.className = "addButton";
-  addButton.onclick = () => navigate("edit");
+  var editButton = createElement("button", taskDiv);
+  editButton.textContent = "Edit Tasks";
+  editButton.onclick = () => navigate("edit");
 
   updateCallback = setInterval(navigate, 6 * 1000);
 }
@@ -106,7 +105,6 @@ function editTasks() {
     lastDone =
       Date.now() -
       dayToMillis(repeat - parseInt(containerDiv.children[2].value));
-    id = Math.max(tasks.map(t => t.id)) + 1;
     tasks.push({
       name,
       repeat,
@@ -145,11 +143,14 @@ function editTasks() {
     };
   });
 
+  // Navigation
   var navDiv = createElement("div", taskDiv);
+
   var button = createElement("button", navDiv);
   button.textContent = "Done";
   button.onclick = () => navigate();
-  var button = createElement("button", navDiv);
+
+  button = createElement("button", navDiv);
   button.textContent = "Admin";
   button.onclick = () => navigate("admin");
 }
@@ -159,12 +160,23 @@ function taskAdmin() {
   var adminText = createElement("textarea", taskDiv);
   adminText.className = "adminText";
   adminText.value = JSON.stringify({ tasks, taskHistory }, null, 2);
+
   var navDiv = createElement("div", taskDiv);
+
   var button = createElement("button", navDiv);
   button.textContent = "Done";
   button.onclick = () => navigate("edit");
-  var button = createElement("button", navDiv);
+
+  button = createElement("button", navDiv);
   button.textContent = "Import";
+  button.onclick = () => {
+    var vals = JSON.parse(adminText.value);
+
+    taskHistory = vals.taskHistory;
+    tasks = vals.tasks;
+    store();
+    navigate("admin");
+  };
 }
 
 /**
@@ -176,38 +188,6 @@ function doTask(name) {
   var task = tasks.find(e => e.name === name);
   task.lastDone = time;
   taskHistory.push({ name, time });
-  store();
-  navigate();
-}
-
-function addUpdateTask() {
-  var name = document.getElementById("taskName").value;
-  var repeat = parseInt(document.getElementById("taskRepeat").value);
-  var task = tasks.find(e => e.name === name);
-  if (!task) {
-    if (Number.isNaN(repeat)) {
-      return;
-    }
-    var lastDone = Date.now() - dayToMillis(repeat);
-    task = { name, repeat, lastDone };
-    tasks.push(task);
-  } else {
-    if (Number.isNaN(repeat)) {
-      tasks = tasks.filter(e => e.name !== name);
-    } else {
-      task.repeat = repeat;
-    }
-  }
-  store();
-  navigate("add");
-}
-
-function adminImport() {
-  var adminText = document.getElementById("adminText");
-  var vals = JSON.parse(adminText.value);
-
-  taskHistory = vals.taskHistory;
-  tasks = vals.tasks;
   store();
   navigate();
 }

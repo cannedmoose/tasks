@@ -3,6 +3,7 @@ input {
 }
 button {
   width: 100%;
+  height: max-content;
   font-size: 2em;
 }
 

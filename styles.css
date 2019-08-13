@@ -1,0 +1,62 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100vw;
+}
+
+#adminText {
+  width: 100%;
+  height: 70vh;
+}
+
+.divider {
+  height: 2vh;
+  width: 100%;
+  background-color: black;
+}
+
+.addButtons {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+button {
+  width: 100%;
+  height: 100%;
+  font-size: 1em;
+  padding: 0.5em 0;
+}
+
+.task {
+  width: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+.inputs {
+  font-size: 3em;
+}
+
+input {
+  font-size: 1em;
+}
+
+.addButton {
+  margin: 1em 1em;
+}
+
+#taskList {
+  font-size: 2.5em;
+  width: 100%;
+  margin: 2em 2em;
+}
+@media only screen and (max-width: 1000px) {
+  /* For mobile phones: */
+  button {
+    font-size: 3em;
+  }
+}

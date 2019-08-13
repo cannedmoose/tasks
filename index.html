@@ -15,10 +15,24 @@
 
       Template for adding/editing a task
       <div id="taskEdit" class="task">
-        <button class="taskButton">
-          <div class="taskName">Task Name</div>
-          <div>Due in</div>
-        </button>
+        <input
+          type="text"
+          name="taskName"
+          placeholder="Task name"
+          autocomplete="off"
+        />
+        <input
+          type="number"
+          name="taskRepeat"
+          placeholder="Repeat Days"
+          autocomplete="off"
+        />
+        <input
+          type="number"
+          name="taskDue"
+          placeholder="Due in Days"
+          autocomplete="off"
+        />
       </div>
     </div>
   </head>

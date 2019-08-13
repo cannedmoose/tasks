@@ -62,8 +62,7 @@ function displayTasks(time) {
   var taskDiv = document.getElementById("container");
   tasks.sort(taskCompare(time));
   var passedUpToDate = false;
-  for (i in tasks) {
-    var task = tasks[i];
+  tasks.forEach(task => {
     var score = taskScore(task, time);
     var delta = time - task.lastDone - dayToMillis(task.repeat);
 
@@ -75,44 +74,97 @@ function displayTasks(time) {
     // Get and fill out task button
     var containerDiv = initTemplate("taskDisplay", taskDiv);
     var button = containerDiv.firstElementChild;
-    button.onClick = () => doTask(task.name);
+    button.onclick = () => doTask(task.name);
     button.firstElementChild.textContent = task.name;
     button.lastElementChild.textContent =
       (score > 1 ? "Overdue " : "Due in ") + formatDelta(delta);
-  }
+  });
 
   if (!passedUpToDate) {
     createElement("div", taskDiv).className = "divider";
   }
 
   var addButton = createElement("button", taskDiv);
-  addButton.textContent = "Add Task";
+  addButton.textContent = "Edit Tasks";
   addButton.className = "addButton";
-  addButton.onClick, () => navigate("add");
+  addButton.onclick = () => navigate("edit");
 
   updateCallback = setInterval(navigate, 6 * 1000);
 }
 
 function editTasks() {
-  var taskList = document.getElementById("taskList");
-  while (taskList.firstChild) {
-    taskList.removeChild(taskList.firstChild);
-  }
-  for (i in tasks) {
-    var task = tasks[i];
-    var listItem = document.createElement("div");
-    taskList.append(listItem);
-    listItem.append(
-      document.createTextNode(
-        '"' + task.name + '" repeats every ' + task.repeat + " days"
-      )
-    );
-  }
+  var time = Date.now();
+  var taskDiv = document.getElementById("container");
+
+  // Show add
+  var containerDiv = initTemplate("taskEdit", taskDiv);
+  var button = createElement("button", containerDiv);
+  button.textContent = "Add";
+  button.onclick = () => {
+    name = containerDiv.children[0].value;
+    repeat = parseInt(containerDiv.children[1].value);
+    lastDone =
+      Date.now() -
+      dayToMillis(repeat - parseInt(containerDiv.children[2].value));
+    id = Math.max(tasks.map(t => t.id)) + 1;
+    tasks.push({
+      name,
+      repeat,
+      lastDone
+    });
+    store();
+    navigate("edit");
+  };
+  createElement("div", taskDiv).className = "divider";
+
+  tasks.forEach(task => {
+    var containerDiv = initTemplate("taskEdit", taskDiv);
+    containerDiv.children[0].value = task.name;
+    containerDiv.children[0].oninput = e => {
+      task.name = e.target.value;
+      store();
+    };
+    containerDiv.children[1].value = task.repeat;
+    containerDiv.children[1].oninput = e => {
+      task.repeat = parseInt(e.target.value);
+      store();
+    };
+    containerDiv.children[2].value =
+      task.repeat - millisToDays(time - task.lastDone);
+    containerDiv.children[2].oninput = e => {
+      task.lastDone =
+        Date.now() - dayToMillis(task.repeat - parseInt(e.target.value));
+      store();
+    };
+    var button = createElement("button", containerDiv);
+    button.textContent = "Delete";
+    button.onclick = () => {
+      tasks = tasks.filter(e => e !== task);
+      store();
+      navigate("edit");
+    };
+  });
+
+  var navDiv = createElement("div", taskDiv);
+  var button = createElement("button", navDiv);
+  button.textContent = "Done";
+  button.onclick = () => navigate();
+  var button = createElement("button", navDiv);
+  button.textContent = "Admin";
+  button.onclick = () => navigate("admin");
 }
 
 function taskAdmin() {
-  var adminText = document.getElementById("adminText");
+  var taskDiv = document.getElementById("container");
+  var adminText = createElement("textarea", taskDiv);
+  adminText.className = "adminText";
   adminText.value = JSON.stringify({ tasks, taskHistory }, null, 2);
+  var navDiv = createElement("div", taskDiv);
+  var button = createElement("button", navDiv);
+  button.textContent = "Done";
+  button.onclick = () => navigate("edit");
+  var button = createElement("button", navDiv);
+  button.textContent = "Import";
 }
 
 /**
@@ -132,7 +184,6 @@ function addUpdateTask() {
   var name = document.getElementById("taskName").value;
   var repeat = parseInt(document.getElementById("taskRepeat").value);
   var task = tasks.find(e => e.name === name);
-  console.log(repeat);
   if (!task) {
     if (Number.isNaN(repeat)) {
       return;
@@ -143,7 +194,6 @@ function addUpdateTask() {
   } else {
     if (Number.isNaN(repeat)) {
       tasks = tasks.filter(e => e.name !== name);
-      console.log(repeat);
     } else {
       task.repeat = repeat;
     }
@@ -205,6 +255,10 @@ function taskCompare(time) {
 
 function dayToMillis(days) {
   return days * 86400000;
+}
+
+function millisToDays(millis) {
+  return Math.round(millis / 86400000);
 }
 
 function formatDelta(delta) {

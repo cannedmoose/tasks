@@ -64,7 +64,7 @@ function displayTasks(time) {
   var passedUpToDate = false;
   tasks.forEach(task => {
     var score = taskScore(task, time);
-    var delta = time - task.lastDone - dayToMillis(task.repeat);
+    var delta = time - task.lastDone - daysToMillis(task.repeat);
 
     // Add divider for due/overdue items
     if (!passedUpToDate && score <= 1) {
@@ -104,7 +104,7 @@ function editTasks() {
     repeat = parseInt(containerDiv.children[1].value);
     lastDone =
       Date.now() -
-      dayToMillis(repeat - parseInt(containerDiv.children[2].value));
+      daysToMillis(repeat - parseInt(containerDiv.children[2].value));
     tasks.push({
       name,
       repeat,
@@ -131,7 +131,7 @@ function editTasks() {
       task.repeat - millisToDays(time - task.lastDone);
     containerDiv.children[2].oninput = e => {
       task.lastDone =
-        Date.now() - dayToMillis(task.repeat - parseInt(e.target.value));
+        Date.now() - daysToMillis(task.repeat - parseInt(e.target.value));
       store();
     };
     var button = createElement("button", containerDiv);
@@ -212,7 +212,7 @@ function initTemplate(name, parent) {
 
 function taskScore(task, time) {
   var delta = time - task.lastDone;
-  var repeat = dayToMillis(task.repeat);
+  var repeat = daysToMillis(task.repeat);
 
   return delta / repeat;
 }
@@ -233,7 +233,7 @@ function taskCompare(time) {
   };
 }
 
-function dayToMillis(days) {
+function daysToMillis(days) {
   return days * 86400000;
 }
 
@@ -273,8 +273,3 @@ function formatDelta(delta) {
 
   return "Now";
 }
-/**
- * TODO
- * CLEAN CODE
- * More styling
- */

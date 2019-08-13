@@ -5,49 +5,24 @@
     <script src="scripts.js"></script>
 
     <div id="templates" hidden>
+      Template for displaying a task
       <div id="taskDisplay" class="task">
         <button class="taskButton">
           <div class="taskName">Task Name</div>
           <div>Due in</div>
         </button>
       </div>
+
+      Template for adding/editing a task
       <div id="taskEdit" class="task">
         <button class="taskButton">
           <div class="taskName">Task Name</div>
           <div>Due in</div>
         </button>
       </div>
-      <div id="dividerTemplate" class="divider"></div>
     </div>
   </head>
   <body>
-    <div class="page" id="tasks"></div>
-    <div class="page" id="add">
-      <div id="taskList"></div>
-      <div class="inputs">
-        <input
-          type="text"
-          name="taskName"
-          id="taskName"
-          placeholder="Task name"
-        />
-        <input
-          type="number"
-          name="taskRepeat"
-          id="taskRepeat"
-          placeholder="Repeat"
-        />
-        days
-      </div>
-      <div class="addButtons">
-        <button onClick="addUpdateTask()">Add/Update</button>
-        <button onClick="navigate('admin')">Admin</button>
-      </div>
-      <button onClick="navigate()">Done</button>
-    </div>
-    <div class="page" id="admin">
-      <textarea id="adminText"></textarea>
-      <button onClick="adminImport()">Import</button>
-    </div>
+    <div id="container" class="container"></div>
   </body>
 </html>

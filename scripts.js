@@ -8,13 +8,7 @@ window.onload = function() {
   localStorage = window.localStorage;
   var url = new URL(window.location);
   var params = new URLSearchParams(url.search);
-  if (localStorage.tasks) {
-    tasks = JSON.parse(localStorage.tasks);
-  }
-  if (localStorage.taskHistory) {
-    taskHistory = JSON.parse(localStorage.taskHistory);
-  }
-
+  load();
   navigate(params.get("page"));
 };
 
@@ -22,6 +16,108 @@ function store() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
   localStorage.setItem("taskHistory", JSON.stringify(taskHistory));
 }
+
+function load() {
+  if (localStorage.tasks) {
+    tasks = JSON.parse(localStorage.tasks);
+  }
+  if (localStorage.taskHistory) {
+    taskHistory = JSON.parse(localStorage.taskHistory);
+  }
+}
+
+function navigate(page) {
+  // Cleanup
+  if (updateCallback) {
+    clearInterval(updateCallback);
+    updateCallback = null;
+  }
+  clearPage();
+
+  // Show page
+  if (!page || page === "all") {
+    // Default, show tasks
+    displayTasks(Date.now());
+  }
+  if (page === "edit" || page === "all") {
+    editTasks();
+  }
+  if (page === "admin" || page === "all") {
+    taskAdmin();
+  }
+}
+
+/**
+ * Display pages
+ */
+
+function clearPage() {
+  var taskDiv = document.getElementById("container");
+  while (taskDiv.firstChild) {
+    taskDiv.removeChild(taskDiv.firstChild);
+  }
+}
+
+function displayTasks(time) {
+  var taskDiv = document.getElementById("container");
+  tasks.sort(taskCompare(time));
+  var passedUpToDate = false;
+  for (i in tasks) {
+    var task = tasks[i];
+    var score = taskScore(task, time);
+    var delta = time - task.lastDone - dayToMillis(task.repeat);
+
+    // Add divider for due/overdue items
+    if (!passedUpToDate && score <= 1) {
+      createElement("div", taskDiv).className = "divider";
+      passedUpToDate = true;
+    }
+    // Get and fill out task button
+    var containerDiv = initTemplate("taskDisplay", taskDiv);
+    var button = containerDiv.firstElementChild;
+    button.onClick = () => doTask(task.name);
+    button.firstElementChild.textContent = task.name;
+    button.lastElementChild.textContent =
+      (score > 1 ? "Overdue " : "Due in ") + formatDelta(delta);
+  }
+
+  if (!passedUpToDate) {
+    createElement("div", taskDiv).className = "divider";
+  }
+
+  var addButton = createElement("button", taskDiv);
+  addButton.textContent = "Add Task";
+  addButton.className = "addButton";
+  addButton.onClick, () => navigate("add");
+
+  updateCallback = setInterval(navigate, 6 * 1000);
+}
+
+function editTasks() {
+  var taskList = document.getElementById("taskList");
+  while (taskList.firstChild) {
+    taskList.removeChild(taskList.firstChild);
+  }
+  for (i in tasks) {
+    var task = tasks[i];
+    var listItem = document.createElement("div");
+    taskList.append(listItem);
+    listItem.append(
+      document.createTextNode(
+        '"' + task.name + '" repeats every ' + task.repeat + " days"
+      )
+    );
+  }
+}
+
+function taskAdmin() {
+  var adminText = document.getElementById("adminText");
+  adminText.value = JSON.stringify({ tasks, taskHistory }, null, 2);
+}
+
+/**
+ * Task actions
+ */
 
 function doTask(name) {
   var time = Date.now();
@@ -66,105 +162,23 @@ function adminImport() {
   navigate();
 }
 
-function getTemplate(name, id) {
-  var node = document.getElementById(name).cloneNode(true);
-  node.setAttribute("id", id);
-  return node;
-}
-
-function displayTasks(time) {
-  updateCallback = setInterval(navigate, 6 * 1000);
-
-  var taskDiv = document.getElementById("tasks");
-  while (taskDiv.firstChild) {
-    taskDiv.removeChild(taskDiv.firstChild);
-  }
-  tasks.sort(taskCompare(time));
-  var passedUpToDate = false;
-  for (i in tasks) {
-    var task = tasks[i];
-    var score = taskScore(task, time);
-    var delta = time - task.lastDone - dayToMillis(task.repeat);
-
-    // Add divider for due/overdue items
-    if (!passedUpToDate && score <= 1) {
-      taskDiv.append(getTemplate("dividerTemplate", "divider"));
-      passedUpToDate = true;
-    }
-    // Get and fill out task button
-    var containerDiv = getTemplate("taskDisplay", "task" + i);
-    var button = containerDiv.firstElementChild;
-    button.setAttribute("onClick", "doTask('" + task.name + "')");
-    button.firstElementChild.textContent = task.name;
-    button.lastElementChild.textContent =
-      (score > 1 ? "Overdue " : "Due in ") + formatDelta(delta);
-    taskDiv.append(containerDiv);
-  }
-
-  if (!passedUpToDate) {
-    taskDiv.append(getTemplate("dividerTemplate", "divider"));
-  }
-
-  var button = document.createElement("Button");
-  button.textContent = "Add Task";
-  button.setAttribute("class", "addButton");
-  button.setAttribute("onClick", "navigate('add')");
-  taskDiv.append(button);
-}
-
-function addTasks() {
-  var taskList = document.getElementById("taskList");
-  while (taskList.firstChild) {
-    taskList.removeChild(taskList.firstChild);
-  }
-  for (i in tasks) {
-    var task = tasks[i];
-    var listItem = document.createElement("div");
-    taskList.append(listItem);
-    listItem.append(
-      document.createTextNode(
-        '"' + task.name + '" repeats every ' + task.repeat + " days"
-      )
-    );
-  }
-}
-
-function displayAdmin() {
-  var adminText = document.getElementById("adminText");
-  adminText.value = JSON.stringify({ tasks, taskHistory }, null, 2);
-}
-
-function navigate(page) {
-  // NOTE TO SELF MAYBE NOT THE BEST IDEA
-  // Should come up with a better way to update these....
-  if (updateCallback) {
-    clearInterval(updateCallback);
-    updateCallback = null;
-  }
-  // Hide pages
-  // For some reason Element.hidden was not working for task display :/
-  document.getElementById("tasks").style.display = "none";
-  document.getElementById("add").style.display = "none";
-  document.getElementById("admin").style.display = "none";
-
-  if (!page || page === "all") {
-    // Default, show tasks
-    displayTasks(Date.now());
-    document.getElementById("tasks").style.display = "flex";
-  }
-  if (page === "add" || page === "all") {
-    addTasks();
-    document.getElementById("add").style.display = "flex";
-  }
-  if (page === "admin" || page === "all") {
-    displayAdmin();
-    document.getElementById("admin").style.display = "flex";
-  }
-}
-
 /**
  * Helpers
  */
+
+function createElement(name, parent) {
+  var child = document.createElement(name);
+  parent.append(child);
+  return child;
+}
+
+function initTemplate(name, parent) {
+  var child = document.getElementById(name).cloneNode(true);
+  // Reset ID so we don't have duplicates
+  child.id = undefined;
+  parent.append(child);
+  return child;
+}
 
 function taskScore(task, time) {
   var delta = time - task.lastDone;

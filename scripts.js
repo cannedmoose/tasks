@@ -109,15 +109,17 @@ function displayTasks(time) {
 
   genCordian("Overdue", 0, dueTasks, taskDiv, time);
 
+  var timesort = (t1, t2) => {
+    var d1 = time - t1.lastDone - t1.repeat;
+    var d2 = time - t2.lastDone - t2.repeat;
+    return d2 - d1;
+  };
+
   var dueSoonTasks = tasks.filter(task => {
     var due = task.lastDone + task.repeat;
     return time < due && time + 12 * 60 * 60 * 1000 > due;
   });
-  dueSoonTasks.sort((t1, t2) => {
-    var d1 = time - t1.lastDone - t1.repeat;
-    var d2 = time - t2.lastDone - t2.repeat;
-    return d2 - d1;
-  });
+  dueSoonTasks.sort(timesort);
 
   genCordian("Due Soon", 1, dueSoonTasks, taskDiv, time);
 
@@ -125,11 +127,7 @@ function displayTasks(time) {
     var due = task.lastDone + task.repeat;
     return time + 12 * 60 * 60 * 1000 < due && time + 48 * 60 * 60 * 1000 > due;
   });
-  dueLaterTasks.sort((t1, t2) => {
-    var d1 = time - t1.lastDone - t1.repeat;
-    var d2 = time - t2.lastDone - t2.repeat;
-    return d2 - d1;
-  });
+  dueLaterTasks.sort(timesort);
 
   genCordian("Due Later", 2, dueLaterTasks, taskDiv, time);
 
@@ -137,11 +135,7 @@ function displayTasks(time) {
     var due = task.lastDone + task.repeat;
     return time + 48 * 60 * 60 * 1000 < due;
   });
-  theRestTasks.sort((t1, t2) => {
-    var d1 = time - t1.lastDone - t1.repeat;
-    var d2 = time - t2.lastDone - t2.repeat;
-    return d2 - d1;
-  });
+  theRestTasks.sort(timesort);
 
   genCordian("The Rest", 3, theRestTasks, taskDiv, time);
 

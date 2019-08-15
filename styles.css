@@ -1,3 +1,4 @@
+select,
 input {
   font-size: 1.5em;
 }
@@ -87,6 +88,7 @@ body {
     font-size: 4em;
   }
 
+  select,
   input {
     font-size: 3em;
   }

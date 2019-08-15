@@ -1,8 +1,9 @@
+var localStorage;
 var tasks = [];
 var taskHistory = [];
-var updateCallback;
+var version = 1;
 
-var localStorage;
+var updateCallback;
 
 window.onload = function() {
   localStorage = window.localStorage;
@@ -15,6 +16,7 @@ window.onload = function() {
 function store() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
   localStorage.setItem("taskHistory", JSON.stringify(taskHistory));
+  localStorage.setItem("version", version);
 }
 
 function load() {
@@ -23,6 +25,13 @@ function load() {
   }
   if (localStorage.taskHistory) {
     taskHistory = JSON.parse(localStorage.taskHistory);
+  }
+
+  if (!localStorage.version) {
+    // Convert repeat time to millis
+    tasks.forEach(task => (task.repeat = daysToMillis(task.repeat)));
+    version = 1;
+    store();
   }
 }
 
@@ -60,29 +69,42 @@ function clearPage() {
 
 function displayTasks(time) {
   var taskDiv = document.getElementById("container");
-  tasks.sort(taskCompare(time));
-  var passedUpToDate = false;
-  tasks.forEach(task => {
-    var score = taskScore(task, time);
-    var delta = time - task.lastDone - daysToMillis(task.repeat);
+  var dueTasks = tasks.filter(task => {
+    return time >= task.lastDone + task.repeat;
+  });
+  dueTasks.sort(taskCompare(time));
 
-    // Add divider for due/overdue items
-    if (!passedUpToDate && score <= 1) {
-      createElement("div", taskDiv).className = "divider";
-      passedUpToDate = true;
-    }
+  dueTasks.forEach(task => {
+    var delta = time - task.lastDone - task.repeat;
     // Get and fill out task button
     var containerDiv = initTemplate("taskDisplay", taskDiv);
     var button = containerDiv.firstElementChild;
     button.onclick = () => doTask(task.name);
     button.children[0].textContent = task.name;
-    button.children[1].textContent =
-      (score > 1 ? "Overdue " : "Due in ") + formatDelta(delta);
+    button.children[1].textContent = "Overdue " + formatDelta(delta);
   });
 
-  if (!passedUpToDate) {
-    createElement("div", taskDiv).className = "divider";
-  }
+  createElement("div", taskDiv).className = "divider";
+
+  var undueTasks = tasks.filter(task => {
+    // TODO add cutoff (eg 12 hours, a day, a week, all)
+    return time < task.lastDone + task.repeat;
+  });
+  undueTasks.sort((t1, t2) => {
+    var d1 = time - t1.lastDone - t1.repeat;
+    var d2 = time - t2.lastDone - t2.repeat;
+    return d2 - d1;
+  });
+
+  undueTasks.forEach(task => {
+    var delta = time - task.lastDone - task.repeat;
+    // Get and fill out task button
+    var containerDiv = initTemplate("taskDisplay", taskDiv);
+    var button = containerDiv.firstElementChild;
+    button.onclick = () => doTask(task.name);
+    button.children[0].textContent = task.name;
+    button.children[1].textContent = "Due in " + formatDelta(delta);
+  });
 
   var navDiv = createElement("div", taskDiv);
   navDiv.className = "navDiv";
@@ -103,10 +125,11 @@ function editTasks() {
   button.textContent = "Add";
   button.onclick = () => {
     name = containerDiv.children[0].value;
-    repeat = parseInt(containerDiv.children[1].value);
+    repeat = daysToMillis(parseInt(containerDiv.children[1].value));
     lastDone =
       Date.now() -
-      daysToMillis(repeat - parseInt(containerDiv.children[2].value));
+      repeat -
+      daysToMillis(parseInt(containerDiv.children[2].value));
     tasks.push({
       name,
       repeat,
@@ -124,13 +147,13 @@ function editTasks() {
       task.name = e.target.value;
       store();
     };
-    containerDiv.children[1].value = task.repeat;
+    containerDiv.children[1].value = millisToDays(task.repeat);
     containerDiv.children[1].oninput = e => {
-      task.repeat = parseInt(e.target.value);
+      task.repeat = daysToMillis(parseInt(e.target.value));
       store();
     };
     containerDiv.children[2].value =
-      task.repeat - millisToDays(time - task.lastDone);
+      millisToDays(task.repeat) - millisToDays(time - task.lastDone);
     containerDiv.children[2].oninput = e => {
       task.lastDone =
         Date.now() - daysToMillis(task.repeat - parseInt(e.target.value));
@@ -161,7 +184,7 @@ function taskAdmin() {
   var taskDiv = document.getElementById("container");
   var adminText = createElement("textarea", taskDiv);
   adminText.className = "adminText";
-  adminText.value = JSON.stringify({ tasks, taskHistory }, null, 2);
+  adminText.value = JSON.stringify({ tasks, taskHistory, version }, null, 2);
 
   var navDiv = createElement("div", taskDiv);
   navDiv.className = "navDiv";
@@ -176,6 +199,7 @@ function taskAdmin() {
 
     taskHistory = vals.taskHistory;
     tasks = vals.tasks;
+    version = vals.version;
     store();
     navigate("admin");
   };
@@ -214,7 +238,7 @@ function initTemplate(name, parent) {
 
 function taskScore(task, time) {
   var delta = time - task.lastDone;
-  var repeat = daysToMillis(task.repeat);
+  var repeat = task.repeat;
 
   return delta / repeat;
 }

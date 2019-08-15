@@ -1,9 +1,8 @@
 Styling for not due/overdue (green/red)
 Dark mode (maybe with switch)
 
-Sorting
-  Sort not-due (below line) by time to due
-  Sort due (above line) by how due they are (current score)
+Filter not due tasks by time
+Task edit/input overhaul
 
 Online sync
   Initial version can be like sheets based

@@ -1,8 +1,12 @@
 Styling for not due/overdue (green/red)
 Dark mode (maybe with switch)
 
-Filter not due tasks by time
+Refactor templating - there must be a nicer way :/
+Refactor accordian code
+
 Task edit/input overhaul
+Make categories editable
+
 
 Online sync
   Initial version can be like sheets based

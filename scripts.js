@@ -2,6 +2,7 @@ var localStorage;
 var tasks = [];
 var taskHistory = [];
 var version = 1;
+var checked = [true, true, false, false];
 
 var updateCallback;
 
@@ -67,44 +68,82 @@ function clearPage() {
   }
 }
 
+function genCordian(name, id, tasks, taskDiv, time) {
+  if (tasks.length === 0) {
+    return;
+  }
+  var accordian = initTemplate("accordianSection", taskDiv);
+  accordian.children[0].id = "accordian" + id;
+  accordian.children[0].checked = checked[id];
+  accordian.children[0].onchange = e => {
+    checked[id] = e.target.checked;
+  };
+  accordian.children[1].textContent = name + " - " + tasks.length;
+  accordian.children[1].setAttribute("for", "accordian" + id);
+
+  tasks.forEach(task => {
+    var delta = time - task.lastDone - task.repeat;
+    // Get and fill out task button
+    var containerDiv = initTemplate("taskDisplay", accordian.children[2]);
+    var button = containerDiv.firstElementChild;
+    button.onclick = () => doTask(task.name);
+    button.children[0].textContent = task.name;
+    button.children[1].textContent =
+      (delta >= 0 ? "Overdue " : "Due in ") + formatDelta(delta);
+  });
+}
+
 function displayTasks(time) {
   var taskDiv = document.getElementById("container");
   var dueTasks = tasks.filter(task => {
     return time >= task.lastDone + task.repeat;
   });
-  dueTasks.sort(taskCompare(time));
+  dueTasks.sort((t1, t2) => {
+    var s1 = (time - t1.lastDone) / t1.repeat;
+    var s2 = (time - t2.lastDone) / t2.repeat;
+    diff = s2 - s1;
 
-  dueTasks.forEach(task => {
-    var delta = time - task.lastDone - task.repeat;
-    // Get and fill out task button
-    var containerDiv = initTemplate("taskDisplay", taskDiv);
-    var button = containerDiv.firstElementChild;
-    button.onclick = () => doTask(task.name);
-    button.children[0].textContent = task.name;
-    button.children[1].textContent = "Overdue " + formatDelta(delta);
+    // TODO check this ordering
+    return Math.abs(diff) < 0.001 ? t2.repeat - t1.repeat : diff;
   });
 
-  createElement("div", taskDiv).className = "divider";
+  genCordian("Overdue", 0, dueTasks, taskDiv, time);
 
-  var undueTasks = tasks.filter(task => {
-    // TODO add cutoff (eg 12 hours, a day, a week, all)
-    return time < task.lastDone + task.repeat;
+  var dueSoonTasks = tasks.filter(task => {
+    var due = task.lastDone + task.repeat;
+    return time < due && time + 12 * 60 * 60 * 1000 > due;
   });
-  undueTasks.sort((t1, t2) => {
+  dueSoonTasks.sort((t1, t2) => {
     var d1 = time - t1.lastDone - t1.repeat;
     var d2 = time - t2.lastDone - t2.repeat;
     return d2 - d1;
   });
 
-  undueTasks.forEach(task => {
-    var delta = time - task.lastDone - task.repeat;
-    // Get and fill out task button
-    var containerDiv = initTemplate("taskDisplay", taskDiv);
-    var button = containerDiv.firstElementChild;
-    button.onclick = () => doTask(task.name);
-    button.children[0].textContent = task.name;
-    button.children[1].textContent = "Due in " + formatDelta(delta);
+  genCordian("Due Soon", 1, dueSoonTasks, taskDiv, time);
+
+  var dueLaterTasks = tasks.filter(task => {
+    var due = task.lastDone + task.repeat;
+    return time + 12 * 60 * 60 * 1000 < due && time + 48 * 60 * 60 * 1000 > due;
   });
+  dueLaterTasks.sort((t1, t2) => {
+    var d1 = time - t1.lastDone - t1.repeat;
+    var d2 = time - t2.lastDone - t2.repeat;
+    return d2 - d1;
+  });
+
+  genCordian("Due Later", 2, dueLaterTasks, taskDiv, time);
+
+  var theRestTasks = tasks.filter(task => {
+    var due = task.lastDone + task.repeat;
+    return time + 48 * 60 * 60 * 1000 < due;
+  });
+  theRestTasks.sort((t1, t2) => {
+    var d1 = time - t1.lastDone - t1.repeat;
+    var d2 = time - t2.lastDone - t2.repeat;
+    return d2 - d1;
+  });
+
+  genCordian("The Rest", 3, theRestTasks, taskDiv, time);
 
   var navDiv = createElement("div", taskDiv);
   navDiv.className = "navDiv";
@@ -112,7 +151,7 @@ function displayTasks(time) {
   editButton.textContent = "Edit Tasks";
   editButton.onclick = () => navigate("edit");
 
-  updateCallback = setInterval(navigate, 6 * 1000);
+  updateCallback = setInterval(navigate, 10 * 1000);
 }
 
 function editTasks() {
@@ -156,7 +195,7 @@ function editTasks() {
       millisToDays(task.repeat) - millisToDays(time - task.lastDone);
     containerDiv.children[2].oninput = e => {
       task.lastDone =
-        Date.now() - daysToMillis(task.repeat - parseInt(e.target.value));
+        Date.now() - task.repeat - daysToMillis(parseInt(e.target.value));
       store();
     };
     var button = createElement("button", containerDiv);
@@ -234,29 +273,6 @@ function initTemplate(name, parent) {
   child.id = undefined;
   parent.append(child);
   return child;
-}
-
-function taskScore(task, time) {
-  var delta = time - task.lastDone;
-  var repeat = task.repeat;
-
-  return delta / repeat;
-}
-
-/**
- * Return a comparator for tasks at a given time.
- */
-function taskCompare(time) {
-  return function(task1, task2) {
-    var score1 = taskScore(task1, time);
-    var score2 = taskScore(task2, time);
-    var diff = score2 - score1;
-
-    if (Math.abs(diff) < 0.001) {
-      return task1.repeat - task2.repeat;
-    }
-    return diff;
-  };
 }
 
 function daysToMillis(days) {

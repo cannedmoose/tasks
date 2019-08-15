@@ -18,7 +18,6 @@ button {
 .task {
   width: 100%;
   display: flex;
-  margin: 0.5em 0;
 }
 
 .adminText {
@@ -54,6 +53,34 @@ body {
   margin: 1em 0;
 }
 
+.accordian-section {
+  width: 100%;
+}
+
+.accordian-toggle {
+  display: none;
+}
+.accordion-content {
+  display: none;
+}
+
+.accordian-toggle-label {
+  display: block;
+  text-align: center;
+  font-size: 2em;
+  background-color: #aaa;
+  border: 2px solid black;
+  padding: 0.5em 0.5em;
+  font-family: sans-serif;
+  font-weight: bold;
+}
+
+.accordian-toggle:checked + .accordian-toggle-label + .accordion-content {
+  display: block;
+  border: 2px dashed black;
+  border-top: none;
+}
+
 @media only screen and (max-width: 1000px) {
   /* For mobile phones: */
   button {
@@ -66,5 +93,9 @@ body {
 
   .container {
     max-width: 100%;
+  }
+
+  .accordian-toggle-label {
+    font-size: 4em;
   }
 }

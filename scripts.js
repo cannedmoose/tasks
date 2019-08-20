@@ -1,3 +1,5 @@
+import { Accordian } from "./components/accordian.js";
+
 var localStorage;
 var tasks = [];
 var taskHistory = [];
@@ -68,29 +70,23 @@ function clearPage() {
   }
 }
 
-function genCordian(name, id, tasks, taskDiv, time) {
-  if (tasks.length === 0) {
-    return;
-  }
-  var accordian = initTemplate("accordianSection", taskDiv);
-  accordian.children[0].id = "accordian" + id;
-  accordian.children[0].checked = checked[id];
-  accordian.children[0].onchange = e => {
-    checked[id] = e.target.checked;
-  };
-  accordian.children[1].textContent = name + " - " + tasks.length;
-  accordian.children[1].setAttribute("for", "accordian" + id);
+function groupAccordian(name, tasks, taskDiv) {
+  var accordian = new Accordian(true);
+  taskDiv.append(accordian);
 
+  var label = document.createElement("div");
+  accordian.slot("label", label);
+  label.textContent = name + " - " + tasks.length;
+
+  var tasksDiv = document.createElement("div");
   tasks.forEach(task => {
-    var delta = time - task.lastDone - task.repeat;
-    // Get and fill out task button
-    var containerDiv = initTemplate("taskDisplay", accordian.children[2]);
-    var button = containerDiv.firstElementChild;
-    button.onclick = () => doTask(task.name);
-    button.children[0].textContent = task.name;
-    button.children[1].textContent =
-      (delta >= 0 ? "Overdue " : "Due in ") + formatDelta(delta);
+    var t = document.createElement("div");
+    t.textContent = "BLAH";
+    tasksDiv.append(t);
   });
+  var t = document.createElement("div");
+  t.textContent = "BLAH";
+  accordian.slot("content", t);
 }
 
 function displayTasks(time) {
@@ -107,7 +103,7 @@ function displayTasks(time) {
     return Math.abs(diff) < 0.001 ? t2.repeat - t1.repeat : diff;
   });
 
-  genCordian("Overdue", 0, dueTasks, taskDiv, time);
+  groupAccordian("Overdue", dueTasks, taskDiv);
 
   var timesort = (t1, t2) => {
     var d1 = time - t1.lastDone - t1.repeat;
@@ -121,7 +117,7 @@ function displayTasks(time) {
   });
   dueSoonTasks.sort(timesort);
 
-  genCordian("Due Soon", 1, dueSoonTasks, taskDiv, time);
+  groupAccordian("Due Soon", dueSoonTasks, taskDiv);
 
   var dueLaterTasks = tasks.filter(task => {
     var due = task.lastDone + task.repeat;
@@ -129,7 +125,7 @@ function displayTasks(time) {
   });
   dueLaterTasks.sort(timesort);
 
-  genCordian("Due Later", 2, dueLaterTasks, taskDiv, time);
+  groupAccordian("Due Later", dueLaterTasks, taskDiv);
 
   var theRestTasks = tasks.filter(task => {
     var due = task.lastDone + task.repeat;
@@ -137,7 +133,7 @@ function displayTasks(time) {
   });
   theRestTasks.sort(timesort);
 
-  genCordian("The Rest", 3, theRestTasks, taskDiv, time);
+  groupAccordian("The Rest", theRestTasks, taskDiv);
 
   var navDiv = createElement("div", taskDiv);
   navDiv.className = "navDiv";
@@ -145,7 +141,7 @@ function displayTasks(time) {
   editButton.textContent = "Edit Tasks";
   editButton.onclick = () => navigate("edit");
 
-  updateCallback = setInterval(navigate, 10 * 1000);
+  //updateCallback = setInterval(navigate, 10 * 1000);
 }
 
 function editTasks() {
@@ -257,14 +253,6 @@ function doTask(name) {
 
 function createElement(name, parent) {
   var child = document.createElement(name);
-  parent.append(child);
-  return child;
-}
-
-function initTemplate(name, parent) {
-  var child = document.getElementById(name).cloneNode(true);
-  // Reset ID so we don't have duplicates
-  child.id = undefined;
   parent.append(child);
   return child;
 }

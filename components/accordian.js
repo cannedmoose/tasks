@@ -1,9 +1,15 @@
 import { WebComponent } from "./web_component.js";
 
+/**
+ * A generic accordian, can be opened/closed.
+ *
+ * TODO(P1): Styling;
+ * TODO(P1): Add disconnectedCallback to get rid of event listener;
+ * TODO(P2): open/close event;
+ */
 export class Accordian extends WebComponent {
-  constructor(open) {
+  constructor() {
     super(TEMPLATE);
-    this.open = open;
   }
 
   get open() {
@@ -11,35 +17,29 @@ export class Accordian extends WebComponent {
   }
 
   set open(val) {
-    // Reflect the value of the open property as an HTML attribute.
     if (val) {
       this.setAttribute("open", "");
+      this.shadowRoot.querySelector(".content").classList.add("open");
     } else {
       this.removeAttribute("open");
+      this.shadowRoot.querySelector(".content").classList.remove("open");
     }
-    this.toggleOpen();
   }
 
   connectedCallback() {
+    this._upgradeProperty("open");
+
     this.shadowRoot.querySelector(".label").onclick = e => {
       this.open = !this.open;
     };
   }
-
-  toggleOpen() {
-    this.shadowRoot.querySelector(".content").classList.toggle("open");
-  }
 }
 
-customElements.define("the-accordian", Accordian);
+customElements.define("wc-accordian", Accordian);
 
 const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
-<template id = "accordian-template" class="accordian">
+<template id = "accordian-template">
     <style>
-    .accordian {
-        width: 100%;
-    }
-
     .content {
         display: none;
     }
@@ -51,7 +51,7 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
     }
 
   </style>
-  <slot class="label" name="label">Accordian</slot>
-   <slot  class="content" name="content">CONTENT</slot>
-</template >
+    <div class="label"><slot  name="label">Accordian</slot></div>
+    <div class="content"><slot name="content">CONTENT</slot></div>
+  </template >
 `);

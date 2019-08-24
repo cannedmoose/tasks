@@ -1,4 +1,5 @@
 import { Accordian } from "./components/accordian.js";
+import { TaskList } from "./components/task_list.js";
 
 var localStorage;
 var tasks = [];
@@ -71,75 +72,66 @@ function clearPage() {
 }
 
 function groupAccordian(name, tasks, taskDiv) {
-  var accordian = new Accordian(true);
+  var accordian = new TaskList();
+  accordian.label = name;
+  accordian.open = false;
   taskDiv.append(accordian);
-
-  var label = document.createElement("div");
-  accordian.slot("label", label);
-  label.textContent = name + " - " + tasks.length;
 
   var tasksDiv = document.createElement("div");
   tasks.forEach(task => {
-    var t = document.createElement("div");
-    t.textContent = "BLAH";
-    tasksDiv.append(t);
+    //tasksDiv.append();
   });
-  var t = document.createElement("div");
-  t.textContent = "BLAH";
-  accordian.slot("content", t);
 }
 
 function displayTasks(time) {
-  var taskDiv = document.getElementById("container");
-  var dueTasks = tasks.filter(task => {
+  let taskDiv = document.getElementById("container");
+
+  let dueFilter = task => {
     return time >= task.lastDone + task.repeat;
-  });
-  dueTasks.sort((t1, t2) => {
+  };
+  let makeFilter = (from, to) => {
+    return task => {
+      var due = task.lastDone + task.repeat;
+      return (
+        time + from * 60 * 60 * 1000 < due && time + to * 60 * 60 * 1000 > due
+      );
+    };
+  };
+  let scoreComp = (t1, t2) => {
     var s1 = (time - t1.lastDone) / t1.repeat;
     var s2 = (time - t2.lastDone) / t2.repeat;
-    diff = s2 - s1;
+    var diff = s2 - s1;
 
-    // TODO check this ordering
+    // TODO(P3) Check this ordering
     return Math.abs(diff) < 0.001 ? t2.repeat - t1.repeat : diff;
-  });
+  };
 
-  groupAccordian("Overdue", dueTasks, taskDiv);
-
-  var timesort = (t1, t2) => {
+  let timeComp = (t1, t2) => {
     var d1 = time - t1.lastDone - t1.repeat;
     var d2 = time - t2.lastDone - t2.repeat;
     return d2 - d1;
   };
 
-  var dueSoonTasks = tasks.filter(task => {
-    var due = task.lastDone + task.repeat;
-    return time < due && time + 12 * 60 * 60 * 1000 > due;
-  });
-  dueSoonTasks.sort(timesort);
-
-  groupAccordian("Due Soon", dueSoonTasks, taskDiv);
-
-  var dueLaterTasks = tasks.filter(task => {
-    var due = task.lastDone + task.repeat;
-    return time + 12 * 60 * 60 * 1000 < due && time + 48 * 60 * 60 * 1000 > due;
-  });
-  dueLaterTasks.sort(timesort);
-
-  groupAccordian("Due Later", dueLaterTasks, taskDiv);
-
-  var theRestTasks = tasks.filter(task => {
-    var due = task.lastDone + task.repeat;
-    return time + 48 * 60 * 60 * 1000 < due;
-  });
-  theRestTasks.sort(timesort);
-
-  groupAccordian("The Rest", theRestTasks, taskDiv);
-
-  var navDiv = createElement("div", taskDiv);
-  navDiv.className = "navDiv";
-  var editButton = createElement("button", navDiv);
-  editButton.textContent = "Edit Tasks";
-  editButton.onclick = () => navigate("edit");
+  let overdue = new TaskList(
+    tasks,
+    makeFilter(Number.NEGATIVE_INFINITY, 12),
+    scoreComp
+  );
+  overdue.label = "Overdue";
+  overdue.open = true;
+  taskDiv.append(overdue);
+  let soon = new TaskList(tasks, makeFilter(0, 12), timeComp);
+  soon.label = "Due Soon";
+  soon.open = true;
+  taskDiv.append(soon);
+  let later = new TaskList(tasks, makeFilter(12, 48), scoreComp);
+  later.label = "Due Later";
+  later.open = false;
+  taskDiv.append(later);
+  let rest = new TaskList(tasks, makeFilter(48, Infinity), scoreComp);
+  rest.label = "Due Later";
+  rest.open = false;
+  taskDiv.append(rest);
 
   //updateCallback = setInterval(navigate, 10 * 1000);
 }

@@ -1,28 +1,22 @@
-export class TaskList extends HTMLElement {
-  constructor(open) {
-    super();
-    this.attachShadow({ mode: "open" });
-    this.open = open;
+import { Accordian } from "./accordian.js";
+import { WebComponent } from "./web_component.js";
+
+export class TaskList extends WebComponent {
+  constructor(tasks, filter, compare) {
+    super(TEMPLATE);
+    this.tasks = tasks;
+    this.filter = filter;
+    this.compare = compare;
   }
 
-  connectedCallback() {
-    var template = document.querySelector("#task-list-template");
-    if (!template) {
-      template = document.createElement("template");
-      // Convert to document fragment
-      template.innerHTML = TEMPLATE;
-      // Retrieve actual template
-      template = template.content.firstElementChild;
-      document.querySelector("head").appendChild(template);
-    }
+  get label() {
+    return this.getAttribute("label");
+  }
 
-    this.shadowRoot.appendChild(template.content.cloneNode(true));
-    // Toggle open on label click
-    this.shadowRoot.querySelector("#label").onclick = e => {
-      this.open = !this.open;
-    };
-
-    return Promise.resolve();
+  set label(val) {
+    this.setAttribute("label", val);
+    // Should also have number of tasks
+    this.shadowRoot.querySelector("#label").textContent = val;
   }
 
   get open() {
@@ -36,24 +30,42 @@ export class TaskList extends HTMLElement {
     } else {
       this.removeAttribute("open");
     }
-    this.toggleOpen();
+    this.shadowRoot.querySelector("#accordian").open = val;
   }
 
-  toggleOpen() {
-    if (this.shadowRoot.querySelector('slot[name="content"]')) {
-      this.shadowRoot.querySelector('"#content"').classList.toggle("open");
+  connectedCallback() {
+    this._upgradeProperty("open");
+    this._upgradeProperty("label");
+
+    this.refreshTasks();
+  }
+
+  refreshTasks() {
+    let content = this.shadowRoot.querySelector("#content");
+    while (content.firstChild) {
+      content.removeChild(content.firstChild);
     }
+
+    this.tasks
+      .filter(this.filter)
+      .sort(this.compare)
+      .forEach(task => {
+        let t = document.createElement("div");
+        t.textContent = task.name;
+        content.append(t);
+      });
   }
 }
 
-customElements.define("the-task-list", TaskList);
+customElements.define("wc-task-list", TaskList);
 
-// TODO insert template into document
-const TEMPLATE = /*html*/ `
-<template id = "task-list">
+const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
+<template id = "task-list-template">
     <style>
   </style>
-    <slot name="label">Accordian</slot>
-    <slot name="content">CONTENT</slot>
+  <wc-accordian id="accordian">
+    <div id ="label" slot="label"></div>
+    <div id ="content" slot="content"></div>
+  </wc-accordian>
 </template >
-`;
+`);

@@ -20,4 +20,13 @@ export class WebComponent extends HTMLElement {
     element.setAttribute("slot", slot);
     return this;
   }
+
+  _upgradeProperty(prop) {
+    if (this.hasOwnProperty(prop)) {
+      console.log(this, prop, this[prop]);
+      let value = this[prop];
+      delete this[prop];
+      this[prop] = value;
+    }
+  }
 }

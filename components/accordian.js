@@ -3,11 +3,10 @@ import { WebComponent } from "./web_component.js";
 /**
  * A generic accordian, can be opened/closed.
  *
- * TODO(P1): Styling;
+ * TODO(P2): Styling;
  *    - Cursor + text highlight on label
  *    - general label
- * TODO(P1): Add disconnectedCallback to get rid of event listener;
- * TODO(P2): open/close event;
+ * TODO(P2): fire open/close event;
  */
 export class Accordian extends WebComponent {
   constructor() {

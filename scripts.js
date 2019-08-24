@@ -1,4 +1,5 @@
 import { TaskList } from "./components/task_list.js";
+import { TaskEdit } from "./components/task_edit.js";
 
 var localStorage;
 var tasks = [];
@@ -76,18 +77,6 @@ function clearPage() {
   }
 }
 
-function groupAccordian(name, tasks, taskDiv) {
-  var accordian = new TaskList();
-  accordian.label = name;
-  accordian.open = false;
-  taskDiv.append(accordian);
-
-  var tasksDiv = document.createElement("div");
-  tasks.forEach(task => {
-    //tasksDiv.append();
-  });
-}
-
 function displayTasks(time) {
   let taskDiv = document.getElementById("container");
 
@@ -134,6 +123,8 @@ function displayTasks(time) {
   rest.label = "Due Later";
   rest.open = false;
   taskDiv.append(rest);
+
+  taskDiv.append(document.createElement("wc-task-edit"));
 }
 
 function editTasks() {

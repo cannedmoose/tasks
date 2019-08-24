@@ -1,8 +1,8 @@
 import { WebComponent } from "./web_component.js";
 /**
- * A button that shows task information.
+ * A button that shows task information
  *
- * TODO(P1) Styling
+ * TODO(P2) Styling
  * TODO(P2) Add an "importance measure" (want more underlines for more important task)
  */
 export class Task extends WebComponent {

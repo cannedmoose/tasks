@@ -33,4 +33,12 @@ export class WebComponent extends HTMLElement {
       this[prop] = value;
     }
   }
+
+  querySelector(query) {
+    return this.shadowRoot.querySelector(query);
+  }
+
+  bind(fn) {
+    this[fn] = this[fn].bind(this);
+  }
 }

@@ -31,9 +31,20 @@ export class Accordian extends WebComponent {
   connectedCallback() {
     this._upgradeProperty("open");
 
-    this.shadowRoot.querySelector(".label").onclick = e => {
-      this.open = !this.open;
-    };
+    this.bind("_onLabelClick");
+    this.shadowRoot
+      .querySelector(".label")
+      .addEventListener("click", this._onLabelClick);
+  }
+
+  _onLabelClick(e) {
+    this.open = !this.open;
+  }
+
+  disconnectedCallback() {
+    this.shadowRoot
+      .querySelector(".label")
+      .removeEventListener("click", this._onLabelClick);
   }
 }
 

@@ -1,8 +1,7 @@
 import { WebComponent } from "./web_component.js";
 /**
- * A task that can be clicked to be done.
+ * A button that shows task information.
  *
- * TODO(P1) Add onclick handler
  * TODO(P1) Styling
  * TODO(P2) Add an "importance measure" (want more underlines for more important task)
  */
@@ -36,7 +35,7 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
     }
 
   </style>
-  <button class="task">
+  <button id="button" class="task">
     <div id="name"></div>
   </button>
 </template>

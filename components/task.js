@@ -1,29 +1,34 @@
-class Task extends HTMLElement {
-  connectedCallback() {
-    var template = document.querySelector("#task-template");
-    if (!template) {
-      template = document.createElement("template");
-      // Convert to document fragment
-      template.innerHTML = TEMPLATE;
-      // Retrieve actual template
-      template = template.content.firstElementChild;
-      document.querySelector("head").appendChild(template);
-    }
-
-    this.shadowRoot.appendChild(template.content.cloneNode(true));
+import { WebComponent } from "./web_component.js";
+/**
+ * A task that can be clicked to be done.
+ *
+ * TODO(P1) Add onclick handler
+ * TODO(P1) Styling
+ * TODO(P2) Add an "importance measure" (want more underlines for more important task)
+ */
+export class Task extends WebComponent {
+  constructor() {
+    super(TEMPLATE);
   }
 
-  constructor() {
-    super();
-    this.attachShadow({ mode: "open" });
+  get name() {
+    return this.getAttribute("name");
+  }
+
+  set name(val) {
+    this.setAttribute("name", val);
+    this.shadowRoot.querySelector("#name").textContent = val;
+  }
+
+  connectedCallback() {
+    this._upgradeProperty("name");
   }
 }
 
-customElements.define("the-task", TaskEdit);
+customElements.define("wc-task", Task);
 
-const TEMPLATE =
-  /*html*/
-  `<template id="taskDisplay" class="task">
+const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
+<template id="task-display">
   <style>
     .task {
       width: 100%;
@@ -31,13 +36,8 @@ const TEMPLATE =
     }
 
   </style>
-  <button>
-    <slot name="taskName">
-      Task Name
-    </slot>
-    <slot name="taskDesc">
-      Task Description
-    </slot>
+  <button class="task">
+    <div id="name"></div>
   </button>
 </template>
-`;
+`);

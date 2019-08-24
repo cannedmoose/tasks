@@ -28,7 +28,6 @@ export class WebComponent extends HTMLElement {
 
   _upgradeProperty(prop) {
     if (this.hasOwnProperty(prop)) {
-      console.log(this, prop, this[prop]);
       let value = this[prop];
       delete this[prop];
       this[prop] = value;

@@ -1,4 +1,5 @@
 import { Accordian } from "./accordian.js";
+import { Task } from "./task.js";
 import { WebComponent } from "./web_component.js";
 
 /**
@@ -21,8 +22,6 @@ export class TaskList extends WebComponent {
 
   set label(val) {
     this.setAttribute("label", val);
-    // Should also have number of tasks
-    this.shadowRoot.querySelector("#label").textContent = val;
   }
 
   get open() {
@@ -52,14 +51,16 @@ export class TaskList extends WebComponent {
       content.removeChild(content.firstChild);
     }
 
-    this.tasks
-      .filter(this.filter)
-      .sort(this.compare)
-      .forEach(task => {
-        let t = document.createElement("div");
-        t.textContent = task.name;
-        content.append(t);
-      });
+    let filteredTasks = this.tasks.filter(this.filter).sort(this.compare);
+
+    filteredTasks.forEach(task => {
+      let t = document.createElement("wc-task");
+      t.name = task.name;
+      content.append(t);
+    });
+
+    this.shadowRoot.querySelector("#label").textContent =
+      this.label + " - " + filteredTasks.length;
   }
 }
 

@@ -1,4 +1,3 @@
-import { Accordian } from "./components/accordian.js";
 import { TaskList } from "./components/task_list.js";
 
 var localStorage;
@@ -8,6 +7,12 @@ var version = 1;
 var checked = [true, true, false, false];
 
 var updateCallback;
+
+/**
+ * Task app main entry point.
+ *
+ * TODO(P1) Web componantize each page
+ */
 
 window.onload = function() {
   localStorage = window.localStorage;
@@ -86,9 +91,6 @@ function groupAccordian(name, tasks, taskDiv) {
 function displayTasks(time) {
   let taskDiv = document.getElementById("container");
 
-  let dueFilter = task => {
-    return time >= task.lastDone + task.repeat;
-  };
   let makeFilter = (from, to) => {
     return task => {
       var due = task.lastDone + task.repeat;
@@ -132,9 +134,6 @@ function displayTasks(time) {
   rest.label = "Due Later";
   rest.open = false;
   taskDiv.append(rest);
-
-  // TODO(P3) re-enable
-  //updateCallback = setInterval(navigate, 10 * 1000);
 }
 
 function editTasks() {

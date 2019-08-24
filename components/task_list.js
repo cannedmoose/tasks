@@ -1,6 +1,12 @@
 import { Accordian } from "./accordian.js";
 import { WebComponent } from "./web_component.js";
 
+/**
+ * A list of tasks.
+ *
+ * Displays a subset of tasks from a larger array, given by a filter.
+ * Sorts taks by given comparator.
+ */
 export class TaskList extends WebComponent {
   constructor(tasks, filter, compare) {
     super(TEMPLATE);

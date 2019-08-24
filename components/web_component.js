@@ -1,3 +1,8 @@
+/**
+ * Web component to subclass.
+ *
+ * Adds a shadow dom filled with a template on construction.
+ */
 export class WebComponent extends HTMLElement {
   constructor(template) {
     super();

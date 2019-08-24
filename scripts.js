@@ -133,6 +133,7 @@ function displayTasks(time) {
   rest.open = false;
   taskDiv.append(rest);
 
+  // TODO(P3) re-enable
   //updateCallback = setInterval(navigate, 10 * 1000);
 }
 

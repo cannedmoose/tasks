@@ -55,12 +55,19 @@ export class TaskList extends WebComponent {
     }
 
     let filteredTasks = this.tasks.filter(this.filter).sort(this.compare);
-
     filteredTasks.forEach(task => {
       let button = document.createElement("wc-task");
       button.name = task.name;
       button.addEventListener("click", e => {
-        button.name = "CLICKED";
+        e.stopPropagation();
+        this.dispatchEvent(
+          new CustomEvent("done", {
+            detail: {
+              task: task
+            },
+            bubbles: true
+          })
+        );
       });
       content.append(button);
     });

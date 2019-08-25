@@ -1,4 +1,4 @@
-import { TaskList } from "./components/task_list.js";
+import { HomePage } from "./components/home_page.js";
 import { TaskEdit } from "./components/task_edit.js";
 
 var localStorage;
@@ -79,52 +79,8 @@ function clearPage() {
 
 function displayTasks(time) {
   let taskDiv = document.getElementById("container");
-
-  let makeFilter = (from, to) => {
-    return task => {
-      var due = task.lastDone + task.repeat;
-      return (
-        time + from * 60 * 60 * 1000 < due && time + to * 60 * 60 * 1000 > due
-      );
-    };
-  };
-  let scoreComp = (t1, t2) => {
-    var s1 = (time - t1.lastDone) / t1.repeat;
-    var s2 = (time - t2.lastDone) / t2.repeat;
-    var diff = s2 - s1;
-
-    // TODO(P3) Check this ordering
-    return Math.abs(diff) < 0.001 ? t2.repeat - t1.repeat : diff;
-  };
-
-  let timeComp = (t1, t2) => {
-    var d1 = time - t1.lastDone - t1.repeat;
-    var d2 = time - t2.lastDone - t2.repeat;
-    return d2 - d1;
-  };
-
-  let overdue = new TaskList(
-    tasks,
-    makeFilter(Number.NEGATIVE_INFINITY, 12),
-    scoreComp
-  );
-  overdue.label = "Overdue";
-  overdue.open = true;
-  taskDiv.append(overdue);
-  let soon = new TaskList(tasks, makeFilter(0, 12), timeComp);
-  soon.label = "Due Soon";
-  soon.open = true;
-  taskDiv.append(soon);
-  let later = new TaskList(tasks, makeFilter(12, 48), scoreComp);
-  later.label = "Due Later";
-  later.open = false;
-  taskDiv.append(later);
-  let rest = new TaskList(tasks, makeFilter(48, Infinity), scoreComp);
-  rest.label = "Due Later";
-  rest.open = false;
-  taskDiv.append(rest);
-
-  taskDiv.append(document.createElement("wc-task-edit"));
+  let homePage = new HomePage(tasks);
+  taskDiv.append(homePage);
 }
 
 function editTasks() {

@@ -9,12 +9,14 @@ import { WebComponent } from "./web_component.js";
 export class TaskEdit extends WebComponent {
   constructor(task) {
     super(TEMPLATE);
-
     this.task = task;
   }
 
   connectedCallback() {
-    this._upgradeProperty("name");
+    this.querySelector("#label").textContent = this.task.name;
+    this.querySelector("#name").value = this.task.name;
+    this.querySelector("#repeat").value = this.task.repeat;
+    this.querySelector("#next").value = this.task.lastDone;
   }
 }
 
@@ -30,14 +32,14 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
 
   </style>
   <wc-accordian>
-    <div slot="label">Edit Task</div>
+    <div id = "label" slot="label">Edit Task</div>
     <div slot="content">
       My task is called:
-      <input type="text"/>
+      <input id="name" type="text"/>
       I should do it every:
-      <wc-time-input></wc-time-input>
+      <wc-time-input id="repeat"></wc-time-input>
       I will next do it in:
-      <wc-time-input></wc-time-input>
+      <wc-time-input id="next"></wc-time-input>
     </div>
   </wc-accordian>
 </template>

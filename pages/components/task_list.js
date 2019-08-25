@@ -81,7 +81,7 @@ customElements.define("wc-task-list", TaskList);
 
 const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
 <template id = "task-list-template">
-    <style>
+  <style>
   </style>
   <wc-accordian id="accordian">
     <div id ="label" slot="label"></div>

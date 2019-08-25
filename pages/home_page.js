@@ -1,5 +1,5 @@
-import { TaskList } from "./task_list.js";
-import { WebComponent } from "./web_component.js";
+import { TaskList } from "./components/task_list.js";
+import { WebComponent } from "./components/web_component.js";
 
 /**
  * The home page

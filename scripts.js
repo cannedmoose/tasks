@@ -1,18 +1,20 @@
-import { HomePage } from "./components/home_page.js";
-import { TaskEdit } from "./components/task_edit.js";
+import { HomePage } from "./pages/home_page.js";
+import { EditPage } from "./pages/edit_page.js";
 
 var localStorage;
 var tasks = [];
 var taskHistory = [];
 var version = 1;
-var checked = [true, true, false, false];
 
 var updateCallback;
 
 /**
  * Task app main entry point.
  *
- * TODO(P1) Web componantize each page
+ * TODO(P1) finish edit_page
+ * TODO(P1) add navigation
+ * TODO(P1) add admin
+ * TODO(P2) styling
  */
 
 window.onload = function() {
@@ -84,68 +86,9 @@ function displayTasks(time) {
 }
 
 function editTasks() {
-  var time = Date.now();
-  var taskDiv = document.getElementById("container");
-
-  // Show add
-  var containerDiv = initTemplate("taskEdit", taskDiv);
-  var button = createElement("button", containerDiv);
-  button.textContent = "Add";
-  button.onclick = () => {
-    name = containerDiv.children[0].value;
-    repeat = daysToMillis(parseInt(containerDiv.children[1].value));
-    lastDone =
-      Date.now() -
-      repeat -
-      daysToMillis(parseInt(containerDiv.children[2].value));
-    tasks.push({
-      name,
-      repeat,
-      lastDone
-    });
-    store();
-    navigate("edit");
-  };
-  createElement("div", taskDiv).className = "divider";
-
-  tasks.forEach(task => {
-    var containerDiv = initTemplate("taskEdit", taskDiv);
-    containerDiv.children[0].value = task.name;
-    containerDiv.children[0].oninput = e => {
-      task.name = e.target.value;
-      store();
-    };
-    containerDiv.children[1].value = millisToDays(task.repeat);
-    containerDiv.children[1].oninput = e => {
-      task.repeat = daysToMillis(parseInt(e.target.value));
-      store();
-    };
-    containerDiv.children[2].value =
-      millisToDays(task.repeat) - millisToDays(time - task.lastDone);
-    containerDiv.children[2].oninput = e => {
-      task.lastDone =
-        Date.now() - task.repeat - daysToMillis(parseInt(e.target.value));
-      store();
-    };
-    var button = createElement("button", containerDiv);
-    button.textContent = "Delete";
-    button.onclick = () => {
-      tasks = tasks.filter(e => e !== task);
-      store();
-      navigate("edit");
-    };
-  });
-
-  // Navigation
-  var navDiv = createElement("div", taskDiv);
-  navDiv.className = "navDiv";
-  var button = createElement("button", navDiv);
-  button.textContent = "Done";
-  button.onclick = () => navigate();
-
-  button = createElement("button", navDiv);
-  button.textContent = "Admin";
-  button.onclick = () => navigate("admin");
+  let taskDiv = document.getElementById("container");
+  let editPage = new EditPage(tasks);
+  taskDiv.append(editPage);
 }
 
 function taskAdmin() {

@@ -8,7 +8,6 @@ import { WebComponent } from "./web_component.js";
  * Displays a subset of tasks from a larger array, given by a filter.
  * Sorts taks by given comparator.
  *
- * TODO(P1) bubble up task on clicks, fire custom "done" event?
  * TODO(P2) styling
  */
 export class TaskList extends WebComponent {

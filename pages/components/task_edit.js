@@ -3,7 +3,6 @@ import { WebComponent } from "./web_component.js";
 /**
  * Edit form for task.
  *
- * TODO(P1) Populate fields from task
  * TODO(P1) Fire on change events
  */
 export class TaskEdit extends WebComponent {
@@ -13,10 +12,11 @@ export class TaskEdit extends WebComponent {
   }
 
   connectedCallback() {
+    let now = Date.now();
     this.querySelector("#label").textContent = this.task.name;
     this.querySelector("#name").value = this.task.name;
-    this.querySelector("#repeat").value = this.task.repeat;
-    this.querySelector("#next").value = this.task.lastDone;
+    this.querySelector("#repeat").millis = this.task.repeat;
+    this.querySelector("#next").millis = now - this.task.lastDone;
   }
 }
 

@@ -5,6 +5,7 @@ import { WebComponent } from "./components/web_component.js";
  * Page for task CRUD operations
  *
  * TODO(P1) hook up to future edit_task events
+ * TODO(P1) STORAGE
  * TODO(P2) make sure event handlers are cleaned up
  *
  */

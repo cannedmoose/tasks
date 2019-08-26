@@ -3,12 +3,12 @@ import { toMillis, fromMillis } from "./time_utils.js";
 
 /**
  * For entering a period of time
- *
- * TODO(P1) bubble up change
  */
 export class TimeInput extends WebComponent {
   constructor() {
     super(TEMPLATE);
+
+    this.bind("onChange");
   }
   get unit() {
     let unit = this.querySelector("#unit");
@@ -42,8 +42,28 @@ export class TimeInput extends WebComponent {
     this.amount = converted.amount;
   }
 
+  onChange(e) {
+    e.stopPropagation();
+    this.dispatchEvent(
+      new CustomEvent("change", {
+        detail: {
+          millis: this.millis
+        },
+        bubbles: true
+      })
+    );
+  }
+
   connectedCallback() {
     this._upgradeProperty("millis");
+
+    this.querySelector("#unit").addEventListener("select", this.onChange);
+    this.querySelector("#amount").addEventListener("change", this.onChange);
+  }
+
+  disconnectedCallback() {
+    this.querySelector("#unit").removeEventListener("select", this.onChange);
+    this.querySelector("#amount").removeEventListener("change", this.onChange);
   }
 }
 

@@ -3,20 +3,35 @@ import { WebComponent } from "./web_component.js";
 /**
  * Edit form for task.
  *
- * TODO(P1) Fire on change events
+ * TODO(P1) hook up to local storage.
  */
 export class TaskEdit extends WebComponent {
   constructor(task) {
     super(TEMPLATE);
     this.task = task;
+    this.bind("onChange");
   }
 
   connectedCallback() {
     let now = Date.now();
     this.querySelector("#label").textContent = this.task.name;
     this.querySelector("#name").value = this.task.name;
+    this.querySelector("#name").addEventListener("change", this.onChange);
     this.querySelector("#repeat").millis = this.task.repeat;
+    this.querySelector("#repeat").addEventListener("change", this.onChange);
     this.querySelector("#next").millis = now - this.task.lastDone;
+    this.querySelector("#next").addEventListener("change", this.onChange);
+  }
+
+  onChange(e) {
+    let name = this.querySelector("#name").value;
+    let next = this.querySelector("#next").millis;
+    let repeat = this.querySelector("#repeat").millis;
+
+    this.task.name = name;
+    this.task.next = next;
+    this.task.repeat = repeat;
+    this.querySelector("#label").textContent = this.task.name;
   }
 }
 

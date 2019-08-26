@@ -9,62 +9,60 @@ import { WebComponent } from "./components/web_component.js";
  *
  */
 export class HomePage extends WebComponent {
-  constructor(tasks) {
+  constructor(store) {
     super(TEMPLATE);
-    this.tasks = tasks;
+    this.store = store;
   }
 
   connectedCallback() {
     let taskDiv = this.querySelector("#content");
     let overdue = new TaskList(
-      this.tasks,
+      this.store.tasks,
       this.makeFilter(Number.NEGATIVE_INFINITY, 12),
       this.scoreComp
     );
+
+    // TODO(P2) move out of function
+    let EVs = e => {
+      e.detail.task.lastDone = Date.now();
+      this.refreshTasks();
+    };
+
     overdue.label = "Overdue";
     overdue.id = "overdue";
     overdue.open = true;
     taskDiv.append(overdue);
-    overdue.addEventListener("done", e => {
-      e.detail.task.lastDone = Date.now();
-      this.refreshTasks();
-    });
-    let soon = new TaskList(this.tasks, this.makeFilter(0, 12), this.timeComp);
+    overdue.addEventListener("done", EVs);
+    let soon = new TaskList(
+      this.store.tasks,
+      this.makeFilter(0, 12),
+      this.timeComp
+    );
     soon.label = "Due Soon";
     soon.id = "soon";
     soon.open = true;
-    soon.addEventListener("done", e => {
-      e.task.lastDone = Date.now();
-      this.refreshTasks();
-    });
+    soon.addEventListener("done", EVs);
     taskDiv.append(soon);
     let later = new TaskList(
-      this.tasks,
+      this.store.tasks,
       this.makeFilter(12, 48),
       this.timeComp
     );
     later.label = "Due Later";
     later.id = "later";
     later.open = false;
-    later.addEventListener("done", e => {
-      e.task.lastDone = Date.now();
-      this.refreshTasks();
-    });
+    later.addEventListener("done", EVs);
     taskDiv.append(later);
     let rest = new TaskList(
-      this.tasks,
+      this.store.tasks,
       this.makeFilter(48, Infinity),
       this.timeComp
     );
     rest.label = "The Rest";
     rest.id = "rest";
     rest.open = false;
-    rest.addEventListener("done", e => {
-      e.task.lastDone = Date.now();
-      this.refreshTasks();
-    });
+    rest.addEventListener("done", EVs);
     taskDiv.append(rest);
-    //this.refreshTasks();
   }
 
   makeFilter(from, to) {

@@ -1,13 +1,8 @@
 import { HomePage } from "./js/pages/home_page.js";
 import { EditPage } from "./js/pages/edit_page.js";
+import { TaskStore } from "./js/utils/task_store.js";
 
-var localStorage;
-var tasks = [];
-var taskHistory = [];
-var version = 1;
-
-var updateCallback;
-
+var store;
 /**
  * Task app main entry point.
  *
@@ -18,41 +13,14 @@ var updateCallback;
  */
 
 window.onload = function() {
-  localStorage = window.localStorage;
+  store = new TaskStore(window.localStorage);
   var url = new URL(window.location);
   var params = new URLSearchParams(url.search);
-  load();
+  store.load();
   navigate(params.get("page"));
 };
 
-function store() {
-  localStorage.setItem("tasks", JSON.stringify(tasks));
-  localStorage.setItem("taskHistory", JSON.stringify(taskHistory));
-  localStorage.setItem("version", version);
-}
-
-function load() {
-  if (localStorage.tasks) {
-    tasks = JSON.parse(localStorage.tasks);
-  }
-  if (localStorage.taskHistory) {
-    taskHistory = JSON.parse(localStorage.taskHistory);
-  }
-
-  if (!localStorage.version) {
-    // Convert repeat time to millis
-    tasks.forEach(task => (task.repeat = daysToMillis(task.repeat)));
-    version = 1;
-    store();
-  }
-}
-
 function navigate(page) {
-  // Cleanup
-  if (updateCallback) {
-    clearInterval(updateCallback);
-    updateCallback = null;
-  }
   clearPage();
 
   // Show page
@@ -81,13 +49,13 @@ function clearPage() {
 
 function displayTasks(time) {
   let taskDiv = document.getElementById("container");
-  let homePage = new HomePage(tasks);
+  let homePage = new HomePage(store);
   taskDiv.append(homePage);
 }
 
 function editTasks() {
   let taskDiv = document.getElementById("container");
-  let editPage = new EditPage(tasks);
+  let editPage = new EditPage(store);
   taskDiv.append(editPage);
 }
 
@@ -95,7 +63,7 @@ function taskAdmin() {
   var taskDiv = document.getElementById("container");
   var adminText = createElement("textarea", taskDiv);
   adminText.className = "adminText";
-  adminText.value = JSON.stringify({ tasks, taskHistory, version }, null, 2);
+  //adminText.value = JSON.stringify({ store.tasks, taskHistory, version }, null, 2);
 
   var navDiv = createElement("div", taskDiv);
   navDiv.className = "navDiv";
@@ -108,10 +76,10 @@ function taskAdmin() {
   button.onclick = () => {
     var vals = JSON.parse(adminText.value);
 
-    taskHistory = vals.taskHistory;
+    /*taskHistory = vals.taskHistory;
     tasks = vals.tasks;
     version = vals.version;
-    store();
+    store();*/
     navigate("admin");
   };
 }

@@ -3,7 +3,7 @@ import { WebComponent } from "./web_component.js";
 /**
  * Edit form for task.
  *
- * TODO(P1) hook up to local storage.
+ * TODO(P1) add delete button
  */
 export class TaskEdit extends WebComponent {
   constructor(task) {
@@ -29,7 +29,8 @@ export class TaskEdit extends WebComponent {
     let repeat = this.querySelector("#repeat").millis;
 
     this.task.name = name;
-    this.task.next = next;
+    // TODO(P1) fix lastDone handling
+    //this.task.next = next;
     this.task.repeat = repeat;
     this.querySelector("#label").textContent = this.task.name;
   }

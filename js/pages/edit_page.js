@@ -4,23 +4,22 @@ import { WebComponent } from "./components/web_component.js";
 /**
  * Page for task CRUD operations
  *
- * TODO(P1) hook up to future edit_task events
- * TODO(P1) STORAGE
  * TODO(P2) make sure event handlers are cleaned up
  *
  */
 export class EditPage extends WebComponent {
-  constructor(tasks) {
+  constructor(store) {
     super(TEMPLATE);
-    this.tasks = tasks;
+    this.store = store;
   }
 
   connectedCallback() {
     let content = this.querySelector("#content");
-    this.tasks.forEach(task => {
+    this.store.tasks.forEach(task => {
       let edit = new TaskEdit(task);
       edit.name = task.name;
       edit.addEventListener("change", e => {
+        this.store.store();
         e.stopPropagation();
       });
       content.append(edit);

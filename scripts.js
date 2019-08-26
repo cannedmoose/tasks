@@ -84,71 +84,8 @@ function taskAdmin() {
   };
 }
 
-/**
- * Task actions
- */
-
-function doTask(name) {
-  var time = Date.now();
-  var task = tasks.find(e => e.name === name);
-  task.lastDone = time;
-  taskHistory.push({ name, time });
-  store();
-  navigate();
-}
-
-/**
- * Helpers
- */
-
 function createElement(name, parent) {
   var child = document.createElement(name);
   parent.append(child);
   return child;
-}
-
-function daysToMillis(days) {
-  return days * 86400000;
-}
-
-function millisToDays(millis) {
-  return Math.round(millis / 86400000);
-}
-
-function formatDelta(delta) {
-  var millis = Math.abs(delta);
-  var seconds = millis / 1000;
-
-  var minutes = seconds / 60;
-  var hours = minutes / 60;
-  var days = hours / 24;
-  var weeks = days / 7;
-  var months = weeks / 4;
-
-  if (months >= 1) {
-    months = Math.round(months);
-    return Math.round(months) + " Month" + (months > 1 ? "s" : "");
-  }
-
-  if (weeks >= 1) {
-    weeks = Math.round(weeks);
-    return Math.round(weeks) + " Week" + (weeks > 1 ? "s" : "");
-  }
-
-  if (days >= 1) {
-    days = Math.round(days);
-    return Math.round(days) + " Day" + (days > 1 ? "s" : "");
-  }
-
-  if (hours >= 1) {
-    hours = Math.round(hours);
-    return Math.round(hours) + " Hour" + (hours > 1 ? "s" : "");
-  }
-
-  if (minutes >= 1) {
-    minutes = Math.round(minutes);
-    return Math.round(minutes) + " Minute" + (minutes > 1 ? "s" : "");
-  }
-
-  return "Now";
 }

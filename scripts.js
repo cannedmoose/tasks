@@ -1,5 +1,5 @@
-import { HomePage } from "./pages/home_page.js";
-import { EditPage } from "./pages/edit_page.js";
+import { HomePage } from "./js/pages/home_page.js";
+import { EditPage } from "./js/pages/edit_page.js";
 
 var localStorage;
 var tasks = [];

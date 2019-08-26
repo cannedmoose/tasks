@@ -26,7 +26,6 @@ export class HomePage extends WebComponent {
     overdue.open = true;
     taskDiv.append(overdue);
     overdue.addEventListener("done", e => {
-      console.log(e);
       e.detail.task.lastDone = Date.now();
       this.refreshTasks();
     });

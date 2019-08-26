@@ -22,7 +22,6 @@ export class EditPage extends WebComponent {
       edit.name = task.name;
       edit.addEventListener("change", e => {
         e.stopPropagation();
-        console.log(e);
       });
       content.append(edit);
     });

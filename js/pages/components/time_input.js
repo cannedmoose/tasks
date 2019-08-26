@@ -1,5 +1,5 @@
 import { WebComponent } from "./web_component.js";
-import { toMillis, fromMillis } from "./time_utils.js";
+import { toMillis, fromMillis } from "../../utils/time_utils.js";
 
 /**
  * For entering a period of time

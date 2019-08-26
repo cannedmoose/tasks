@@ -28,7 +28,6 @@ export function fromMillis(amount, lowest = "hours") {
   for (let i = 0; i < ORDER.length; i++) {
     let unit = ORDER[i];
     let converted = amount / UNITS[unit];
-    console.log(amount, i, unit, UNITS[unit], converted);
     if (Math.abs(converted) < 1) continue;
 
     return { unit, amount: converted };

@@ -1,5 +1,6 @@
 import { HomePage } from "./js/pages/home_page.js";
 import { EditPage } from "./js/pages/edit_page.js";
+import { AdminPage } from "./js/pages/admin_page.js";
 import { TaskStore } from "./js/utils/task_store.js";
 
 var store;
@@ -60,28 +61,9 @@ function editTasks() {
 }
 
 function taskAdmin() {
-  var taskDiv = document.getElementById("container");
-  var adminText = createElement("textarea", taskDiv);
-  adminText.className = "adminText";
-  //adminText.value = JSON.stringify({ store.tasks, taskHistory, version }, null, 2);
-
-  var navDiv = createElement("div", taskDiv);
-  navDiv.className = "navDiv";
-  var button = createElement("button", navDiv);
-  button.textContent = "Done";
-  button.onclick = () => navigate("edit");
-
-  button = createElement("button", navDiv);
-  button.textContent = "Import";
-  button.onclick = () => {
-    var vals = JSON.parse(adminText.value);
-
-    /*taskHistory = vals.taskHistory;
-    tasks = vals.tasks;
-    version = vals.version;
-    store();*/
-    navigate("admin");
-  };
+  let taskDiv = document.getElementById("container");
+  let adminPage = new AdminPage(store);
+  taskDiv.append(adminPage);
 }
 
 function createElement(name, parent) {

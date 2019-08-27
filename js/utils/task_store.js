@@ -11,7 +11,7 @@ export class TaskStore {
     // TODO(P2) fallback if undefined
     if (this.storage.tasks) {
       this.tasks = JSON.parse(this.storage.tasks).map(taskJSON => {
-        // TODO(P2) HACKEYYY
+        // TODO(P3) HACKEYYY
         return new Task(
           () => {
             this.store();

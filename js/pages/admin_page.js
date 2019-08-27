@@ -14,7 +14,6 @@ export class AdminPage extends WebComponent {
 
   connectedCallback() {
     let con = this.querySelector("#console");
-    // TODO show tasks values in a nicer way...
     con.value = JSON.stringify(
       {
         tasks: this.store.tasks.map(tasks => tasks.values),

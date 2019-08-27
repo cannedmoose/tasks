@@ -33,6 +33,7 @@ export class WebComponent extends HTMLElement {
   }
 
   // TODO(P2) WOULD BE BETTER IF DECORATOR STYLED (or based on prop name)
+  // TODO(P2) Ensure we are Consistently handling/dispatch events
   bind(fn) {
     this[fn] = this[fn].bind(this);
   }

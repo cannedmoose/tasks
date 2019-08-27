@@ -2,6 +2,8 @@ import { TimeInput } from "./time_input.js";
 import { WebComponent } from "./web_component.js";
 /**
  * Edit form for task.
+ *
+ * TODO(P2) split out create/edit...
  */
 export class TaskEdit extends WebComponent {
   constructor(task) {
@@ -40,7 +42,6 @@ export class TaskEdit extends WebComponent {
     this.querySelector("#name").addEventListener("change", this.onChange);
     this.querySelector("#repeat").millis = this.task.repeat;
     this.querySelector("#repeat").addEventListener("change", this.onChange);
-    // TODO(P2) maybe split out create/edit...
     this.querySelector("#next").millis = this.task.lastDone
       ? this.task.lastDone + this.task.repeat - now
       : undefined;

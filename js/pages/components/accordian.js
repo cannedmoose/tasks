@@ -6,7 +6,7 @@ import { WebComponent } from "./web_component.js";
  * TODO(P2): Styling;
  *    - Cursor + text highlight on label
  *    - general label
- * TODO(P2): fire open/close event;
+ * TODO(P3): fire open/close event;
  */
 export class Accordian extends WebComponent {
   constructor() {

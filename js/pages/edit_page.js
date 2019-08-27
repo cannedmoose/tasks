@@ -40,7 +40,7 @@ export class EditPage extends WebComponent {
     taskDiv.append(add);
     this.store.tasks.forEach(task => {
       let edit = new TaskEdit(task);
-      // Todo move out into function
+      // TODO(P2) move out into function
       edit.addEventListener("delete", e => {
         this.store.deleteTask(e.detail.task);
         this.refresh();

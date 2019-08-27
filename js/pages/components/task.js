@@ -3,7 +3,7 @@ import { WebComponent } from "./web_component.js";
  * A button that shows task information
  *
  * TODO(P2) Styling
- * TODO(P2) Add an "importance measure" (want more underlines for more important task)
+ * TODO(P3) Add an "importance indicator visual" (want more underlines for more important task)
  */
 export class Task extends WebComponent {
   constructor() {

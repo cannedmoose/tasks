@@ -7,9 +7,7 @@ var store;
 /**
  * Task app main entry point.
  *
- * TODO(P1) finish edit_page
  * TODO(P1) add navigation
- * TODO(P1) add admin
  * TODO(P2) styling
  */
 

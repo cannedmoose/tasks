@@ -3,8 +3,6 @@ import { WebComponent } from "./components/web_component.js";
 
 /**
  * Page for task CRUD operations
- *s
- * TODO(P2) make sure event handlers are cleaned up
  *
  */
 export class EditPage extends WebComponent {

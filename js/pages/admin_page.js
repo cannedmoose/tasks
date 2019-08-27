@@ -2,7 +2,6 @@ import { WebComponent } from "./components/web_component.js";
 
 /**
  * for 1337 users
- *
  */
 export class AdminPage extends WebComponent {
   constructor(store) {

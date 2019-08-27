@@ -16,7 +16,7 @@ export class Task extends WebComponent {
 
   set name(val) {
     this.setAttribute("name", val);
-    this.shadowRoot.querySelector("#name").textContent = val;
+    this.querySelector("#name").textContent = val;
   }
 
   connectedCallback() {

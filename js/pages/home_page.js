@@ -12,10 +12,12 @@ export class HomePage extends WebComponent {
   constructor(store) {
     super(TEMPLATE);
     this.store = store;
+
+    this.bind("onEdit");
   }
 
   connectedCallback() {
-    let taskDiv = this.querySelector("#content");
+    let taskDiv = this.querySelector("#tasks");
     let overdue = new TaskList(
       this.store.tasks,
       this.makeFilter(Number.NEGATIVE_INFINITY, 12),
@@ -63,6 +65,8 @@ export class HomePage extends WebComponent {
     rest.open = false;
     rest.addEventListener("done", EVs);
     taskDiv.append(rest);
+
+    this.querySelector("#edit").addEventListener("click", this.onEdit);
   }
 
   makeFilter(from, to) {
@@ -103,6 +107,18 @@ export class HomePage extends WebComponent {
     later.refreshTasks();
     rest.refreshTasks();
   }
+
+  onEdit(e) {
+    e.stopPropagation();
+    this.dispatchEvent(
+      new CustomEvent("nav", {
+        detail: {
+          page: "edit"
+        },
+        bubbles: true
+      })
+    );
+  }
 }
 
 customElements.define("wc-home-page", HomePage);
@@ -111,6 +127,7 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
 <template id = "home-page-template">
     <style>
   </style>
-  <div id="content"></div>
+  <div id="tasks"></div>
+  <button id="edit">Edit Tasks</button>
 </template >
 `);

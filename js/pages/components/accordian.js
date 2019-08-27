@@ -20,10 +20,10 @@ export class Accordian extends WebComponent {
   set open(val) {
     if (val) {
       this.setAttribute("open", "");
-      this.shadowRoot.querySelector(".content").classList.add("open");
+      this.querySelector(".content").classList.add("open");
     } else {
       this.removeAttribute("open");
-      this.shadowRoot.querySelector(".content").classList.remove("open");
+      this.querySelector(".content").classList.remove("open");
     }
   }
 

@@ -38,6 +38,14 @@ export class TaskStore {
     localStorage.setItem("version", this.version);
   }
 
+  import(str) {
+    let vals = JSON.parse(str);
+    localStorage.setItem("tasks", JSON.stringify(vals.tasks));
+    localStorage.setItem("taskHistory", JSON.stringify(vals.taskHistory));
+    localStorage.setItem("version", vals.version);
+    this.load();
+  }
+
   // TODO(P1) implement these
   addTask(name, repeat, lastDone) {}
   deleteTask(task) {}

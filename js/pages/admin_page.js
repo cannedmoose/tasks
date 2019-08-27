@@ -7,6 +7,9 @@ export class AdminPage extends WebComponent {
   constructor(store) {
     super(TEMPLATE);
     this.store = store;
+
+    this.bind("onDone");
+    this.bind("onImport");
   }
 
   connectedCallback() {
@@ -21,6 +24,26 @@ export class AdminPage extends WebComponent {
       null,
       2
     );
+
+    this.querySelector("#done").addEventListener("click", this.onDone);
+    this.querySelector("#import").addEventListener("click", this.onImport);
+  }
+
+  onDone(e) {
+    e.stopPropagation();
+    this.dispatchEvent(
+      new CustomEvent("nav", {
+        detail: {
+          page: "edit"
+        },
+        bubbles: true
+      })
+    );
+  }
+
+  onImport(e) {
+    e.stopPropagation();
+    this.store.import(this.querySelector("#console").value);
   }
 }
 
@@ -31,5 +54,7 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
   <style>
   </style>
   <textarea id="console"></textarea>
+  <button id="done">Done</button>
+  <button id="import">Import</button>
 </template >
 `);

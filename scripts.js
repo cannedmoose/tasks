@@ -16,6 +16,10 @@ window.onload = function() {
   var url = new URL(window.location);
   var params = new URLSearchParams(url.search);
   store.load();
+
+  document.querySelector("#container").addEventListener("nav", e => {
+    navigate(e.detail.page);
+  });
   navigate(params.get("page"));
 };
 
@@ -62,10 +66,4 @@ function taskAdmin() {
   let taskDiv = document.getElementById("container");
   let adminPage = new AdminPage(store);
   taskDiv.append(adminPage);
-}
-
-function createElement(name, parent) {
-  var child = document.createElement(name);
-  parent.append(child);
-  return child;
 }

@@ -9,14 +9,49 @@ export class EditPage extends WebComponent {
   constructor(store) {
     super(TEMPLATE);
     this.store = store;
+
+    this.bind("onDone");
+    this.bind("onAdmin");
   }
 
   connectedCallback() {
-    let content = this.querySelector("#content");
+    let taskDiv = this.querySelector("#tasks");
+    let add = new TaskEdit({});
+    add.create = true;
+    taskDiv.append(add);
     this.store.tasks.forEach(task => {
       let edit = new TaskEdit(task);
-      content.append(edit);
+      taskDiv.append(edit);
     });
+
+    this.querySelector("#done").addEventListener("click", this.onDone);
+    this.querySelector("#admin").addEventListener("click", this.onAdmin);
+  }
+
+  disconnectedCallback() {
+    this.querySelector("#done").removeEventListener("click", this.onDone);
+    this.querySelector("#admin").removeEventListener("click", this.onAdmin);
+  }
+
+  nav(page) {
+    this.dispatchEvent(
+      new CustomEvent("nav", {
+        detail: {
+          page: page
+        },
+        bubbles: true
+      })
+    );
+  }
+
+  onDone(e) {
+    e.stopPropagation();
+    this.nav("");
+  }
+
+  onAdmin(e) {
+    e.stopPropagation();
+    this.nav("admin");
   }
 }
 
@@ -26,6 +61,8 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
 <template id = "home-page-template">
   <style>
   </style>
-  <div id="content"> </div>
+  <div id="tasks"> </div>
+  <button id="done">Done</button>
+  <button id="admin">Admin</button>
 </template >
 `);

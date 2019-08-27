@@ -37,7 +37,7 @@ export class TaskList extends WebComponent {
     } else {
       this.removeAttribute("open");
     }
-    this.shadowRoot.querySelector("#accordian").open = val;
+    this.querySelector("#accordian").open = val;
   }
 
   connectedCallback() {
@@ -48,7 +48,7 @@ export class TaskList extends WebComponent {
   }
 
   refreshTasks() {
-    let content = this.shadowRoot.querySelector("#content");
+    let content = this.querySelector("#content");
     while (content.firstChild) {
       content.removeChild(content.firstChild);
     }
@@ -71,7 +71,7 @@ export class TaskList extends WebComponent {
       content.append(button);
     });
 
-    this.shadowRoot.querySelector("#label").textContent =
+    this.querySelector("#label").textContent =
       this.label + " - " + filteredTasks.length;
   }
 }

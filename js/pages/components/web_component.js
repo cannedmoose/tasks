@@ -20,12 +20,6 @@ export class WebComponent extends HTMLElement {
     return t.content.firstElementChild;
   }
 
-  slot(slot, element) {
-    this.append(element);
-    element.setAttribute("slot", slot);
-    return this;
-  }
-
   _upgradeProperty(prop) {
     if (this.hasOwnProperty(prop)) {
       let value = this[prop];
@@ -38,6 +32,7 @@ export class WebComponent extends HTMLElement {
     return this.shadowRoot.querySelector(query);
   }
 
+  // TODO(P2) WOULD BE BETTER IF DECORATOR STYLED (or based on prop name)
   bind(fn) {
     this[fn] = this[fn].bind(this);
   }

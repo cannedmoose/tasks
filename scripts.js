@@ -7,8 +7,8 @@ var store;
 /**
  * Task app main entry point.
  *
- * TODO(P1) add navigation
  * TODO(P2) styling
+ * TODO(P2) Standardize navigation
  */
 
 window.onload = function() {

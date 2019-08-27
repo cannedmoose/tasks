@@ -4,6 +4,7 @@ export class TaskStore {
     this.tasks = [];
     this.history = [];
     this.version = 1;
+    this.lastId = 0;
   }
 
   load() {
@@ -21,6 +22,7 @@ export class TaskStore {
           taskJSON.lastDone
         );
       });
+      this.lastId = Math.max(...this.tasks.map(task => task.id));
     }
     if (this.storage.taskHistory) {
       this.history = JSON.parse(this.storage.taskHistory);
@@ -39,6 +41,7 @@ export class TaskStore {
   }
 
   import(str) {
+    // TODO(P2) Merge store + import
     let vals = JSON.parse(str);
     localStorage.setItem("tasks", JSON.stringify(vals.tasks));
     localStorage.setItem("taskHistory", JSON.stringify(vals.taskHistory));
@@ -46,9 +49,31 @@ export class TaskStore {
     this.load();
   }
 
-  // TODO(P1) implement these
-  addTask(name, repeat, lastDone) {}
-  deleteTask(task) {}
+  addTask(name, repeat, lastDone) {
+    let id = this.nextId();
+    this.tasks.push(
+      new Task(
+        () => {
+          this.store();
+        },
+        id,
+        name,
+        repeat,
+        lastDone
+      )
+    );
+    this.store();
+  }
+  nextId() {
+    console.log(this.lastId);
+    this.lastId += 1;
+    return this.lastId;
+  }
+
+  deleteTask(task) {
+    this.tasks = this.tasks.filter(t => t.id !== task.id);
+    this.store();
+  }
 
   handleUpgrade() {
     if (!this.storage.version) {

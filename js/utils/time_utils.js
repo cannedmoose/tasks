@@ -25,6 +25,10 @@ export function toMillis(unit, amount) {
 }
 
 export function fromMillis(amount, lowest = "hours") {
+  if (amount === undefined) {
+    return { unit: "days", amount: 0 };
+  }
+  // TODO(P2) use lowest
   for (let i = 0; i < ORDER.length; i++) {
     let unit = ORDER[i];
     let converted = amount / UNITS[unit];

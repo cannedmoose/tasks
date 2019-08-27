@@ -2,14 +2,13 @@ import { TimeInput } from "./time_input.js";
 import { WebComponent } from "./web_component.js";
 /**
  * Edit form for task.
- *
- * TODO(P1) add delete button
  */
 export class TaskEdit extends WebComponent {
   constructor(task) {
     super(TEMPLATE);
     this.task = task;
     this.bind("onChange");
+    this.bind("onAction");
   }
 
   get create() {
@@ -41,28 +40,49 @@ export class TaskEdit extends WebComponent {
     this.querySelector("#name").addEventListener("change", this.onChange);
     this.querySelector("#repeat").millis = this.task.repeat;
     this.querySelector("#repeat").addEventListener("change", this.onChange);
-    this.querySelector("#next").millis = now - this.task.lastDone;
+    // TODO(P2) maybe split out create/edit...
+    this.querySelector("#next").millis = this.task.lastDone
+      ? this.task.lastDone + this.task.repeat - now
+      : undefined;
     this.querySelector("#next").addEventListener("change", this.onChange);
-
     this.querySelector("#action").addEventListener("click", this.onAction);
   }
 
   onAction(e) {
     if (this.create) {
-      this.store;
+      this.dispatchEvent(
+        new CustomEvent("create", {
+          detail: {
+            task: this.task
+          },
+          bubbles: true
+        })
+      );
+    } else {
+      this.dispatchEvent(
+        new CustomEvent("delete", {
+          detail: {
+            task: this.task
+          },
+          bubbles: true
+        })
+      );
     }
   }
 
   onChange(e) {
+    let now = Date.now();
+
     let name = this.querySelector("#name").value;
     let next = this.querySelector("#next").millis;
     let repeat = this.querySelector("#repeat").millis;
 
     this.task.name = name;
-    // TODO(P1) fix lastDone handling
-    //this.task.next = next;
+    this.task.lastDone = now - (repeat - next);
     this.task.repeat = repeat;
-    this.querySelector("#label").textContent = this.task.name;
+    if (!this.create) {
+      this.querySelector("#label").textContent = this.task.name;
+    }
   }
 }
 

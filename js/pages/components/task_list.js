@@ -8,7 +8,7 @@ import { WebComponent } from "./web_component.js";
  * Displays a subset of tasks from a larger array, given by a filter.
  * Sorts taks by given comparator.
  *
- * TODO(P2) styling
+ * TODO(P1) styling
  */
 export class TaskList extends WebComponent {
   constructor(tasks, filter, compare) {

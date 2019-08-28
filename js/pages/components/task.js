@@ -2,7 +2,7 @@ import { WebComponent } from "./web_component.js";
 /**
  * A button that shows task information
  *
- * TODO(P2) Styling
+ * TODO(P1) Styling
  * TODO(P3) Add an "importance indicator visual" (want more underlines for more important task)
  */
 export class Task extends WebComponent {
@@ -31,8 +31,13 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
   <style>
     .task {
       width: 100%;
-      display: flex;
+
+      background-color: white;
+      border: none;
+      border-bottom: 1px solid #ADD8E6;
     }
+
+    /*TODO(P1) why doesn't html font apply to button */
 
   </style>
   <button id="button" class="task">

@@ -3,7 +3,7 @@ import { WebComponent } from "./web_component.js";
 /**
  * A generic accordian, can be opened/closed.
  *
- * TODO(P2): Styling;
+ * TODO(P1): Styling;
  *    - Cursor + text highlight on label
  *    - general label
  * TODO(P3): fire open/close event;
@@ -21,9 +21,11 @@ export class Accordian extends WebComponent {
     if (val) {
       this.setAttribute("open", "");
       this.querySelector(".content").classList.add("open");
+      this.querySelector(".label").classList.add("open");
     } else {
       this.removeAttribute("open");
       this.querySelector(".content").classList.remove("open");
+      this.querySelector(".label").classList.remove("open");
     }
   }
 
@@ -56,14 +58,33 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
         display: none;
     }
 
-    .open {
+    .content.open {
       display: block;
-      border: 2px dashed black;
       border-top: none;
+    }
+
+    .label {
+      cursor: pointer;
+      -webkit-user-select: none;  /* Chrome all / Safari all */
+      -moz-user-select: none;     /* Firefox all */
+      -ms-user-select: none;      /* IE 10+ */
+      user-select: none;          /* Likely future */
+      border-bottom: 2px solid #ADD8E6;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+
+    .label::after {
+      content: "◀";
+    }
+
+    .open.label::after {
+      content: "▽";
     }
 
   </style>
     <div class="label"><slot  name="label">Accordian</slot></div>
-    <div class="content"><slot name="content">CONTENT</slot></div>
+    <slot class="content" name="content">CONTENT</slot>
   </template >
 `);

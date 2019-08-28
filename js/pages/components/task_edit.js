@@ -92,9 +92,9 @@ customElements.define("wc-task-edit", TaskEdit);
 const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
 <template id="task-display">
   <style>
-    .task {
-      width: 100%;
+    #content {
       display: flex;
+      flex-direction: column;
     }
 
     #action:after {

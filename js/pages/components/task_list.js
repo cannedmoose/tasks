@@ -55,9 +55,9 @@ export class TaskList extends WebComponent {
 
     let filteredTasks = this.tasks.filter(this.filter).sort(this.compare);
     filteredTasks.forEach(task => {
-      let button = document.createElement("wc-task");
-      button.name = task.name;
-      button.addEventListener("click", e => {
+      let teskEl = new Task(task);
+      teskEl.name = task.name;
+      /*button.addEventListener("click", e => {
         e.stopPropagation();
         this.dispatchEvent(
           new CustomEvent("done", {
@@ -67,8 +67,8 @@ export class TaskList extends WebComponent {
             bubbles: true
           })
         );
-      });
-      content.append(button);
+      });*/
+      content.append(teskEl);
     });
 
     this.querySelector("#label").textContent =
@@ -81,6 +81,15 @@ customElements.define("wc-task-list", TaskList);
 const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
 <template id = "task-list-template">
   <style>
+    #label {
+      border-bottom: 3px solid #ADD8E6;
+      width: 100%;
+      font-size: 1.5em;
+    }
+
+    #accordian {
+      width: 100%;
+    }
   </style>
   <wc-accordian id="accordian">
     <div id ="label" slot="label"></div>

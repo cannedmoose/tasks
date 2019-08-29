@@ -60,7 +60,7 @@ export class HomePage extends WebComponent {
       this.makeFilter(48, Infinity),
       this.timeComp
     );
-    rest.label = "The Rest";
+    rest.label = "Upcoming";
     rest.id = "rest";
     rest.open = false;
     rest.addEventListener("done", EVs);
@@ -126,6 +126,10 @@ customElements.define("wc-home-page", HomePage);
 const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
 <template id = "home-page-template">
     <style>
+
+    :host{
+      width: 100%;
+    }
   </style>
   <div id="tasks"></div>
   <button id="edit">Edit Tasks</button>

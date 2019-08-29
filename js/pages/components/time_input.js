@@ -72,8 +72,28 @@ customElements.define("wc-time-input", TimeInput);
 const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
 <template id="time-input">
   <style>
+    select,input {
+      border:none;
+      border-bottom: 1px black dotted;
+      line-height: 1.5em;
+    }
+
+    :host {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-end;
+    }
+
+    #amount {
+      text-align: right;
+    }
+
+    #unit {
+      /*To make sure text lines up, maybe a better way to do this..*/
+      height: 100%;
+    }
   </style>
-  <input id="amount" type="number" step =".5"/>
+  <input id="amount" type="number" step=".5"/>
   <select id="unit">
     <option value="hours">Hours</option>
     <option value="days">Days</option>

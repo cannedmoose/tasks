@@ -32,6 +32,10 @@ export class WebComponent extends HTMLElement {
     return this.shadowRoot.querySelector(query);
   }
 
+  querySelectorAll(query) {
+    return this.shadowRoot.querySelectorAll(query);
+  }
+
   // TODO(P2) WOULD BE BETTER IF DECORATOR STYLED (or based on prop name)
   // TODO(P2) Ensure we are Consistently handling/dispatch events
   bind(fn) {

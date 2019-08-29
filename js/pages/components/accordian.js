@@ -57,10 +57,9 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
     .content {
         display: none;
     }
-
+    
     .content.open {
       display: block;
-      border-top: none;
     }
 
     .label {
@@ -69,22 +68,12 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
       -moz-user-select: none;     /* Firefox all */
       -ms-user-select: none;      /* IE 10+ */
       user-select: none;          /* Likely future */
-      border-bottom: 2px solid #ADD8E6;
       display: flex;
       flex-direction: row;
       justify-content: space-between;
     }
-
-    .label::after {
-      content: "◀";
-    }
-
-    .open.label::after {
-      content: "▽";
-    }
-
   </style>
-    <div class="label"><slot  name="label">Accordian</slot></div>
+    <slot class="label" name="label">Accordian</slot>
     <slot class="content" name="content">CONTENT</slot>
   </template >
 `);

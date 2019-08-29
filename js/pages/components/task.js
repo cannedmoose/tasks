@@ -1,4 +1,6 @@
 import { WebComponent } from "./web_component.js";
+import { TimeInput } from "./time_input.js";
+import { Accordian } from "./accordian.js";
 /**
  * A button that shows task information
  *
@@ -6,8 +8,9 @@ import { WebComponent } from "./web_component.js";
  * TODO(P3) Add an "importance indicator visual" (want more underlines for more important task)
  */
 export class Task extends WebComponent {
-  constructor() {
+  constructor(task) {
     super(TEMPLATE);
+    this.task = task;
   }
 
   get name() {
@@ -16,11 +19,30 @@ export class Task extends WebComponent {
 
   set name(val) {
     this.setAttribute("name", val);
-    this.querySelector("#name").textContent = val;
+    //this.querySelector("#label").textContent = val;
   }
 
   connectedCallback() {
     this._upgradeProperty("name");
+
+    this.querySelector("#right-icon").addEventListener("click", e => {
+      e.stopPropagation();
+    });
+    this.querySelector("#label-name").addEventListener("click", e => {
+      e.stopPropagation();
+    });
+
+    this.querySelectorAll(".name").forEach(el => {
+      el.textContent = this.task.name;
+    });
+
+    if (this.task.lastDone + this.task.repeat >= Date.now()) {
+      this.querySelector("#right-icon").textContent = "☑";
+    } else {
+      this.querySelector("#right-icon").textContent = "☐";
+    }
+
+    this.querySelector("#left-icon").textContent = "✍";
   }
 }
 
@@ -37,11 +59,47 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
       border-bottom: 1px solid #ADD8E6;
     }
 
-    /*TODO(P1) why doesn't html font apply to button */
+    #label {
+      width: 100%;
+      border-bottom: 1px solid #ADD8E6;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
 
+    #content {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 2px solid #ADD8E6;
+    }
+
+    #right-icon {
+      flex-grow: 2;
+    }
+    #label-name {
+      flex-grow: 4;
+    }
+
+    #left-icon {
+      flex-grow: 1;
+    }
+
+    #accordian {
+      width: 100%;
+    }
   </style>
-  <button id="button" class="task">
-    <div id="name"></div>
-  </button>
+  <wc-accordian id="accordian">
+    <div id ="label" slot="label">
+      <span id="right-icon"></span>
+      <span id="label-name" class="name"></span>
+      <span id="left-icon"></span>
+    </div>
+    <div id ="content" slot="content">
+      <span>I should <span class="name"></span> every:</span>
+      <wc-time-input id="repeat"></wc-time-input>
+      <span>I will next <span class="name"></span> in:</span>
+      <wc-time-input id="next"></wc-time-input>
+    </div>
+  </wc-accordian>
 </template>
 `);

@@ -98,3 +98,9 @@ html {
 
   width: 50vw;
 }
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

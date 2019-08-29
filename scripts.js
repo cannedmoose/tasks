@@ -8,6 +8,7 @@ var store;
  * Task app main entry point.
  *
  * TODO(P2) styling CLEANUP
+ * TODO(P2) Convert history to ID based
  *
  */
 

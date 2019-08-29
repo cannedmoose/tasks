@@ -13,9 +13,7 @@ export class TaskStore {
       this.tasks = JSON.parse(this.storage.tasks).map(taskJSON => {
         // TODO(P3) HACKEYYY
         return new Task(
-          () => {
-            this.store();
-          },
+          this,
           taskJSON.id,
           taskJSON.name,
           taskJSON.repeat,
@@ -49,28 +47,20 @@ export class TaskStore {
     this.load();
   }
 
-  addTask(name, repeat, lastDone) {
+  add(name, repeat, lastDone) {
     let id = this.nextId();
-    this.tasks.push(
-      new Task(
-        () => {
-          this.store();
-        },
-        id,
-        name,
-        repeat,
-        lastDone
-      )
-    );
+    let task = new Task(this, id, name, repeat, lastDone);
+    this.tasks.push(task);
     this.store();
+    return task;
   }
+
   nextId() {
-    console.log(this.lastId);
     this.lastId += 1;
     return this.lastId;
   }
 
-  deleteTask(task) {
+  remove(task) {
     this.tasks = this.tasks.filter(t => t.id !== task.id);
     this.store();
   }
@@ -96,7 +86,7 @@ class Task {
 
   set name(val) {
     this.values.name = val;
-    this.storage();
+    this.storage.store();
   }
 
   get name() {
@@ -105,7 +95,7 @@ class Task {
 
   set repeat(val) {
     this.values.repeat = val;
-    this.storage();
+    this.storage.store();
   }
 
   get repeat() {
@@ -114,10 +104,25 @@ class Task {
 
   set lastDone(val) {
     this.values.lastDone = val;
-    this.storage();
+    this.storage.store();
   }
 
   get lastDone() {
     return this.values.lastDone;
+  }
+
+  remove() {
+    this.storage.delete(this);
+  }
+}
+
+export class TaskBuilder extends Task {
+  constructor(realstore, name, repeat, lastDone) {
+    super({ store: () => {} }, "", name, repeat, lastDone);
+    this.realStore = realstore;
+  }
+
+  create() {
+    return this.realStore.addTask(this.name, this.repeat, this.lastDone);
   }
 }

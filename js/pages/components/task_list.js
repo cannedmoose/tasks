@@ -58,17 +58,6 @@ export class TaskList extends WebComponent {
     filteredTasks.forEach(task => {
       let teskEl = new Task(task);
       teskEl.name = task.name;
-      /*button.addEventListener("click", e => {
-        e.stopPropagation();
-        this.dispatchEvent(
-          new CustomEvent("done", {
-            detail: {
-              task: task
-            },
-            bubbles: true
-          })
-        );
-      });*/
       content.append(teskEl);
     });
 

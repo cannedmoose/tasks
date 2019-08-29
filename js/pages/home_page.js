@@ -12,8 +12,6 @@ export class HomePage extends WebComponent {
   constructor(store) {
     super(TEMPLATE);
     this.store = store;
-
-    this.bind("onEdit");
   }
 
   connectedCallback() {
@@ -26,6 +24,7 @@ export class HomePage extends WebComponent {
 
     // TODO(P2) move out of function
     let EVs = e => {
+      console.log("DONE", e);
       e.detail.task.lastDone = Date.now();
       this.refreshTasks();
     };
@@ -65,8 +64,6 @@ export class HomePage extends WebComponent {
     rest.open = false;
     rest.addEventListener("done", EVs);
     taskDiv.append(rest);
-
-    this.querySelector("#edit").addEventListener("click", this.onEdit);
   }
 
   makeFilter(from, to) {
@@ -107,18 +104,6 @@ export class HomePage extends WebComponent {
     later.refreshTasks();
     rest.refreshTasks();
   }
-
-  onEdit(e) {
-    e.stopPropagation();
-    this.dispatchEvent(
-      new CustomEvent("nav", {
-        detail: {
-          page: "edit"
-        },
-        bubbles: true
-      })
-    );
-  }
 }
 
 customElements.define("wc-home-page", HomePage);
@@ -132,6 +117,5 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
     }
   </style>
   <div id="tasks"></div>
-  <button id="edit">Edit Tasks</button>
 </template >
 `);

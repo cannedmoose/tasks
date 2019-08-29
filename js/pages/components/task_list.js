@@ -8,7 +8,8 @@ import { WebComponent } from "./web_component.js";
  * Displays a subset of tasks from a larger array, given by a filter.
  * Sorts taks by given comparator.
  *
- * TODO(P1) styling
+ * TODO(P1) Add open/close arrow
+ * TODO(P1) Make sure we size properly
  */
 export class TaskList extends WebComponent {
   constructor(tasks, filter, compare) {

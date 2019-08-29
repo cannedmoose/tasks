@@ -7,7 +7,7 @@ var store;
 /**
  * Task app main entry point.
  *
- * TODO(P1) styling
+ * TODO(P2) styling CLEANUP
  *
  */
 

@@ -4,7 +4,11 @@ import { Accordian } from "./accordian.js";
 /**
  * A button that shows task information
  *
- * TODO(P1) Styling
+ * TODO(P1) Fix up label spacing
+ * TODO(P1) make it so only edit click opens edit (should catch all label onClick and do things depending on target)
+ * TODO(P1) Change icons when editing (trash, close edit)
+ * TODO(P1) Add actual edit functionality
+ *
  * TODO(P3) Add an "importance indicator visual" (want more underlines for more important task)
  */
 export class Task extends WebComponent {

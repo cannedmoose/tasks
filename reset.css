@@ -86,21 +86,12 @@ video {
 }
 
 html {
-  font: 1em/1.5 "Comic Sans MS", cursive;
+  font: 5em/1.5 "Comic Sans MS", cursive;
   color: rgb(37, 37, 37);
 }
 
 .container {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  width: 50vw;
-}
-
-body {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 0 0.1em;
 }

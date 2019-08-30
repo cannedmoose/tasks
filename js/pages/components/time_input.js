@@ -37,7 +37,6 @@ export class TimeInput extends WebComponent {
   }
 
   set millis(val) {
-    if (val === this.millis) return;
     let converted = fromMillis(val);
     this.unit = converted.unit;
     this.amount = converted.amount;

@@ -1,12 +1,13 @@
 import { TaskList } from "./components/task_list.js";
 import { WebComponent } from "./components/web_component.js";
+import { Task } from "./components/task.js";
+import { TaskBuilder } from "../utils/task_store.js";
+import { toMillis, fromMillis } from "../utils/time_utils.js";
 
 /**
  * The home page
  *
  *
- * TODO(P1) Add add task button
- * TODO(P1) Mobile styling
  * TODO(P2) having task open should stop other interactions (EG accordians opening)
  *    Liuttle hackey but could do this with some slick csss maybs
  * TODO(P2) make sure event handlers are cleaned up
@@ -67,6 +68,32 @@ export class HomePage extends WebComponent {
     rest.open = false;
     rest.addEventListener("taskchange", EVs);
     taskDiv.append(rest);
+
+    this.makeAddTask();
+  }
+
+  makeAddTask() {
+    let addTask = new Task(
+      new TaskBuilder(
+        this.store,
+        "",
+        toMillis("days", 1),
+        Date.now() - toMillis("days", 1)
+      )
+    );
+    addTask.create = true;
+    addTask.addEventListener("confirm", e => {
+      if (e.detail.task.name !== "") {
+        e.detail.task.create();
+      }
+      this.refreshTasks();
+    });
+    addTask.addEventListener("remove", e => {
+      this.refreshTasks();
+    });
+    addTask.id = "add-task";
+
+    this.querySelector("#tasks").append(addTask);
   }
 
   makeFilter(from, to) {
@@ -102,10 +129,18 @@ export class HomePage extends WebComponent {
     let later = this.querySelector("#later");
     let rest = this.querySelector("#rest");
 
+    overdue.tasks = this.store.tasks;
     overdue.refreshTasks();
+    soon.tasks = this.store.tasks;
     soon.refreshTasks();
+    later.tasks = this.store.tasks;
     later.refreshTasks();
+    rest.tasks = this.store.tasks;
     rest.refreshTasks();
+
+    let addTask = this.querySelector("#add-task");
+    addTask.parentElement.removeChild(addTask);
+    this.makeAddTask();
   }
 }
 

@@ -56,14 +56,36 @@ export class TaskList extends WebComponent {
     let filteredTasks = this.tasks.filter(this.filter).sort(this.compare);
     filteredTasks.forEach(task => {
       let teskEl = new Task(task);
-      teskEl.addEventListener("taskchange", e =>
-        /**TODO(P1) this doesn't seem to bubble from task so need to refire*/
+      teskEl.addEventListener("done", e => {
+        e.stopPropagation();
+        e.detail.task.lastDone = Date.now();
+        console.log("DONEVENT");
         this.dispatchEvent(
           new CustomEvent("taskchange", {
+            detail: { task: e.detail.task },
             bubbles: true
           })
-        )
-      );
+        );
+      });
+      teskEl.addEventListener("remove", e => {
+        e.stopPropagation();
+        e.detail.task.remove();
+        this.dispatchEvent(
+          new CustomEvent("taskchange", {
+            detail: { task: e.detail.task },
+            bubbles: true
+          })
+        );
+      });
+      teskEl.addEventListener("confirm", e => {
+        e.stopPropagation();
+        this.dispatchEvent(
+          new CustomEvent("taskchange", {
+            detail: { task: e.detail.task },
+            bubbles: true
+          })
+        );
+      });
       content.append(teskEl);
     });
 

@@ -33,7 +33,7 @@ export class AdminPage extends WebComponent {
     this.dispatchEvent(
       new CustomEvent("nav", {
         detail: {
-          page: "edit"
+          page: ""
         },
         bubbles: true
       })

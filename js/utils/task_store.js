@@ -23,6 +23,9 @@ export class TaskStore {
           );
         });
       this.lastId = Math.max(...this.tasks.map(task => task.id));
+      if (!this.lastId) {
+        this.lastId = 1;
+      }
     }
     if (this.storage.taskHistory) {
       this.history = JSON.parse(this.storage.taskHistory);
@@ -65,20 +68,27 @@ export class TaskStore {
   }
 
   remove(task) {
-    let index = this.tasks.findIndex(t => t.id === task.id);
-    // TODO(P2) this leave null entries in array which we then need to filter
-    // Figure out a better way to do this
-    if (index > -1) {
-      delete this.tasks[index];
-      this.store();
-    }
+    this.tasks = this.tasks.filter(t => t.id !== task.id);
+    this.store();
   }
 
   handleUpgrade() {
     if (!this.storage.version) {
       // Convert repeat time to millis
-      tasks.forEach(task => (task.repeat = daysToMillis(task.repeat)));
-      store();
+      this.tasks.forEach(task => (task.repeat = daysToMillis(task.repeat)));
+      this.version = 1;
+      this.store();
+    }
+
+    if (this.storage.version == 1) {
+      // Make sure everyone has ids
+      this.tasks.forEach(task => {
+        if (!task.id) {
+          task.id = this.nextId();
+        }
+      });
+      this.version = 2;
+      this.store();
     }
   }
 }
@@ -91,6 +101,12 @@ class Task {
 
   get id() {
     return this.values.id;
+  }
+
+  set id(val) {
+    if (val === this.name) return;
+    this.values.id = val;
+    this.storage.store();
   }
 
   set name(val) {
@@ -135,6 +151,6 @@ export class TaskBuilder extends Task {
   }
 
   create() {
-    return this.realStore.addTask(this.name, this.repeat, this.lastDone);
+    return this.realStore.add(this.name, this.repeat, this.lastDone);
   }
 }

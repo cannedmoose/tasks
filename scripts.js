@@ -6,7 +6,6 @@ var store;
 /**
  * Task app main entry point.
  *
- * TODO(P1) Ensure versioning will work on phone, convert history to ID based
  * TODO(P2) styling CLEANUP
  *
  */

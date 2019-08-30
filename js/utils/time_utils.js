@@ -13,11 +13,11 @@ const ORDER = [
   "years",
   "months",
   "weeks",
-  "days",
-  "hours",
+  "days"
+  /*  "hours",
   "minutes",
   "seconds",
-  "millis"
+  "millis" */
 ];
 
 export function toMillis(unit, amount) {
@@ -37,5 +37,5 @@ export function fromMillis(amount, lowest = "hours") {
     return { unit, amount: converted };
   }
 
-  return { unit: "days", amount: 0 };
+  return { unit: "hours", amount: 0 };
 }

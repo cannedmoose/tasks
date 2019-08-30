@@ -14,12 +14,18 @@ export class Task extends WebComponent {
     this.task = task;
   }
 
-  get name() {
-    return this.getAttribute("name");
+  get create() {
+    return this.hasAttribute("create");
   }
 
-  set name(val) {
-    this.setAttribute("name", val);
+  set create(val) {
+    if (val) {
+      this.setAttribute("create", "");
+      this.querySelector("#accordian").classList.add("create");
+    } else {
+      this.removeAttribute("create");
+      this.querySelector("#accordian").classList.remove("create");
+    }
   }
 
   connectedCallback() {
@@ -30,20 +36,18 @@ export class Task extends WebComponent {
         // TODO(P2) find a better way to do this
         // HACKEY, trigger task list refgresh when closing an edited task
         if (this.querySelector("#name").classList.contains("editable")) {
-          this.firetaskchange();
+          this.firetaskchange("confirm");
         }
         // Edit icon should let event bubble
         this.querySelector("#name").classList.toggle("editable");
         return;
       }
 
-      if (this.querySelector("#name").classList.contains("editable")) {
-        e.stopPropagation();
-        return;
-      }
       e.stopPropagation();
-      this.task.lastDone = Date.now();
-      this.firetaskchange();
+
+      if (!this.querySelector("#name").classList.contains("editable")) {
+        this.firetaskchange("done");
+      }
     });
 
     // TODO(P2) this could be convenience function
@@ -79,15 +83,19 @@ export class Task extends WebComponent {
     });
 
     this.querySelector("#trash-icon").addEventListener("click", e => {
-      this.task.remove();
-      this.firetaskchange();
+      this.firetaskchange("remove");
     });
   }
 
-  // TODO(P2) Think about what events should actually fire
-  firetaskchange() {
+  // TODO(P3) Think about what events should actually fire
+  // FOR add task 3 events:
+  // Done (task was click)
+  // Confirm (edit button closed)
+  // Delete (trash was clicked)
+  firetaskchange(what) {
     this.dispatchEvent(
-      new CustomEvent("taskchange", {
+      new CustomEvent(what, {
+        detail: { task: this.task },
         bubbles: true
       })
     );
@@ -111,6 +119,7 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
       border: none;
       font: 1em/1.5 "Comic Sans MS", cursive;
       color: rgb(37, 37, 37);
+      min-width: 0;
     }
 
     #name {
@@ -148,7 +157,7 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
     }
 
     .center-column {
-      flex: 15;
+      flex: 5;
       padding-left: 1em;
     }
 
@@ -157,12 +166,31 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
       text-align: center;
       border-left: 1px dotted #ADD8E6;
     }
+
+    .create > #label > #tick-icon, .create > #label > #name {
+      visibility: hidden;
+    }
+
+    .create > #label > #edit-icon {
+      border-left: none;
+    }
+
+    .create > #label > #name.editable {
+      visibility: visible;
+    }
+
+    .create > #label {
+      border-top: 2px dotted #ADD8E6;
+      border-bottom: 2px dotted #ADD8E6;
+      margin-top: 1.5em;
+    }
+
   </style>
   <wc-accordian id="accordian">
     <div id="label" class="line-item" slot="label">
       <span id="tick-icon" class="right-column"></span>
-      <input id="name" type="text" class="center-column"/>
-      <span id="edit-icon" class="left-column" >✍</span>
+      <input id="name" type="text" placeholder="Name" class="center-column"/>
+      <span id="edit-icon" class="left-column">✍</span>
     </div>
     <div id="content" class="line-item" slot="content">
       <span class="right-column"></span>

@@ -10,16 +10,18 @@ export class TaskStore {
   load() {
     // TODO(P2) fallback if undefined
     if (this.storage.tasks) {
-      this.tasks = JSON.parse(this.storage.tasks).map(taskJSON => {
-        // TODO(P3) HACKEYYY
-        return new Task(
-          this,
-          taskJSON.id,
-          taskJSON.name,
-          taskJSON.repeat,
-          taskJSON.lastDone
-        );
-      });
+      this.tasks = JSON.parse(this.storage.tasks)
+        .filter(i => i !== null)
+        .map(taskJSON => {
+          // TODO(P3) HACKEYY
+          return new Task(
+            this,
+            taskJSON.id,
+            taskJSON.name,
+            taskJSON.repeat,
+            taskJSON.lastDone
+          );
+        });
       this.lastId = Math.max(...this.tasks.map(task => task.id));
     }
     if (this.storage.taskHistory) {
@@ -32,7 +34,9 @@ export class TaskStore {
   store() {
     localStorage.setItem(
       "tasks",
-      JSON.stringify(this.tasks.map(tasks => tasks.values))
+      JSON.stringify(
+        this.tasks.filter(t => t !== null).map(tasks => tasks.values)
+      )
     );
     localStorage.setItem("taskHistory", JSON.stringify(this.history));
     localStorage.setItem("version", this.version);
@@ -61,8 +65,13 @@ export class TaskStore {
   }
 
   remove(task) {
-    this.tasks = this.tasks.filter(t => t.id !== task.id);
-    this.store();
+    let index = this.tasks.findIndex(t => t.id === task.id);
+    // TODO(P2) this leave null entries in array which we then need to filter
+    // Figure out a better way to do this
+    if (index > -1) {
+      delete this.tasks[index];
+      this.store();
+    }
   }
 
   handleUpgrade() {
@@ -85,8 +94,10 @@ class Task {
   }
 
   set name(val) {
+    if (val === this.name) return;
     this.values.name = val;
     this.storage.store();
+    this.fireChange("name");
   }
 
   get name() {
@@ -94,8 +105,10 @@ class Task {
   }
 
   set repeat(val) {
+    if (val === this.repeat) return;
     this.values.repeat = val;
     this.storage.store();
+    this.fireChange("repeat");
   }
 
   get repeat() {
@@ -103,8 +116,10 @@ class Task {
   }
 
   set lastDone(val) {
+    if (val === this.lastDone) return;
     this.values.lastDone = val;
     this.storage.store();
+    this.fireChange("lastDone");
   }
 
   get lastDone() {
@@ -112,7 +127,12 @@ class Task {
   }
 
   remove() {
-    this.storage.delete(this);
+    this.storage.remove(this);
+    this.fireChange("remove");
+  }
+
+  fireChange(what) {
+    //TODO(P1) remove
   }
 }
 

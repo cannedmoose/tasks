@@ -18,14 +18,12 @@ export class HomePage extends WebComponent {
     let taskDiv = this.querySelector("#tasks");
     let overdue = new TaskList(
       this.store.tasks,
-      this.makeFilter(Number.NEGATIVE_INFINITY, 12),
+      this.makeFilter(Number.NEGATIVE_INFINITY, 0),
       this.scoreComp
     );
 
     // TODO(P2) move out of function
     let EVs = e => {
-      console.log("DONE", e);
-      e.detail.task.lastDone = Date.now();
       this.refreshTasks();
     };
 
@@ -33,7 +31,7 @@ export class HomePage extends WebComponent {
     overdue.id = "overdue";
     overdue.open = true;
     taskDiv.append(overdue);
-    overdue.addEventListener("done", EVs);
+    overdue.addEventListener("taskchange", EVs);
     let soon = new TaskList(
       this.store.tasks,
       this.makeFilter(0, 12),
@@ -42,7 +40,7 @@ export class HomePage extends WebComponent {
     soon.label = "Due Soon";
     soon.id = "soon";
     soon.open = true;
-    soon.addEventListener("done", EVs);
+    soon.addEventListener("taskchange", EVs);
     taskDiv.append(soon);
     let later = new TaskList(
       this.store.tasks,
@@ -52,7 +50,7 @@ export class HomePage extends WebComponent {
     later.label = "Due Later";
     later.id = "later";
     later.open = false;
-    later.addEventListener("done", EVs);
+    later.addEventListener("taskchange", EVs);
     taskDiv.append(later);
     let rest = new TaskList(
       this.store.tasks,
@@ -62,7 +60,7 @@ export class HomePage extends WebComponent {
     rest.label = "Upcoming";
     rest.id = "rest";
     rest.open = false;
-    rest.addEventListener("done", EVs);
+    rest.addEventListener("taskchange", EVs);
     taskDiv.append(rest);
   }
 

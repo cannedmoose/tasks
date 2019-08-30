@@ -37,6 +37,7 @@ export class TimeInput extends WebComponent {
   }
 
   set millis(val) {
+    if (val === this.millis) return;
     let converted = fromMillis(val);
     this.unit = converted.unit;
     this.amount = converted.amount;
@@ -57,12 +58,12 @@ export class TimeInput extends WebComponent {
   connectedCallback() {
     this._upgradeProperty("millis");
 
-    this.querySelector("#unit").addEventListener("select", this.onChange);
+    this.querySelector("#unit").addEventListener("change", this.onChange);
     this.querySelector("#amount").addEventListener("change", this.onChange);
   }
 
   disconnectedCallback() {
-    this.querySelector("#unit").removeEventListener("select", this.onChange);
+    this.querySelector("#unit").removeEventListener("change", this.onChange);
     this.querySelector("#amount").removeEventListener("change", this.onChange);
   }
 }

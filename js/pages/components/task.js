@@ -28,8 +28,18 @@ export class Task extends WebComponent {
 
     this.querySelector("#label").addEventListener("click", e => {
       if (e.target.id === "edit-icon") {
+        // TODO(P2) find a better way to do this
+        // HACKEY, trigger task list refgresh when closing an edited task
+        if (this.querySelector("#name").classList.contains("editable")) {
+          this.firetaskchange();
+        }
         // Edit icon should let event bubble
         this.querySelector("#name").classList.toggle("editable");
+        return;
+      }
+
+      if (this.querySelector("#name").classList.contains("editable")) {
+        e.stopPropagation();
         return;
       }
 
@@ -49,6 +59,7 @@ export class Task extends WebComponent {
       // Yeah then it kinda works with eventual syncing
       e.stopPropagation();
       this.task.lastDone = Date.now();
+      this.firetaskchange();
     });
 
     // TODO(P2) this could be convenience function
@@ -64,19 +75,38 @@ export class Task extends WebComponent {
       this.querySelector("#tick-icon").textContent = "☐";
     }
 
+    this.querySelector("#name").value = this.task.name;
+    this.querySelector("#repeat").millis = this.task.repeat;
+    this.querySelector("#next").millis =
+      this.task.lastDone + this.task.repeat - Date.now();
+
     this.querySelector("#repeat").addEventListener("change", e => {
-      console.log("test", e);
+      this.task.repeat = this.querySelector("#repeat").millis;
     });
     this.querySelector("#next").addEventListener("change", e => {
-      console.log("test", e);
+      this.task.lastDone = Date.now() - (this.task.repeat - e.detail.millis);
     });
 
     this.querySelector("#name").addEventListener("change", e => {
-      console.log("test", e);
+      this.task.name = this.querySelector("#name").value;
+      this.querySelectorAll(".name").forEach(el => {
+        el.textContent = this.task.name;
+      });
     });
-    this.querySelectorAll("#name").forEach(el => {
-      el.value = this.task.name;
+
+    this.querySelector("#trash-icon").addEventListener("click", e => {
+      this.task.remove();
+      this.firetaskchange();
     });
+  }
+
+  // TODO(P2) Think about what events should actually fire
+  firetaskchange() {
+    this.dispatchEvent(
+      new CustomEvent("taskchange", {
+        bubbles: true
+      })
+    );
   }
 
   refresh() {
@@ -118,6 +148,8 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+
+      cursor: pointer;
     }
 
     .line-item {
@@ -149,7 +181,7 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
   <wc-accordian id="accordian">
     <div id="label" class="line-item" slot="label">
       <span id="tick-icon" class="right-column"></span>
-      <input id="name" type="text" class="name center-column"/>
+      <input id="name" type="text" class="center-column"/>
       <span id="edit-icon" class="left-column" >✍</span>
     </div>
     <div id="content" class="line-item" slot="content">

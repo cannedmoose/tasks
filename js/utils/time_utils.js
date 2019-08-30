@@ -36,4 +36,6 @@ export function fromMillis(amount, lowest = "hours") {
 
     return { unit, amount: converted };
   }
+
+  return { unit: "days", amount: 0 };
 }

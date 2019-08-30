@@ -57,7 +57,13 @@ export class TaskList extends WebComponent {
     let filteredTasks = this.tasks.filter(this.filter).sort(this.compare);
     filteredTasks.forEach(task => {
       let teskEl = new Task(task);
-      teskEl.name = task.name;
+      teskEl.addEventListener("taskchange", e =>
+        this.dispatchEvent(
+          new CustomEvent("taskchange", {
+            bubbles: true
+          })
+        )
+      );
       content.append(teskEl);
     });
 

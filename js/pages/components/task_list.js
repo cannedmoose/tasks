@@ -58,8 +58,11 @@ export class TaskList extends WebComponent {
       let teskEl = new Task(task);
       teskEl.addEventListener("done", e => {
         e.stopPropagation();
+        e.detail.task.storage.history.push({
+          name: e.detail.task.name,
+          time: Date.now()
+        });
         e.detail.task.lastDone = Date.now();
-        console.log("DONEVENT");
         this.dispatchEvent(
           new CustomEvent("taskchange", {
             detail: { task: e.detail.task },

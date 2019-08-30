@@ -1,14 +1,10 @@
-Styling for not due/overdue (green/red)
 Dark mode (maybe with switch)
 
-Refactor templating - there must be a nicer way :/
-Refactor accordian code
-
-Task edit/input overhaul
 Make categories editable
-
 
 Online sync
   Initial version can be like sheets based
 
 Figure out namecheap too many redirects :/
+
+Touch interactions?

@@ -92,10 +92,6 @@ export class Task extends WebComponent {
       })
     );
   }
-
-  refresh() {
-    // TODO FILL IN;
-  }
 }
 
 customElements.define("wc-task", Task);

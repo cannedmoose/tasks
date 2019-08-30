@@ -117,7 +117,8 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
 
     input {
       border: none;
-      font: 1em/1.5 "Comic Sans MS", cursive;
+      /*TODO P1 figure out why we need to re set this*/
+      font: 1em/1.5 "Courier", cursive;
       color: rgb(37, 37, 37);
       min-width: 0;
     }

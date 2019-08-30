@@ -4,9 +4,8 @@ import { Accordian } from "./accordian.js";
 /**
  * A button that shows task information
  *
+ * TODO(P1) Cleanup event speghetti
  * TODO(P3) Maybe re-use icon spaces for other things...
- * TODO(P1) Add actual edit functionality
- *
  * TODO(P3) Add an "importance indicator visual" (want more underlines for more important task)
  */
 export class Task extends WebComponent {
@@ -42,21 +41,6 @@ export class Task extends WebComponent {
         e.stopPropagation();
         return;
       }
-
-      // TODO(P1)
-      // Lets let the task do it, it'll know better
-      // So it could fire events for
-      // name change,
-      //   -- Anything displaying a name should refresh it
-      // repeat change,
-      //   -- Task ordering should refresh
-      // last done change
-      //   -- Task ordering should refresh
-      // Should storage subscribe to event as well?
-      // Hmm we could probs still just store directly...
-      // Or maybe have a commit? IDK
-      // Or could just store every second or something... not gonna miss much
-      // Yeah then it kinda works with eventual syncing
       e.stopPropagation();
       this.task.lastDone = Date.now();
       this.firetaskchange();

@@ -4,6 +4,10 @@ import { WebComponent } from "./components/web_component.js";
 /**
  * The home page
  *
+ *
+ * TODO(P1) Add add task button
+ * TODO(P2) having task open should stop other interactions (EG accordians opening)
+ *    Liuttle hackey but could do this with some slick csss maybs
  * TODO(P2) make sure event handlers are cleaned up
  * TODO(P3) allow filter params to be passed in
  *

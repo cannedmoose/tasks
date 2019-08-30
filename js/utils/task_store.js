@@ -97,7 +97,6 @@ class Task {
     if (val === this.name) return;
     this.values.name = val;
     this.storage.store();
-    this.fireChange("name");
   }
 
   get name() {
@@ -108,7 +107,6 @@ class Task {
     if (val === this.repeat) return;
     this.values.repeat = val;
     this.storage.store();
-    this.fireChange("repeat");
   }
 
   get repeat() {
@@ -119,7 +117,6 @@ class Task {
     if (val === this.lastDone) return;
     this.values.lastDone = val;
     this.storage.store();
-    this.fireChange("lastDone");
   }
 
   get lastDone() {
@@ -128,11 +125,6 @@ class Task {
 
   remove() {
     this.storage.remove(this);
-    this.fireChange("remove");
-  }
-
-  fireChange(what) {
-    //TODO(P1) remove
   }
 }
 

@@ -9,7 +9,6 @@ import { WebComponent } from "./web_component.js";
  * Sorts taks by given comparator.
  *
  * TODO(P1) Add open/close arrow
- * TODO(P1) Make sure we size properly
  */
 export class TaskList extends WebComponent {
   constructor(tasks, filter, compare) {
@@ -58,6 +57,7 @@ export class TaskList extends WebComponent {
     filteredTasks.forEach(task => {
       let teskEl = new Task(task);
       teskEl.addEventListener("taskchange", e =>
+        /**TODO(P1) this doesn't seem to bubble from task so need to refire*/
         this.dispatchEvent(
           new CustomEvent("taskchange", {
             bubbles: true

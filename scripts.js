@@ -1,5 +1,4 @@
 import { HomePage } from "./js/pages/home_page.js";
-import { EditPage } from "./js/pages/edit_page.js";
 import { AdminPage } from "./js/pages/admin_page.js";
 import { TaskStore } from "./js/utils/task_store.js";
 
@@ -32,9 +31,6 @@ function navigate(page) {
     // Default, show tasks
     displayTasks(Date.now());
   }
-  if (page === "edit" || page === "all") {
-    editTasks();
-  }
   if (page === "admin" || page === "all") {
     taskAdmin();
   }
@@ -55,12 +51,6 @@ function displayTasks(time) {
   let taskDiv = document.getElementById("container");
   let homePage = new HomePage(store);
   taskDiv.append(homePage);
-}
-
-function editTasks() {
-  let taskDiv = document.getElementById("container");
-  let editPage = new EditPage(store);
-  taskDiv.append(editPage);
 }
 
 function taskAdmin() {

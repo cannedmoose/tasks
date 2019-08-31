@@ -93,7 +93,7 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
 
     #unit {
       /*To make sure text lines up, maybe a better way to do this..*/
-      height: 100%;
+      height: 1.5em;
     }
   </style>
   <input id="amount" type="number" step=".5"/>

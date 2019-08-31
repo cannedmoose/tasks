@@ -110,6 +110,7 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
     #content {
       border-bottom: 2px solid #ADD8E6;
       font-size:.5em;
+      width: 100%;
     }
 
     #next {
@@ -119,13 +120,16 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
     input {
       border: none;
       /*TODO P1 figure out why we need to re set this*/
-      font: 1em/1.5 "Quicksand";
-      color: rgb(37, 37, 37);
-      min-width: 0;
+      font: inherit;
     }
 
     #name {
       pointer-events: none;
+      /*TODO(P2) hackey to get label + content to line up, figure out why :/*/
+      margin-left: .25em;
+      padding-left: .25em;
+      margin-right: .25em;
+      padding-right: .25em;
     }
 
     .editable {
@@ -148,7 +152,6 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
       display: flex;
       flex-direction: row;
       justify-content: space-between;
-      align-content: stretch;
       border-bottom: 1px solid #ADD8E6;
     }
 
@@ -160,7 +163,10 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
 
     .center-column {
       flex: 5;
-      padding-left: 1em;
+      margin-left: .5em;
+      padding-left: .5em;
+      margin-right: .5em;
+      padding-right: .5em;
     }
 
     .left-column {
@@ -190,19 +196,19 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
   </style>
   <wc-accordian id="accordian">
     <div id="label" class="line-item" slot="label">
-      <span id="tick-icon" class="right-column"></span>
+      <div id="tick-icon" class="right-column"></div>
       <input id="name" type="text" placeholder="Name" class="center-column"/>
-      <span id="edit-icon" class="left-column">✍</span>
+      <div id="edit-icon" class="left-column">✍</div>
     </div>
     <div id="content" class="line-item" slot="content">
-      <span class="right-column"></span>
+      <div class="right-column"></div>
       <div class="center-column">
         <span>I should <span class="name"></span> every:</span>
         <wc-time-input id="repeat"></wc-time-input>
         <span>I will next <span class="name"></span> in:</span>
         <wc-time-input id="next"></wc-time-input>
       </div>
-      <span id="trash-icon" class="left-column"><span></span>🗑</span>
+      <div id="trash-icon" class="left-column"><span></span>🗑</div>
     </div>
   </wc-accordian>
 </template>

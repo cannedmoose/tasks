@@ -85,8 +85,19 @@ video {
   vertical-align: baseline;
 }
 
+@font-face {
+  font-family: Quicksand;
+  src: url(/style/Quicksand-Medium.ttf);
+  font-weight: medium;
+}
+
+@font-face {
+  font-family: Quicksand;
+  src: url(/style/Quicksand-Regular.ttf);
+}
+
 html {
-  font: 5em/1.5 "Courier";
+  font: 5em/1.5 "Quicksand";
   color: rgb(37, 37, 37);
 }
 

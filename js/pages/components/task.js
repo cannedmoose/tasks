@@ -109,6 +109,7 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
   <style>
     #content {
       border-bottom: 2px solid #ADD8E6;
+      font-size:.5em;
     }
 
     #next {
@@ -118,7 +119,7 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
     input {
       border: none;
       /*TODO P1 figure out why we need to re set this*/
-      font: 1em/1.5 "Courier";
+      font: 1em/1.5 "Quicksand";
       color: rgb(37, 37, 37);
       min-width: 0;
     }

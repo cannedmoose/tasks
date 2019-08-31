@@ -76,6 +76,8 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
       border:none;
       border-bottom: 1px black dotted;
       line-height: 1.5em;
+      font: 1em/1.5 "Quicksand";
+      color: rgb(37, 37, 37);
     }
 
     :host {

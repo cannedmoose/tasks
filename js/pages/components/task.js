@@ -4,7 +4,8 @@ import { Accordian } from "./accordian.js";
 /**
  * A button that shows task information
  *
- * TODO(P1) Cleanup event speghetti
+ * TODO(P1) Auto refresh (but only when nothing is open)
+ * TODO(P2) Cleanup event speghetti
  * TODO(P3) Maybe re-use icon spaces for other things...
  * TODO(P3) Add an "importance indicator visual" (want more underlines for more important task)
  */

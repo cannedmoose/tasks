@@ -87,13 +87,13 @@ video {
 
 @font-face {
   font-family: Quicksand;
-  src: url(/style/Quicksand-Medium.ttf);
+  src: url(./style/Quicksand-Medium.ttf);
   font-weight: medium;
 }
 
 @font-face {
   font-family: Quicksand;
-  src: url(/style/Quicksand-Regular.ttf);
+  src: url(./style/Quicksand-Regular.ttf);
 }
 
 html {

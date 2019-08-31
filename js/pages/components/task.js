@@ -130,6 +130,7 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
       padding-left: .25em;
       margin-right: .25em;
       padding-right: .25em;
+      min-width: 0;
     }
 
     .editable {
@@ -196,19 +197,19 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
   </style>
   <wc-accordian id="accordian">
     <div id="label" class="line-item" slot="label">
-      <div id="tick-icon" class="right-column"></div>
+      <span id="tick-icon" class="right-column"></span>
       <input id="name" type="text" placeholder="Name" class="center-column"/>
-      <div id="edit-icon" class="left-column">✍</div>
+      <span id="edit-icon" class="left-column">✍</span>
     </div>
     <div id="content" class="line-item" slot="content">
-      <div class="right-column"></div>
+      <span class="right-column"></span>
       <div class="center-column">
         <span>I should <span class="name"></span> every:</span>
         <wc-time-input id="repeat"></wc-time-input>
         <span>I will next <span class="name"></span> in:</span>
         <wc-time-input id="next"></wc-time-input>
       </div>
-      <div id="trash-icon" class="left-column"><span></span>🗑</div>
+      <span id="trash-icon" class="left-column"><span></span>🗑</span>
     </div>
   </wc-accordian>
 </template>

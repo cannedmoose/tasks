@@ -88,6 +88,7 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
 
     #amount {
       text-align: right;
+      margin-right: .5em;
     }
 
     #unit {

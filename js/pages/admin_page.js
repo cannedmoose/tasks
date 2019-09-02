@@ -51,6 +51,10 @@ customElements.define("wc-admin-page", AdminPage);
 const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
 <template id = "home-page-template">
   <style>
+    #console {
+      width: 100vw;
+      height: 50vh;
+    }
   </style>
   <textarea id="console"></textarea>
   <button id="done">Done</button>

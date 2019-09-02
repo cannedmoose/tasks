@@ -7,9 +7,16 @@ import { toMillis, fromMillis } from "../utils/time_utils.js";
 /**
  * The home page
  *
- *
- * TODO(P2) having task open should stop other interactions (EG accordians opening)
- *    Liuttle hackey but could do this with some slick csss maybs
+ * TODO(P1) comments
+ * TODO(P1) having task open should stop other interactions (EG accordians opening)
+ *    How to do?
+ *    - task emits toggled event
+ *    - if toggled open
+ *      - NOTHING ELSE SHOULD BE TOGGLED OPEN
+ *    - tasklist emits interacting event
+ *    - Homepage adds some css to disable mouse interaction
+ *    - Also adds css to enable mouse interaction.
+ * TODO(P1) Auto refresh (but only when nothing is open)
  * TODO(P2) make sure event handlers are cleaned up
  * TODO(P3) allow filter params to be passed in
  *

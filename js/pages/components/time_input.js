@@ -3,6 +3,11 @@ import { toMillis, fromMillis } from "../../utils/time_utils.js";
 
 /**
  * For entering a period of time
+ *
+ * TODO(P2) Make entry a easier
+ *    - Single dropdown listing common options
+ *    - EG day, 2 days, week, 2 weeks, month
+ *    - + custom option for stuff that doesn't fit
  */
 export class TimeInput extends WebComponent {
   constructor() {

@@ -4,7 +4,6 @@ import { Accordian } from "./accordian.js";
 /**
  * A button that shows task information
  *
- * TODO(P1) Auto refresh (but only when nothing is open)
  * TODO(P2) Cleanup event speghetti
  * TODO(P3) Maybe re-use icon spaces for other things...
  * TODO(P3) Add an "importance indicator visual" (want more underlines for more important task)
@@ -30,12 +29,11 @@ export class Task extends WebComponent {
   }
 
   connectedCallback() {
-    this._upgradeProperty("name");
-
+    this._upgradeProperty("create");
     this.querySelector("#label").addEventListener("click", e => {
       if (e.target.id === "edit-icon") {
         // TODO(P2) find a better way to do this
-        // HACKEY, trigger task list refgresh when closing an edited task
+        // HACKEY, trigger task list refresh when closing an edited task
         if (this.querySelector("#name").classList.contains("editable")) {
           this.firetaskchange("confirm");
         }
@@ -120,13 +118,13 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
 
     input {
       border: none;
-      /*TODO P1 figure out why we need to re set this*/
+      /*TODO(P3) to reset inherit */
       font: inherit;
     }
 
     #name {
       pointer-events: none;
-      /*TODO(P2) hackey to get label + content to line up, figure out why :/*/
+      /*TODO(P3) hackey to get label + content to line up, figure out why :/*/
       margin-left: .25em;
       padding-left: .25em;
       margin-right: .25em;
@@ -139,9 +137,9 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
       pointer-events: auto !important;
     }
 
-    /*TODO(P2) add an icon class with cursor biz*/
+    /*TODO(P3) add an icon class with cursor biz*/
     #trash-icon {
-      /*TODO(P3) adding the extra span is a little hackey*/
+      /*TODO(P3) adding the extra span to justify bottom is a little hackey*/
       display: flex;
       flex-direction: column;
       justify-content: space-between;

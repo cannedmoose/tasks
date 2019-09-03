@@ -7,9 +7,6 @@ export class AdminPage extends WebComponent {
   constructor(store) {
     super();
     this.store = store;
-
-    this.bind("onDone");
-    this.bind("onImport");
   }
 
   connectedCallback() {

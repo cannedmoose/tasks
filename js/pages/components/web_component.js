@@ -91,9 +91,7 @@ export class WebComponent extends HTMLElement {
   }
 
   sub() {
-    // MAYBE SUBS AREN"T THE BEST IDEA EITHER
-    // We could do like a registry
-    // That might make it better...
+    //TODO(P1) GET THIS WORKING, or remove
     for (var prop in this) {
       let match = prop.match(/^(.+)_sub$/);
       if (match && Object.prototype.hasOwnProperty.call(this, prop)) {

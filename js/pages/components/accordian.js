@@ -8,7 +8,6 @@ import { WebComponent } from "./web_component.js";
 export class Accordian extends WebComponent {
   constructor() {
     super();
-    this.labelClick = this.labelClick.bind(this);
   }
 
   get open() {
@@ -29,7 +28,7 @@ export class Accordian extends WebComponent {
 
   connected() {
     this._upgradeProperty("open");
-    this.addListener("click", this.labelClick, ( ".label"));
+    this.addListener("click", this.labelClick, ".label");
   }
 
   labelClick(e) {

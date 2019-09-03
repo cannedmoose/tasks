@@ -5,21 +5,20 @@ import { toMillis, fromMillis } from "../../utils/time_utils.js";
 /**
  * A button that shows task information
  *
- * TODO(P2) Cleanup event speghetti
+ * TODO(P1) investigate _upgradeof props
+ * TODO(P1) Cleanup functions
+ *
+ * What events should task fire:
+ *  open/close
+ *  edit (kind implied in a close, just for refresh)
+ *  done
  * TODO(P3) Maybe re-use icon spaces for other things...
  * TODO(P3) Add an "importance indicator visual" (want more underlines for more important task)
  */
 export class Task extends WebComponent {
   constructor(task) {
     super();
-    // WE CAN QUERY SELECTOR BEFORE THE CONSTRUCTOR IS ACTUALLY CALLED
-    // WHICH IS WHY WE WEREN'T GETTING ANYTHING BACK when setting task
-    // The task had allready been set but we were overwriting with the black constructor
-    // MAYBE WE JUST DON'T TAKE A TASK IN THE CONSTRUCTOR...
-    // OR ANYTHING FOR THAT MATTER
-    // MAYBE CONSTRUCTORS SHOULD REMAIN EMPTY
     this.task = task || this.task;
-    this.taskClick = this.taskClick.bind(this);
   }
 
   get create() {
@@ -106,8 +105,6 @@ export class Task extends WebComponent {
     if (e.target.id == "edit-icon") return;
     e.stopPropagation();
     if (!this.querySelector("#accordian").open && !this.create) {
-      // HMM NEED TO HAVE EVENT ON WHOLE LABEL TO FIRE PROPERLY...
-
       this.fireChange("done");
     }
   }

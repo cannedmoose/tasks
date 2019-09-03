@@ -8,7 +8,6 @@ import { toMillis, fromMillis } from "../utils/time_utils.js";
 /**
  * The home page
  * TODO(P1) comments
- * TODO(P2) make sure event handlers are cleaned up
  * TODO(P3) allow filter params to be passed in
  *
  */
@@ -23,7 +22,6 @@ export class HomePage extends WebComponent {
       if (this.querySelector("#tasks").classList.contains("frozen")) {
         return;
       }
-      console.log("refresh");
       this.refreshTasks();
     }, 2000);
 
@@ -103,7 +101,6 @@ export class HomePage extends WebComponent {
   }
 
   refreshTasks() {
-    console.log("REFRESHING");
     this.querySelectorAll("wc-task-list").forEach(el => el.refreshTasks());
 
     let addTask = this.querySelector("#addTask");

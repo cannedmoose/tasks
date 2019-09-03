@@ -3,11 +3,12 @@ import { WebComponent } from "./web_component.js";
 /**
  * A generic accordian, can be opened/closed.
  *
- * TODO(P3): fire open/close event;
+ * Fires a toggle event when open state changes.
  */
 export class Accordian extends WebComponent {
   constructor() {
-    super(TEMPLATE);
+    super();
+    this.labelClick = this.labelClick.bind(this);
   }
 
   get open() {
@@ -26,51 +27,46 @@ export class Accordian extends WebComponent {
     }
   }
 
-  connectedCallback() {
+  connected() {
     this._upgradeProperty("open");
-
-    this.bind("_onLabelClick");
-    this.shadowRoot
-      .querySelector(".label")
-      .addEventListener("click", this._onLabelClick);
+    this.addListener("click", this.labelClick, ( ".label"));
   }
 
-  _onLabelClick(e) {
+  labelClick(e) {
     this.open = !this.open;
+    this.dispatchEvent(
+      new CustomEvent("toggle", {
+        detail: { state: this.open },
+        bubbles: true
+      })
+    );
   }
 
-  disconnectedCallback() {
-    this.shadowRoot
-      .querySelector(".label")
-      .removeEventListener("click", this._onLabelClick);
+  template() {
+    return /*html*/ `
+<style>
+  .content {
+    display: none;
+  }
+
+  .content.open {
+    display: block;
+  }
+
+  .label {
+    cursor: pointer;
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;      /* IE 10+ */
+    user-select: none;          /* Likely future */
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+</style>
+<slot class="label" name="label">Accordian</slot>
+<slot class="content" name="content">CONTENT</slot>`;
   }
 }
 
 customElements.define("wc-accordian", Accordian);
-
-const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
-<template id = "accordian-template">
-    <style>
-    .content {
-        display: none;
-    }
-    
-    .content.open {
-      display: block;
-    }
-
-    .label {
-      cursor: pointer;
-      -webkit-user-select: none;  /* Chrome all / Safari all */
-      -moz-user-select: none;     /* Firefox all */
-      -ms-user-select: none;      /* IE 10+ */
-      user-select: none;          /* Likely future */
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-    }
-  </style>
-    <slot class="label" name="label">Accordian</slot>
-    <slot class="content" name="content">CONTENT</slot>
-  </template >
-`);

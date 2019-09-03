@@ -11,10 +11,11 @@ import { toMillis, fromMillis } from "../../utils/time_utils.js";
  */
 export class TimeInput extends WebComponent {
   constructor() {
-    super(TEMPLATE);
+    super();
 
-    this.bind("onChange");
+    this.chango = this.chango.bind(this);
   }
+
   get unit() {
     let unit = this.querySelector("#unit");
     return unit.options[unit.selectedIndex].value;
@@ -41,13 +42,7 @@ export class TimeInput extends WebComponent {
     return toMillis(this.unit, this.amount);
   }
 
-  set millis(val) {
-    let converted = fromMillis(val);
-    this.unit = converted.unit;
-    this.amount = converted.amount;
-  }
-
-  onChange(e) {
+  chango(e) {
     e.stopPropagation();
     this.dispatchEvent(
       new CustomEvent("change", {
@@ -59,23 +54,15 @@ export class TimeInput extends WebComponent {
     );
   }
 
-  connectedCallback() {
-    this._upgradeProperty("millis");
-
-    this.querySelector("#unit").addEventListener("change", this.onChange);
-    this.querySelector("#amount").addEventListener("change", this.onChange);
+  connected() {
+    this._upgradeProperty("unit");
+    this._upgradeProperty("amount");
+    this.addListener("change", this.chango, "#unit");
+    this.addListener("change", this.chango, "#amount");
   }
 
-  disconnectedCallback() {
-    this.querySelector("#unit").removeEventListener("change", this.onChange);
-    this.querySelector("#amount").removeEventListener("change", this.onChange);
-  }
-}
-
-customElements.define("wc-time-input", TimeInput);
-
-const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
-<template id="time-input">
+  template() {
+    return /*html*/ `
   <style>
     select,input {
       border:none;
@@ -108,5 +95,8 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
     <option value="weeks">Weeks</option>
     <option value="years">Years</option>
   </select>
-</template>
-`);
+`;
+  }
+}
+
+customElements.define("wc-time-input", TimeInput);

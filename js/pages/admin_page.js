@@ -5,7 +5,7 @@ import { WebComponent } from "./components/web_component.js";
  */
 export class AdminPage extends WebComponent {
   constructor(store) {
-    super(TEMPLATE);
+    super();
     this.store = store;
 
     this.bind("onDone");
@@ -24,8 +24,8 @@ export class AdminPage extends WebComponent {
       2
     );
 
-    this.querySelector("#done").addEventListener("click", this.onDone);
-    this.querySelector("#import").addEventListener("click", this.onImport);
+    this.addListener("click", this.onDone, "#done");
+    this.addListener("click", this.onImport, "#import");
   }
 
   onDone(e) {
@@ -48,7 +48,7 @@ export class AdminPage extends WebComponent {
 
 customElements.define("wc-admin-page", AdminPage);
 
-const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
+const TEMPLATE = /*html*/ `
 <template id = "home-page-template">
   <style>
     #console {
@@ -60,4 +60,4 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
   <button id="done">Done</button>
   <button id="import">Import</button>
 </template >
-`);
+`;

@@ -1,6 +1,7 @@
 import { WebComponent } from "./web_component.js";
 import { TimeInput } from "./time_input.js";
 import { Accordian } from "./accordian.js";
+import { toMillis, fromMillis } from "../../utils/time_utils.js";
 /**
  * A button that shows task information
  *
@@ -10,8 +11,15 @@ import { Accordian } from "./accordian.js";
  */
 export class Task extends WebComponent {
   constructor(task) {
-    super(TEMPLATE);
-    this.task = task;
+    super();
+    // WE CAN QUERY SELECTOR BEFORE THE CONSTRUCTOR IS ACTUALLY CALLED
+    // WHICH IS WHY WE WEREN'T GETTING ANYTHING BACK when setting task
+    // The task had allready been set but we were overwriting with the black constructor
+    // MAYBE WE JUST DON'T TAKE A TASK IN THE CONSTRUCTOR...
+    // OR ANYTHING FOR THAT MATTER
+    // MAYBE CONSTRUCTORS SHOULD REMAIN EMPTY
+    this.task = task || this.task;
+    this.taskClick = this.taskClick.bind(this);
   }
 
   get create() {
@@ -27,85 +35,104 @@ export class Task extends WebComponent {
       this.querySelector("#accordian").classList.remove("create");
     }
   }
-
-  connectedCallback() {
-    this._upgradeProperty("create");
-    this.querySelector("#label").addEventListener("click", e => {
-      if (e.target.id === "edit-icon") {
-        // TODO(P2) find a better way to do this
-        // HACKEY, trigger task list refresh when closing an edited task
-        if (this.querySelector("#name").classList.contains("editable")) {
-          this.firetaskchange("confirm");
-        }
-        // Edit icon should let event bubble
-        this.querySelector("#name").classList.toggle("editable");
-        return;
-      }
-
-      e.stopPropagation();
-
-      if (!this.querySelector("#name").classList.contains("editable")) {
-        this.firetaskchange("done");
-      }
-    });
-
-    // TODO(P2) this could be convenience function
-    // EG for replacing text content given a selector
-    // chooses query/query all depending on id or class
-    this.querySelectorAll(".name").forEach(el => {
-      el.textContent = this.task.name;
-    });
-
-    if (this.task.lastDone + this.task.repeat >= Date.now()) {
-      this.querySelector("#tick-icon").textContent = "☑";
+  get open() {
+    return this.querySelector("#accordian").open;
+  }
+  set open(val) {
+    this.querySelector("#accordian").open = val;
+    if (val) {
+      this.setAttribute("open", "");
     } else {
-      this.querySelector("#tick-icon").textContent = "☐";
+      this.removeAttribute("open");
     }
+  }
 
+  name_sub() {
+    return this.task.name;
+  }
+
+  tick_sub() {
+    if (this.task.lastDone + this.task.repeat >= Date.now()) {
+      return "☑";
+    } else {
+      return "☐";
+    }
+  }
+
+  refresh() {
+    if (!this.task) return;
     this.querySelector("#name").value = this.task.name;
-    this.querySelector("#repeat").millis = this.task.repeat;
-    this.querySelector("#next").millis =
-      this.task.lastDone + this.task.repeat - Date.now();
+    let convertedRepeat = fromMillis(this.task.repeat);
+    let convertedNext = fromMillis(
+      this.task.lastDone + this.task.repeat - Date.now()
+    );
+    this.querySelector("#repeat").unit = convertedRepeat.unit;
+    this.querySelector("#repeat").amount = convertedRepeat.amount;
+    this.querySelector("#next").unit = convertedNext.unit;
+    this.querySelector("#next").amount = convertedNext.amount;
+  }
 
-    this.querySelector("#repeat").addEventListener("change", e => {
-      this.task.repeat = this.querySelector("#repeat").millis;
+  connected() {
+    this._upgradeProperty("create");
+    this._upgradeProperty("open");
+
+    this.querySelector("#accordian").addListener("toggle", e => {
+      e.stopPropagation();
+      this.querySelector("#name").classList.toggle("editable");
+      this.fireToggle();
     });
-    this.querySelector("#next").addEventListener("change", e => {
+    this.querySelector("#repeat").addListener("change", e => {
+      this.task.repeat = e.detail.millis;
+    });
+    this.querySelector("#next").addListener("change", e => {
       this.task.lastDone = Date.now() - (this.task.repeat - e.detail.millis);
     });
 
-    this.querySelector("#name").addEventListener("change", e => {
-      this.task.name = this.querySelector("#name").value;
-      this.querySelectorAll(".name").forEach(el => {
-        el.textContent = this.task.name;
-      });
-    });
-
-    this.querySelector("#trash-icon").addEventListener("click", e => {
-      this.firetaskchange("remove");
-    });
+    this.addListener("click", this.taskClick, "#label");
+    this.addListener("change", this.nameChange, "#name");
+    this.addListener("click", this.remove, "#trash-icon");
   }
 
-  // TODO(P3) Think about what events should actually fire
-  // FOR add task 3 events:
-  // Done (task was click)
-  // Confirm (edit button closed)
-  // Delete (trash was clicked)
-  firetaskchange(what) {
+  remove(e) {
+    this.fireChange("remove");
+  }
+
+  nameChange(e) {
+    this.task.name = this.querySelector("#name").value;
+    this.sub();
+  }
+
+  taskClick(e) {
+    if (e.target.id == "edit-icon") return;
+    e.stopPropagation();
+    if (!this.querySelector("#accordian").open && !this.create) {
+      // HMM NEED TO HAVE EVENT ON WHOLE LABEL TO FIRE PROPERLY...
+
+      this.fireChange("done");
+    }
+  }
+
+  fireToggle() {
     this.dispatchEvent(
-      new CustomEvent(what, {
-        detail: { task: this.task },
+      new CustomEvent("toggle", {
+        detail: { open: this.open },
         bubbles: true
       })
     );
   }
-}
 
-customElements.define("wc-task", Task);
+  fireChange(what) {
+    this.dispatchEvent(
+      new CustomEvent("change", {
+        detail: { type: what, task: this.task },
+        bubbles: true
+      })
+    );
+  }
 
-const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
-<template id="task-display">
-  <style>
+  template() {
+    return /*html*/ `
+<style>
     #content {
       border-bottom: 2px solid #ADD8E6;
       font-size:.5em;
@@ -196,7 +223,7 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
   </style>
   <wc-accordian id="accordian">
     <div id="label" class="line-item" slot="label">
-      <span id="tick-icon" class="right-column"></span>
+      <span id="tick-icon" class="tick right-column"></span>
       <input id="name" type="text" placeholder="Name" class="center-column"/>
       <span id="edit-icon" class="left-column">✍</span>
     </div>
@@ -210,6 +237,8 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
       </div>
       <span id="trash-icon" class="left-column"><span></span>🗑</span>
     </div>
-  </wc-accordian>
-</template>
-`);
+  </wc-accordian>`;
+  }
+}
+
+customElements.define("wc-task", Task);

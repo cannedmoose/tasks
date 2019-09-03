@@ -18,6 +18,75 @@ export class TaskList extends WebComponent {
     this.compare = compare;
   }
 
+  /**
+   * Zips a and b
+   */
+  zip(a, b) {
+    let result = [];
+    for (let i = 0; i < Math.max(a.length, b.length); i++) {
+      result.push([a[i], b[i]]);
+    }
+    return result;
+  }
+
+  refresh() {
+    let filteredTasks = this.tasks.filter(this.filter).sort(this.compare);
+
+    this.zip(filteredTasks, this.querySelectorAll("wc-task")).forEach(e =>
+      this.refreshTask(e[0], e[1])
+    );
+    this.querySelector("#label").textContent =
+      this.label + " - " + filteredTasks.length;
+  }
+
+  refreshTask(task, el) {
+    // TODO(P1) NUMBERED TASK TEST TO MAKE SURE THIS WORKS THE WAY WE THINK
+    let content = this.querySelector("#content");
+    if (task && el) {
+      // We have a task to fill
+      el.task = task;
+      el.refresh();
+    } else if (task) {
+      // No el for the task, create one
+      let el = new Task(task);
+      this.addListener(el, "change", this.taskChange);
+      this.addListener(el, "toggle", this.taskToggle);
+      content.append(el);
+    } else if (el) {
+      // No task for el, remove it
+      // Delete element
+      content.removeChild(el);
+    }
+  }
+
+  taskChange(e) {
+    let kind = e.detail.type;
+    if (kind === "done") {
+      e.detail.task.storage.history.push({
+        name: e.detail.task.name,
+        time: Date.now()
+      });
+      e.detail.task.lastDone = Date.now();
+    } else if (kind === "remove") {
+      e.detail.task.remove();
+    }
+    this.dispatchEvent(
+      new CustomEvent("taskchange", {
+        detail: { task: e.detail.task },
+        bubbles: true
+      })
+    );
+  }
+
+  taskToggle(e) {
+    this.dispatchEvent(
+      new CustomEvent("tasktoggle", {
+        detail: { task: e.detail.task, target: e.target },
+        bubbles: true
+      })
+    );
+  }
+
   get label() {
     return this.getAttribute("label");
   }
@@ -38,73 +107,6 @@ export class TaskList extends WebComponent {
       this.removeAttribute("open");
     }
   }
-
-  connected() {
-    /**
-     * OKAY SO WE WANT TO GO THROUGH EXISTING TASKS AND MATCH THEM TO
-     * ELEMENTS...
-     *
-     *
-     */
-    this.refreshTasks();
-  }
-
-  refreshTasks() {
-    let content = this.querySelector("#content");
-    let filteredTasks = this.tasks.filter(this.filter).sort(this.compare);
-    function rah(a, b) {
-      let result = [];
-      for (let i = 0; i < Math.max(a.length, b.length); i++) {
-        result.push([a[i], b[i]]);
-      }
-      return result;
-    }
-    rah(filteredTasks, this.querySelectorAll("wc-task")).forEach(e => {
-      let task = e[0];
-      let el = e[1];
-      if (task && el) {
-        el.task = task;
-        el.refresh();
-      } else if (task) {
-        // Create element
-        let el = new Task(task);
-        el.addListener("change", e => {
-          let kind = e.detail.type;
-          if (kind === "done") {
-            e.detail.task.storage.history.push({
-              name: e.detail.task.name,
-              time: Date.now()
-            });
-            e.detail.task.lastDone = Date.now();
-          } else if (kind === "remove") {
-            e.detail.task.remove();
-          }
-          this.dispatchEvent(
-            new CustomEvent("taskchange", {
-              detail: { task: e.detail.task },
-              bubbles: true
-            })
-          );
-        });
-        el.addListener("toggle", e => {
-          this.dispatchEvent(
-            new CustomEvent("tasktoggle", {
-              detail: { task: e.detail.task, target: e.target },
-              bubbles: true
-            })
-          );
-        });
-        content.append(el);
-      } else if (el) {
-        // Delete element
-        content.removeChild(el);
-      }
-    });
-    this.querySelector("#label").textContent =
-      this.label + " - " + filteredTasks.length;
-  }
-
-  disconnected() {}
 
   template() {
     return /*html*/ `

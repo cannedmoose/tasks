@@ -42,10 +42,6 @@ WebComponent doc
  *          Maybe web components has:
  *            addListener(event, callback)
  *     WebComponent:
- *     TODO(P1) bind convenience
- *     TODO(P1) event listeners
- *     TODO(P1) sub convenience
- *     TODO(P1) slot convenience
  *        - Binding convenience:
  *           find _bound functions in constructor
  *           BIND THEM (convenience for callbacks)
@@ -68,7 +64,6 @@ WebComponent doc
  *          will escape given html content
  *
  *        LIFECYCLE:
- *          TODO(P1) create render/refresh
  *          render - will render template with given slots
  *              - SHOULD this just be text based?
  *                Leaning towards this

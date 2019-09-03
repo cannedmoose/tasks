@@ -14,6 +14,31 @@ export class TimeInput extends WebComponent {
     super();
   }
 
+  upgrades() {
+    return ["unit", "amount"];
+  }
+
+  binds() {
+    return ["onChange"];
+  }
+
+  connected() {
+    this.addListener(this.qs("#unit"), "change", this.onChange);
+    this.addListener(this.qs("#amount"), "change", this.onChange);
+  }
+
+  onChange(e) {
+    e.stopPropagation();
+    this.dispatchEvent(
+      new CustomEvent("change", {
+        detail: {
+          millis: this.millis
+        },
+        bubbles: true
+      })
+    );
+  }
+
   get unit() {
     let unit = this.querySelector("#unit");
     return unit.options[unit.selectedIndex].value;
@@ -38,25 +63,6 @@ export class TimeInput extends WebComponent {
 
   get millis() {
     return toMillis(this.unit, this.amount);
-  }
-
-  chango(e) {
-    e.stopPropagation();
-    this.dispatchEvent(
-      new CustomEvent("change", {
-        detail: {
-          millis: this.millis
-        },
-        bubbles: true
-      })
-    );
-  }
-
-  connected() {
-    this._upgradeProperty("unit");
-    this._upgradeProperty("amount");
-    this.addListener("change", this.chango, "#unit");
-    this.addListener("change", this.chango, "#amount");
   }
 
   template() {

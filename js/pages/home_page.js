@@ -17,77 +17,57 @@ export class HomePage extends WebComponent {
     this.store = store;
   }
 
+  makeTaskList(filter, comp, label, open) {
+    let taskDiv = this.querySelector("#tasks");
+    let listEl = new TaskList(this.store.tasks, filter, comp);
+    listEl.label = label;
+    listEl.open = open;
+    taskDiv.append(listEl);
+    this.addListener(listEl, "taskchange", this.refresh);
+    this.addListener(listEl, "tasktoggle", this.onTaskToggle);
+  }
+
   connected() {
     window.setInterval(() => {
       if (this.querySelector("#tasks").classList.contains("frozen")) {
         return;
       }
-      this.refreshTasks();
+      this.refresh();
     }, 2000);
-
-    let EVs = e => {
-      this.refreshTasks();
-    };
-
-    let OVs = e => {
-      this.querySelector("#tasks").classList.toggle("frozen");
-      e.detail.target.classList.toggle("interacting");
-      if (!e.detail.target.open) {
-        this.refreshTasks();
-      }
-    };
-
-    let taskDiv = this.querySelector("#tasks");
-
-    let overdue = new TaskList(
-      this.store.tasks,
+    this.makeTaskList(
       this.makeFilter(Number.NEGATIVE_INFINITY, 0),
-      this.scoreComp
+      this.scoreComp,
+      "Overdue",
+      true
     );
-    overdue.label = "Overdue";
-    overdue.open = true;
-    taskDiv.append(overdue);
-    overdue.addListener("taskchange", EVs);
-    overdue.addListener("tasktoggle", OVs);
 
-    let soon = new TaskList(
-      this.store.tasks,
-      this.makeFilter(0, 12),
-      this.timeComp
-    );
-    soon.label = "Due Soon";
-    soon.open = true;
-    soon.addListener("taskchange", EVs);
-    soon.addListener("tasktoggle", OVs);
-    taskDiv.append(soon);
+    this.makeTaskList(this.makeFilter(0, 12), this.timeComp, "Due Soon", true);
 
-    let later = new TaskList(
-      this.store.tasks,
+    this.makeTaskList(
       this.makeFilter(12, 48),
-      this.timeComp
+      this.timeComp,
+      "Due Later",
+      false
     );
-    later.label = "Due Later";
-    later.open = false;
-    later.addListener("taskchange", EVs);
-    later.addListener("tasktoggle", OVs);
-    taskDiv.append(later);
-    let rest = new TaskList(
-      this.store.tasks,
-      this.makeFilter(48, Infinity),
-      this.timeComp
-    );
-    rest.label = "Upcoming";
-    rest.open = false;
-    rest.addListener("taskchange", EVs);
-    rest.addListener("tasktoggle", OVs);
-    taskDiv.append(rest);
 
-    var addTask = this.querySelector("#addTask");
-    addTask.addListener("toggle", e => {
-      // TODO(P1) handle different changes
-      /*if (e.detail.task.name !== "") {
-      e.detail.task.create();
-      }*/
+    this.makeTaskList(
+      this.makeFilter(48, Infinity),
+      this.timeComp,
+      "Upcoming",
+      false
+    );
+
+    // TODO(P1) Catch remove event from tasks in task_list
+
+    let addTask = this.querySelector("#addTask");
+    this.addListener(addTask, "toggle", e => {
+      // TODO(P1)
+      // IF IT"S A TOGGLE OPEN WE SHOULD RESET VALUES
+      // IF IT"S A TOGGLE CLOSED WE SHOULD SAVE
+      // IF IT"S A REMOVE WE SHOULD CLOSE WIUTHOUT SAVIONG
+      if (e.detail.task.name !== "") {
+        e.detail.task.create();
+      }
       console.log("toggle", e);
     });
 
@@ -100,8 +80,16 @@ export class HomePage extends WebComponent {
     addTask.refresh();
   }
 
-  refreshTasks() {
-    this.querySelectorAll("wc-task-list").forEach(el => el.refreshTasks());
+  onTaskToggle(e) {
+    this.querySelector("#tasks").classList.toggle("frozen");
+    e.detail.target.classList.toggle("interacting");
+    if (!e.detail.target.open) {
+      this.refresh();
+    }
+  }
+
+  refresh() {
+    this.querySelectorAll("wc-task-list").forEach(el => el.refresh());
 
     let addTask = this.querySelector("#addTask");
     addTask.task = new TaskBuilder(
@@ -110,7 +98,6 @@ export class HomePage extends WebComponent {
       toMillis("days", 1),
       Date.now() - toMillis("days", 1)
     );
-    addTask.refresh();
   }
 
   makeFilter(from, to) {

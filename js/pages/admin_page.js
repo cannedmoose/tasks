@@ -21,8 +21,8 @@ export class AdminPage extends WebComponent {
       2
     );
 
-    this.addListener("click", this.onDone, "#done");
-    this.addListener("click", this.onImport, "#import");
+    this.addListener(this.qs("#done"), "click", this.onDone);
+    this.addListener(this.qs("#import"), "click", this.onImport);
   }
 
   onDone(e) {

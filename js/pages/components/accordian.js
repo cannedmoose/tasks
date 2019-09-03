@@ -26,9 +26,12 @@ export class Accordian extends WebComponent {
     }
   }
 
+  upgrades() {
+    return ["open"];
+  }
+
   connected() {
-    this._upgradeProperty("open");
-    this.addListener("click", this.labelClick, ".label");
+    this.addListener(this.qs(".label"), "click", this.labelClick);
   }
 
   labelClick(e) {

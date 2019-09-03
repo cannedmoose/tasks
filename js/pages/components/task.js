@@ -5,13 +5,7 @@ import { toMillis, fromMillis } from "../../utils/time_utils.js";
 /**
  * A button that shows task information
  *
- * TODO(P1) investigate _upgradeof props
- * TODO(P1) Cleanup functions
- *
- * What events should task fire:
- *  open/close
- *  edit (kind implied in a close, just for refresh)
- *  done
+ * TODO(P2) Cleanup template
  * TODO(P3) Maybe re-use icon spaces for other things...
  * TODO(P3) Add an "importance indicator visual" (want more underlines for more important task)
  */
@@ -19,6 +13,79 @@ export class Task extends WebComponent {
   constructor(task) {
     super();
     this.task = task || this.task;
+  }
+
+  upgrades() {
+    return ["create", "open"];
+  }
+
+  connected() {
+    this.addListener(this.qs("#accordian"), "toggle", e => {
+      e.stopPropagation();
+      this.querySelector("#name").classList.toggle("editable");
+      this.dispatchEvent(
+        new CustomEvent("toggle", {
+          detail: { open: this.open },
+          bubbles: true
+        })
+      );
+    });
+    this.addListener(this.qs("#repeat"), "change", e => {
+      this.task.repeat = e.detail.millis;
+    });
+    this.addListener(this.qs("#next"), "change", e => {
+      this.task.lastDone = Date.now() - (this.task.repeat - e.detail.millis);
+    });
+
+    this.addListener(this.qs("#label"), "click", this.taskClick);
+    this.addListener(this.qs("#name"), "change", this.nameChange);
+    this.addListener(this.qs("#trash-icon"), "click", this.remove);
+  }
+
+  remove(e) {
+    this.fireChange("remove");
+  }
+
+  nameChange(e) {
+    e.stopPropagation();
+    this.task.name = this.querySelector("#name").value;
+    this.sub(".name", this.task.name);
+  }
+
+  taskClick(e) {
+    if (e.target.id == "edit-icon") return;
+    e.stopPropagation();
+    if (!this.querySelector("#accordian").open && !this.create) {
+      this.fireChange("done");
+    }
+  }
+
+  fireChange(what) {
+    this.dispatchEvent(
+      new CustomEvent("change", {
+        detail: { type: what, task: this.task },
+        bubbles: true
+      })
+    );
+  }
+
+  refresh() {
+    if (!this.task) return;
+    this.querySelector("#name").value = this.task.name;
+
+    let convertedRepeat = fromMillis(this.task.repeat);
+    this.querySelector("#repeat").unit = convertedRepeat.unit;
+    this.querySelector("#repeat").amount = convertedRepeat.amount;
+
+    let next = this.task.lastDone + this.task.repeat;
+    let convertedNext = fromMillis(next - Date.now());
+    this.querySelector("#next").unit = convertedNext.unit;
+    this.querySelector("#next").amount = convertedNext.amount;
+
+    this.sub(".name", this.task.name);
+    if (!this.create) {
+      this.sub("#tick-icon", next >= Date.now() ? "☑" : "☐");
+    }
   }
 
   get create() {
@@ -46,90 +113,26 @@ export class Task extends WebComponent {
     }
   }
 
-  name_sub() {
-    return this.task.name;
-  }
-
-  tick_sub() {
-    if (this.task.lastDone + this.task.repeat >= Date.now()) {
-      return "☑";
-    } else {
-      return "☐";
-    }
-  }
-
-  refresh() {
-    if (!this.task) return;
-    this.querySelector("#name").value = this.task.name;
-    let convertedRepeat = fromMillis(this.task.repeat);
-    let convertedNext = fromMillis(
-      this.task.lastDone + this.task.repeat - Date.now()
-    );
-    this.querySelector("#repeat").unit = convertedRepeat.unit;
-    this.querySelector("#repeat").amount = convertedRepeat.amount;
-    this.querySelector("#next").unit = convertedNext.unit;
-    this.querySelector("#next").amount = convertedNext.amount;
-  }
-
-  connected() {
-    this._upgradeProperty("create");
-    this._upgradeProperty("open");
-
-    this.querySelector("#accordian").addListener("toggle", e => {
-      e.stopPropagation();
-      this.querySelector("#name").classList.toggle("editable");
-      this.fireToggle();
-    });
-    this.querySelector("#repeat").addListener("change", e => {
-      this.task.repeat = e.detail.millis;
-    });
-    this.querySelector("#next").addListener("change", e => {
-      this.task.lastDone = Date.now() - (this.task.repeat - e.detail.millis);
-    });
-
-    this.addListener("click", this.taskClick, "#label");
-    this.addListener("change", this.nameChange, "#name");
-    this.addListener("click", this.remove, "#trash-icon");
-  }
-
-  remove(e) {
-    this.fireChange("remove");
-  }
-
-  nameChange(e) {
-    this.task.name = this.querySelector("#name").value;
-    this.sub();
-  }
-
-  taskClick(e) {
-    if (e.target.id == "edit-icon") return;
-    e.stopPropagation();
-    if (!this.querySelector("#accordian").open && !this.create) {
-      this.fireChange("done");
-    }
-  }
-
-  fireToggle() {
-    this.dispatchEvent(
-      new CustomEvent("toggle", {
-        detail: { open: this.open },
-        bubbles: true
-      })
-    );
-  }
-
-  fireChange(what) {
-    this.dispatchEvent(
-      new CustomEvent("change", {
-        detail: { type: what, task: this.task },
-        bubbles: true
-      })
-    );
-  }
-
   template() {
     return /*html*/ `
-<style>
+  <wc-accordian id="accordian">
+    <div id="label" class="line-item" slot="label">
+      <span id="tick-icon" class="right-column"></span>
+      <input id="name" type="text" placeholder="Name" class="center-column"/>
+      <span id="edit-icon" class="left-column">✍</span>
+    </div>
+    <div id="content" class="line-item" slot="content">
+      <span class="right-column"></span>
+      <div class="center-column">
+        <span>I should <span class="name"></span> every:</span>
+        <wc-time-input id="repeat"></wc-time-input>
+        <span>I will next <span class="name"></span> in:</span>
+        <wc-time-input id="next"></wc-time-input>
+      </div>
+      <span id="trash-icon" class="left-column"><span></span>🗑</span>
+    </div>
+  </wc-accordian>
+  <style>
     #content {
       border-bottom: 2px solid #ADD8E6;
       font-size:.5em;
@@ -216,25 +219,8 @@ export class Task extends WebComponent {
       border-bottom: 2px dotted #ADD8E6;
       margin-top: 1.5em;
     }
-
   </style>
-  <wc-accordian id="accordian">
-    <div id="label" class="line-item" slot="label">
-      <span id="tick-icon" class="tick right-column"></span>
-      <input id="name" type="text" placeholder="Name" class="center-column"/>
-      <span id="edit-icon" class="left-column">✍</span>
-    </div>
-    <div id="content" class="line-item" slot="content">
-      <span class="right-column"></span>
-      <div class="center-column">
-        <span>I should <span class="name"></span> every:</span>
-        <wc-time-input id="repeat"></wc-time-input>
-        <span>I will next <span class="name"></span> in:</span>
-        <wc-time-input id="next"></wc-time-input>
-      </div>
-      <span id="trash-icon" class="left-column"><span></span>🗑</span>
-    </div>
-  </wc-accordian>`;
+  `;
   }
 }
 

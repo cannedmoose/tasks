@@ -27,15 +27,14 @@ export class WebComponent extends HTMLElement {
   // Abstract, should be implemented
   disconnected() {}
 
-  addListener(event, listener, target) {
-    if (target) {
-      target = this.querySelector(target);
-    } else {
-      target = this;
-    }
+  upgrades() {
+    return [];
+  }
+
+  addListener(target, event, listener) {
     let fn = listener.bind(this);
     let key = { event, fn, target };
-    target.addEventListener(event, fn, target);
+    target.addEventListener(event, fn);
     this.listeners.push(key);
     return key;
   }
@@ -56,7 +55,9 @@ export class WebComponent extends HTMLElement {
   connectedCallback() {
     // Wait for dom update, hopefully children have been rendered then
     // TODO(P3) make sure this doesn't break down
+    this._upgradePropertys();
     this._refresh();
+
     requestAnimationFrame(() => {
       /** At this point children should be rendered (their constructors have run + and doms rendered) but this is not necissarily called in order! */
       // THEREFORE DO MINIMUM IN CONNECTED
@@ -87,21 +88,12 @@ export class WebComponent extends HTMLElement {
 
   _refresh() {
     this.refresh();
-    this.sub();
   }
 
-  sub() {
-    //TODO(P1) GET THIS WORKING, or remove
-    for (var prop in this) {
-      let match = prop.match(/^(.+)_sub$/);
-      if (match && Object.prototype.hasOwnProperty.call(this, prop)) {
-        // TODO(P1) make sure this doesn't need binding
-        let val = this[prop]();
-        this.querySelectorAll("." + match.group(1)).forEach(el => {
-          el.textContent = val;
-        });
-      }
-    }
+  sub(selector, repl) {
+    this.querySelectorAll(selector).forEach(el => {
+      el.textContent = repl;
+    });
   }
 
   /**
@@ -124,15 +116,22 @@ export class WebComponent extends HTMLElement {
     return template;
   }
 
-  _upgradeProperty(prop) {
-    if (this.hasOwnProperty(prop)) {
-      let value = this[prop];
-      delete this[prop];
-      this[prop] = value;
-    }
+  _upgradePropertys() {
+    let upgrades = this.upgrades();
+    upgrades
+      .filter(prop => this.hasOwnProperty(prop))
+      .forEach(prop => {
+        let value = this[prop];
+        delete this[prop];
+        this[prop] = value;
+      });
   }
 
   querySelector(query) {
+    return this.shadowRoot.querySelector(query);
+  }
+
+  qs(query) {
     return this.shadowRoot.querySelector(query);
   }
 

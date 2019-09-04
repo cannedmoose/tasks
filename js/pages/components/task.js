@@ -14,8 +14,6 @@ import { toMillis, fromMillis } from "../../utils/time_utils.js";
  *   - change
  *
  * TODO(P2) Cleanup template
- * TODO(P3) Maybe re-use icon spaces for other things...
- * TODO(P3) Add an "importance indicator visual" (want more underlines for more important task)
  */
 export class Task extends WebComponent {
   constructor(task) {
@@ -158,7 +156,7 @@ export class Task extends WebComponent {
 
     input {
       border: none;
-      /*TODO(P3) to reset inherit */
+      /*TODO(P3) Figure out how to get inputs to get global styling */
       font: inherit;
     }
 
@@ -179,11 +177,9 @@ export class Task extends WebComponent {
 
     /*TODO(P3) add an icon class with cursor biz*/
     #trash-icon {
-      /*TODO(P3) adding the extra span to justify bottom is a little hackey*/
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-
       cursor: pointer;
     }
 

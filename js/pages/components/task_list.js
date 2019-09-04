@@ -13,8 +13,6 @@ import { WebComponent } from "./web_component.js";
  * #Events
  *   - taskchange
  *   - tasktoggle
- *
- * TODO(P3) Add open/close arrow
  */
 export class TaskList extends WebComponent {
   constructor(store, filter, compare) {
@@ -34,7 +32,7 @@ export class TaskList extends WebComponent {
   }
 
   refreshTask(task, el) {
-    // TODO(P2) NUMBERED TASK TEST TO MAKE SURE THIS WORKS THE WAY WE THINK
+    // TODO(P2) Test to make sure we aren't dropping/duping tasks
     let content = this.qs("#content");
     if (task && el) {
       // We have a task and an element to put it in

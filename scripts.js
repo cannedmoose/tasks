@@ -5,11 +5,7 @@ import { TaskStore } from "./js/utils/task_store.js";
 var store;
 /**
  * Task app main entry point.
- *
- * TODO(P2) styling CLEANUP
- *
  */
-
 window.onload = function() {
   store = new TaskStore(window.localStorage);
   var url = new URL(window.location);

@@ -53,7 +53,8 @@ export class WebComponent extends HTMLElement {
     this._upgradeProperties();
 
     requestAnimationFrame(() => {
-      // TODO(P2) confirm that requesting frame will order this after rendering
+      // TODO(P3) confirm that requesting frame will order this after rendering
+      // (Seems to work for now...)
       this._refresh();
       this.connected();
     });

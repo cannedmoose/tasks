@@ -2,11 +2,11 @@ import { WebComponent } from "./components/web_component.js";
 import { Task } from "./components/task.js";
 import { TaskList } from "./components/task_list.js";
 import { TaskBuilder } from "../utils/task_store.js";
-import { toMillis, fromMillis } from "../utils/time_utils.js";
+import { toMillis } from "../utils/time_utils.js";
 
 /**
  * The home page
- * TODO(P3) allow filter params to be passed in
+ 
  */
 export class HomePage extends WebComponent {
   constructor(store) {
@@ -115,7 +115,6 @@ export class HomePage extends WebComponent {
     var s2 = (time - t2.lastDone) / t2.repeat;
     var diff = s2 - s1;
 
-    // TODO(P3) Check this ordering
     return Math.abs(diff) < 0.001 ? t2.repeat - t1.repeat : diff;
   }
 

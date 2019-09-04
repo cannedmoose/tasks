@@ -1,4 +1,3 @@
-//import { TaskList } from "./components/task_list.js";
 import { WebComponent } from "./components/web_component.js";
 import { Task } from "./components/task.js";
 import { TaskList } from "./components/task_list.js";
@@ -7,9 +6,7 @@ import { toMillis, fromMillis } from "../utils/time_utils.js";
 
 /**
  * The home page
- * TODO(P1) comments
  * TODO(P3) allow filter params to be passed in
- *
  */
 export class HomePage extends WebComponent {
   constructor(store) {
@@ -17,19 +14,18 @@ export class HomePage extends WebComponent {
     this.store = store;
   }
 
-  makeTaskList(filter, comp, label, open) {
-    let taskDiv = this.querySelector("#tasks");
-    let listEl = new TaskList(this.store.tasks, filter, comp);
-    listEl.label = label;
-    listEl.open = open;
-    taskDiv.append(listEl);
-    this.addListener(listEl, "taskchange", this.refresh);
-    this.addListener(listEl, "tasktoggle", this.onTaskToggle);
+  refresh() {
+    this.qs("#tasks").classList.remove("frozen");
+    this.qs("#addTask").classList.remove("interacting");
+    this.qsAll("wc-task-list").forEach(el => el.refresh());
+
+    let addTask = this.qs("#addTask");
+    addTask.refresh();
   }
 
   connected() {
     window.setInterval(() => {
-      if (this.querySelector("#tasks").classList.contains("frozen")) {
+      if (this.qs("#tasks").classList.contains("frozen")) {
         return;
       }
       this.refresh();
@@ -57,47 +53,50 @@ export class HomePage extends WebComponent {
       false
     );
 
-    // TODO(P1) Catch remove event from tasks in task_list
-
-    let addTask = this.querySelector("#addTask");
-    this.addListener(addTask, "toggle", e => {
-      // TODO(P1)
-      // IF IT"S A TOGGLE OPEN WE SHOULD RESET VALUES
-      // IF IT"S A TOGGLE CLOSED WE SHOULD SAVE
-      // IF IT"S A REMOVE WE SHOULD CLOSE WIUTHOUT SAVIONG
-      if (e.detail.task.name !== "") {
-        e.detail.task.create();
-      }
-      console.log("toggle", e);
-    });
-
+    let addTask = this.qs("#addTask");
     addTask.task = new TaskBuilder(
       this.store,
       "",
       toMillis("days", 1),
       Date.now() - toMillis("days", 1)
     );
-    addTask.refresh();
+    this.addListener(addTask, "toggle", e => {
+      if (e.detail.open) {
+        this.qs("#tasks").classList.toggle("frozen");
+        this.qs("#addTask").classList.toggle("interacting");
+        return;
+      }
+      if (!e.detail.open && addTask.task.name !== "") {
+        this.qs("#addTask").task.create();
+        this.qs("#addTask").task.clear();
+      }
+      this.refresh();
+    });
+
+    this.addListener(addTask, "change", e => {
+      if (e.detail.type === "remove") {
+        this.qs("#addTask").task.clear();
+      }
+      this.refresh();
+    });
+  }
+
+  makeTaskList(filter, comp, label, open) {
+    let taskDiv = this.qs("#tasks");
+    let listEl = new TaskList(this.store, filter, comp);
+    listEl.label = label;
+    listEl.open = open;
+    taskDiv.append(listEl);
+    this.addListener(listEl, "taskchange", this.refresh);
+    this.addListener(listEl, "tasktoggle", this.onTaskToggle);
   }
 
   onTaskToggle(e) {
-    this.querySelector("#tasks").classList.toggle("frozen");
+    this.qs("#tasks").classList.toggle("frozen");
     e.detail.target.classList.toggle("interacting");
     if (!e.detail.target.open) {
       this.refresh();
     }
-  }
-
-  refresh() {
-    this.querySelectorAll("wc-task-list").forEach(el => el.refresh());
-
-    let addTask = this.querySelector("#addTask");
-    addTask.task = new TaskBuilder(
-      this.store,
-      "",
-      toMillis("days", 1),
-      Date.now() - toMillis("days", 1)
-    );
   }
 
   makeFilter(from, to) {
@@ -135,6 +134,7 @@ export class HomePage extends WebComponent {
   width: 100%;
 }
 
+/* TODO(P2) rework frozen */
 .frozen {
   pointer-events: none;
 }

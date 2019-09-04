@@ -4,6 +4,13 @@ import { toMillis, fromMillis } from "../../utils/time_utils.js";
 /**
  * For entering a period of time
  *
+ * #Attributes
+ *   - millis (read only)
+ *   - unit
+ *   - amount
+ * #Events
+ *   - change
+ *
  * TODO(P3) Make entry a easier
  *    - Single dropdown listing common options
  *    - EG day, 2 days, week, 2 weeks, month
@@ -16,10 +23,6 @@ export class TimeInput extends WebComponent {
 
   upgrades() {
     return ["unit", "amount"];
-  }
-
-  binds() {
-    return ["onChange"];
   }
 
   connected() {
@@ -40,12 +43,12 @@ export class TimeInput extends WebComponent {
   }
 
   get unit() {
-    let unit = this.querySelector("#unit");
+    let unit = this.qs("#unit");
     return unit.options[unit.selectedIndex].value;
   }
 
   set unit(val) {
-    let unit = this.querySelector("#unit");
+    let unit = this.qs("#unit");
     for (let i = 0; i < unit.options.length; i++) {
       let option = unit.options[i];
       option.selected = option.value === val;
@@ -53,12 +56,12 @@ export class TimeInput extends WebComponent {
   }
 
   get amount() {
-    let amount = this.querySelector("#amount");
+    let amount = this.qs("#amount");
     return parseInt(amount.value);
   }
 
   set amount(val) {
-    this.querySelector("#amount").value = Math.round(val * 2) / 2;
+    this.qs("#amount").value = Math.round(val * 2) / 2;
   }
 
   get millis() {

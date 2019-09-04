@@ -7,54 +7,49 @@ import { WebComponent } from "./web_component.js";
  *
  * Displays a subset of tasks from a larger array, given by a filter.
  * Sorts taks by given comparator.
+ * #Attributes
+ *   - label
+ *   - open
+ * #Events
+ *   - taskchange
+ *   - tasktoggle
  *
  * TODO(P3) Add open/close arrow
  */
 export class TaskList extends WebComponent {
-  constructor(tasks, filter, compare) {
+  constructor(store, filter, compare) {
     super();
-    this.tasks = tasks;
+    this.store = store;
     this.filter = filter;
     this.compare = compare;
   }
 
-  /**
-   * Zips a and b
-   */
-  zip(a, b) {
-    let result = [];
-    for (let i = 0; i < Math.max(a.length, b.length); i++) {
-      result.push([a[i], b[i]]);
-    }
-    return result;
-  }
-
   refresh() {
-    let filteredTasks = this.tasks.filter(this.filter).sort(this.compare);
+    let filteredTasks = this.store.tasks.filter(this.filter).sort(this.compare);
 
-    this.zip(filteredTasks, this.querySelectorAll("wc-task")).forEach(e =>
+    this.zip(filteredTasks, this.qsAll("wc-task")).forEach(e =>
       this.refreshTask(e[0], e[1])
     );
-    this.querySelector("#label").textContent =
-      this.label + " - " + filteredTasks.length;
+    this.sub("#label", this.label + " - " + filteredTasks.length);
   }
 
   refreshTask(task, el) {
-    // TODO(P1) NUMBERED TASK TEST TO MAKE SURE THIS WORKS THE WAY WE THINK
-    let content = this.querySelector("#content");
+    // TODO(P2) NUMBERED TASK TEST TO MAKE SURE THIS WORKS THE WAY WE THINK
+    let content = this.qs("#content");
     if (task && el) {
-      // We have a task to fill
+      // We have a task and an element to put it in
       el.task = task;
+      // TODO(P2) figure out better way to enable interacting for single element
+      el.classList.remove("interacting");
       el.refresh();
     } else if (task) {
-      // No el for the task, create one
+      // We have a task but no element to put it in
       let el = new Task(task);
       this.addListener(el, "change", this.taskChange);
       this.addListener(el, "toggle", this.taskToggle);
       content.append(el);
     } else if (el) {
-      // No task for el, remove it
-      // Delete element
+      // We have an extra element, remove it
       content.removeChild(el);
     }
   }
@@ -96,11 +91,11 @@ export class TaskList extends WebComponent {
   }
 
   get open() {
-    return this.querySelector("#accordian").open;
+    return this.qs("#accordian").open;
   }
 
   set open(val) {
-    this.querySelector("#accordian").open = val;
+    this.qs("#accordian").open = val;
     if (val) {
       this.setAttribute("open", "");
     } else {
@@ -130,6 +125,18 @@ export class TaskList extends WebComponent {
   <div id ="content" slot="content"></div>
 </wc-accordian>
 `;
+  }
+
+  /**
+   * Zips a and b
+   * TODO(P3) move to a util class
+   */
+  zip(a, b) {
+    let result = [];
+    for (let i = 0; i < Math.max(a.length, b.length); i++) {
+      result.push([a[i], b[i]]);
+    }
+    return result;
   }
 }
 

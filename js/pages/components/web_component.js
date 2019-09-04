@@ -13,24 +13,23 @@ export class WebComponent extends HTMLElement {
     this._render();
   }
 
-  // Abstract, should be implemented
+  // Methods to override
   refresh() {}
-
-  // Abstract, should be implemented
   template() {
     return "<div></div>";
   }
-
-  // Abstract, should be implemented
   connected() {}
-
-  // Abstract, should be implemented
   disconnected() {}
-
   upgrades() {
     return [];
   }
 
+  // Helper methods
+  sub(selector, repl) {
+    this.qsAll(selector).forEach(el => {
+      el.textContent = repl;
+    });
+  }
   addListener(target, event, listener) {
     let fn = listener.bind(this);
     let key = { event, fn, target };
@@ -38,29 +37,24 @@ export class WebComponent extends HTMLElement {
     this.listeners.push(key);
     return key;
   }
-
-  // Not key relies on object equality...
   removeListener(key) {
     key.target.removeEventListener(key.event, key.fn);
     this.listeners = this.listeners.filter(k => k !== key);
   }
-
-  _clearListeners() {
-    this.listeners.forEach(key => {
-      key.target.removeEventListener(key.event, key.fn);
-    });
-    this.listeners = [];
+  qs(query) {
+    return this.shadowRoot.querySelector(query);
+  }
+  qsAll(query) {
+    return this.shadowRoot.querySelectorAll(query);
   }
 
+  // Webcomponent lifecycle hooks
   connectedCallback() {
-    // Wait for dom update, hopefully children have been rendered then
-    // TODO(P3) make sure this doesn't break down
-    this._upgradePropertys();
-    this._refresh();
+    this._upgradeProperties();
 
     requestAnimationFrame(() => {
-      /** At this point children should be rendered (their constructors have run + and doms rendered) but this is not necissarily called in order! */
-      // THEREFORE DO MINIMUM IN CONNECTED
+      // TODO(P2) confirm that requesting frame will order this after rendering
+      this._refresh();
       this.connected();
     });
   }
@@ -74,7 +68,14 @@ export class WebComponent extends HTMLElement {
     this._clearListeners();
   }
 
-  // Private (python style)
+  // Private methods
+  _clearListeners() {
+    this.listeners.forEach(key => {
+      key.target.removeEventListener(key.event, key.fn);
+    });
+    this.listeners = [];
+  }
+
   _clear() {
     while (this.shadowRoot.firstChild) {
       this.shadowRoot.removeChild(this.shadowRoot.firstChild);
@@ -90,20 +91,6 @@ export class WebComponent extends HTMLElement {
     this.refresh();
   }
 
-  sub(selector, repl) {
-    this.querySelectorAll(selector).forEach(el => {
-      el.textContent = repl;
-    });
-  }
-
-  /**
-   * returns: id of Component
-   * Used in dom for Component level nodes.
-   */
-  id() {
-    return this.constructor.name;
-  }
-
   _template() {
     let id = this.id() + "-template";
     let template = document.querySelector("#" + id);
@@ -116,7 +103,7 @@ export class WebComponent extends HTMLElement {
     return template;
   }
 
-  _upgradePropertys() {
+  _upgradeProperties() {
     let upgrades = this.upgrades();
     upgrades
       .filter(prop => this.hasOwnProperty(prop))
@@ -127,15 +114,11 @@ export class WebComponent extends HTMLElement {
       });
   }
 
-  querySelector(query) {
-    return this.shadowRoot.querySelector(query);
-  }
-
-  qs(query) {
-    return this.shadowRoot.querySelector(query);
-  }
-
-  querySelectorAll(query) {
-    return this.shadowRoot.querySelectorAll(query);
+  /**
+   * returns: id of Component
+   * Used in dom for Component level nodes.
+   */
+  id() {
+    return this.constructor.name;
   }
 }

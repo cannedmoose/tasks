@@ -9,8 +9,8 @@ export class AdminPage extends WebComponent {
     this.store = store;
   }
 
-  connectedCallback() {
-    let con = this.querySelector("#console");
+  refresh() {
+    let con = this.qs("#console");
     con.value = JSON.stringify(
       {
         tasks: this.store.tasks.map(tasks => tasks.values),
@@ -20,7 +20,9 @@ export class AdminPage extends WebComponent {
       null,
       2
     );
+  }
 
+  connected() {
     this.addListener(this.qs("#done"), "click", this.onDone);
     this.addListener(this.qs("#import"), "click", this.onImport);
   }
@@ -39,22 +41,22 @@ export class AdminPage extends WebComponent {
 
   onImport(e) {
     e.stopPropagation();
-    this.store.import(this.querySelector("#console").value);
+    this.store.import(this.qs("#console").value);
+  }
+
+  template() {
+    return /*html*/ `
+<style>
+  #console {
+    width: 100vw;
+    height: 50vh;
+  }
+</style>
+<textarea id="console"></textarea>
+<button id="done">Done</button>
+<button id="import">Import</button>
+    `;
   }
 }
 
 customElements.define("wc-admin-page", AdminPage);
-
-const TEMPLATE = /*html*/ `
-<template id = "home-page-template">
-  <style>
-    #console {
-      width: 100vw;
-      height: 50vh;
-    }
-  </style>
-  <textarea id="console"></textarea>
-  <button id="done">Done</button>
-  <button id="import">Import</button>
-</template >
-`;

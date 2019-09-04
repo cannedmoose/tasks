@@ -3,27 +3,17 @@ import { WebComponent } from "./web_component.js";
 /**
  * A generic accordian, can be opened/closed.
  *
- * Fires a toggle event when open state changes.
+ * #Attributes
+ *   - open
+ * #Events
+ *   - toggle
+ * #Slots
+ *   - label
+ *   - content
  */
 export class Accordian extends WebComponent {
   constructor() {
     super();
-  }
-
-  get open() {
-    return this.hasAttribute("open");
-  }
-
-  set open(val) {
-    if (val) {
-      this.setAttribute("open", "");
-      this.querySelector(".content").classList.add("open");
-      this.querySelector(".label").classList.add("open");
-    } else {
-      this.removeAttribute("open");
-      this.querySelector(".content").classList.remove("open");
-      this.querySelector(".label").classList.remove("open");
-    }
   }
 
   upgrades() {
@@ -38,10 +28,26 @@ export class Accordian extends WebComponent {
     this.open = !this.open;
     this.dispatchEvent(
       new CustomEvent("toggle", {
-        detail: { state: this.open },
+        detail: { open: this.open },
         bubbles: true
       })
     );
+  }
+
+  get open() {
+    return this.hasAttribute("open");
+  }
+
+  set open(val) {
+    if (val) {
+      this.setAttribute("open", "");
+      this.qs(".content").classList.add("open");
+      this.qs(".label").classList.add("open");
+    } else {
+      this.removeAttribute("open");
+      this.qs(".content").classList.remove("open");
+      this.qs(".label").classList.remove("open");
+    }
   }
 
   template() {

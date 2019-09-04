@@ -2,8 +2,16 @@ import { WebComponent } from "./web_component.js";
 import { TimeInput } from "./time_input.js";
 import { Accordian } from "./accordian.js";
 import { toMillis, fromMillis } from "../../utils/time_utils.js";
+
 /**
  * A button that shows task information
+ *
+ * #Attributes
+ *   - open
+ *   - create
+ * #Events
+ *   - toggle
+ *   - change
  *
  * TODO(P2) Cleanup template
  * TODO(P3) Maybe re-use icon spaces for other things...
@@ -19,17 +27,27 @@ export class Task extends WebComponent {
     return ["create", "open"];
   }
 
+  refresh() {
+    if (!this.task) return;
+    this.qs("#name").value = this.task.name;
+
+    let convertedRepeat = fromMillis(this.task.repeat);
+    this.qs("#repeat").unit = convertedRepeat.unit;
+    this.qs("#repeat").amount = convertedRepeat.amount;
+
+    let next = this.task.lastDone + this.task.repeat;
+    let convertedNext = fromMillis(next - Date.now());
+    this.qs("#next").unit = convertedNext.unit;
+    this.qs("#next").amount = convertedNext.amount;
+
+    this.sub(".name", this.task.name);
+    if (!this.create) {
+      this.sub("#tick-icon", next >= Date.now() ? "☑" : "☐");
+    }
+  }
+
   connected() {
-    this.addListener(this.qs("#accordian"), "toggle", e => {
-      e.stopPropagation();
-      this.querySelector("#name").classList.toggle("editable");
-      this.dispatchEvent(
-        new CustomEvent("toggle", {
-          detail: { open: this.open },
-          bubbles: true
-        })
-      );
-    });
+    this.addListener(this.qs("#accordian"), "toggle", this.onToggle);
     this.addListener(this.qs("#repeat"), "change", e => {
       this.task.repeat = e.detail.millis;
     });
@@ -42,20 +60,34 @@ export class Task extends WebComponent {
     this.addListener(this.qs("#trash-icon"), "click", this.remove);
   }
 
+  onToggle(e) {
+    e.stopPropagation();
+    this.qs("#name").classList.toggle("editable");
+    this.dispatchEvent(
+      new CustomEvent("toggle", {
+        detail: { open: this.open },
+        bubbles: true
+      })
+    );
+  }
+
   remove(e) {
+    /* TODO(P2) figure out better way to do this... */
+    this.qs("#name").classList.remove("editable");
+    this.open = false;
     this.fireChange("remove");
   }
 
   nameChange(e) {
     e.stopPropagation();
-    this.task.name = this.querySelector("#name").value;
+    this.task.name = this.qs("#name").value;
     this.sub(".name", this.task.name);
   }
 
   taskClick(e) {
     if (e.target.id == "edit-icon") return;
     e.stopPropagation();
-    if (!this.querySelector("#accordian").open && !this.create) {
+    if (!this.qs("#accordian").open && !this.create) {
       this.fireChange("done");
     }
   }
@@ -69,25 +101,6 @@ export class Task extends WebComponent {
     );
   }
 
-  refresh() {
-    if (!this.task) return;
-    this.querySelector("#name").value = this.task.name;
-
-    let convertedRepeat = fromMillis(this.task.repeat);
-    this.querySelector("#repeat").unit = convertedRepeat.unit;
-    this.querySelector("#repeat").amount = convertedRepeat.amount;
-
-    let next = this.task.lastDone + this.task.repeat;
-    let convertedNext = fromMillis(next - Date.now());
-    this.querySelector("#next").unit = convertedNext.unit;
-    this.querySelector("#next").amount = convertedNext.amount;
-
-    this.sub(".name", this.task.name);
-    if (!this.create) {
-      this.sub("#tick-icon", next >= Date.now() ? "☑" : "☐");
-    }
-  }
-
   get create() {
     return this.hasAttribute("create");
   }
@@ -95,17 +108,17 @@ export class Task extends WebComponent {
   set create(val) {
     if (val) {
       this.setAttribute("create", "");
-      this.querySelector("#accordian").classList.add("create");
+      this.qs("#accordian").classList.add("create");
     } else {
       this.removeAttribute("create");
-      this.querySelector("#accordian").classList.remove("create");
+      this.qs("#accordian").classList.remove("create");
     }
   }
   get open() {
-    return this.querySelector("#accordian").open;
+    return this.qs("#accordian").open;
   }
   set open(val) {
-    this.querySelector("#accordian").open = val;
+    this.qs("#accordian").open = val;
     if (val) {
       this.setAttribute("open", "");
     } else {

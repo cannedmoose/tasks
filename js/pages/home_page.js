@@ -17,6 +17,7 @@ export class HomePage extends WebComponent {
   refresh() {
     this.qs("#tasks").classList.remove("frozen");
     this.qs("#addTask").classList.remove("interacting");
+    this.qs("#addTask").classList.remove("frozen");
     this.qsAll("wc-task-list").forEach(el => el.refresh());
 
     let addTask = this.qs("#addTask");
@@ -93,6 +94,7 @@ export class HomePage extends WebComponent {
 
   onTaskToggle(e) {
     this.qs("#tasks").classList.toggle("frozen");
+    this.qs("#addTask").classList.toggle("frozen");
     e.detail.target.classList.toggle("interacting");
     if (!e.detail.target.open) {
       this.refresh();

@@ -52,7 +52,7 @@ export class Task extends WebComponent {
       this.task.repeat = e.detail.millis;
     });
     this.addListener(this.qs("#next"), "change", e => {
-      this.task.lastDone = Date.now() - (this.task.repeat - e.detail.millis);
+      this.task.lastDone = Date.now() - this.task.repeat + e.detail.millis;
     });
 
     this.addListener(this.qs("#label"), "click", this.taskClick);

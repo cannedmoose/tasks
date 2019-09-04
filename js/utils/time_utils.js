@@ -32,10 +32,10 @@ export function fromMillis(amount, lowest = "hours") {
   for (let i = 0; i < ORDER.length; i++) {
     let unit = ORDER[i];
     let converted = amount / UNITS[unit];
-    if (Math.abs(converted) < 1) continue;
+    if (Math.abs(converted) < 0.9) continue;
 
     return { unit, amount: converted };
   }
 
-  return { unit: "hours", amount: 0 };
+  return { unit: "hours", amount: amount / UNITS["hours"] };
 }

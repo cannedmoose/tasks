@@ -3,11 +3,35 @@ import { WebComponent } from "./web_component.js";
 /**
  * A generic accordian, can be opened/closed.
  *
- * TODO(P3): fire open/close event;
+ * #Attributes
+ *   - open
+ * #Events
+ *   - toggle
+ * #Slots
+ *   - label
+ *   - content
  */
 export class Accordian extends WebComponent {
   constructor() {
-    super(TEMPLATE);
+    super();
+  }
+
+  upgrades() {
+    return ["open"];
+  }
+
+  connected() {
+    this.addListener(this.qs(".label"), "click", this.labelClick);
+  }
+
+  labelClick(e) {
+    this.open = !this.open;
+    this.dispatchEvent(
+      new CustomEvent("toggle", {
+        detail: { open: this.open },
+        bubbles: true
+      })
+    );
   }
 
   get open() {
@@ -17,60 +41,40 @@ export class Accordian extends WebComponent {
   set open(val) {
     if (val) {
       this.setAttribute("open", "");
-      this.querySelector(".content").classList.add("open");
-      this.querySelector(".label").classList.add("open");
+      this.qs(".content").classList.add("open");
+      this.qs(".label").classList.add("open");
     } else {
       this.removeAttribute("open");
-      this.querySelector(".content").classList.remove("open");
-      this.querySelector(".label").classList.remove("open");
+      this.qs(".content").classList.remove("open");
+      this.qs(".label").classList.remove("open");
     }
   }
 
-  connectedCallback() {
-    this._upgradeProperty("open");
-
-    this.bind("_onLabelClick");
-    this.shadowRoot
-      .querySelector(".label")
-      .addEventListener("click", this._onLabelClick);
+  template() {
+    return /*html*/ `
+<style>
+  .content {
+    display: none;
   }
 
-  _onLabelClick(e) {
-    this.open = !this.open;
+  .content.open {
+    display: block;
   }
 
-  disconnectedCallback() {
-    this.shadowRoot
-      .querySelector(".label")
-      .removeEventListener("click", this._onLabelClick);
+  .label {
+    cursor: pointer;
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;      /* IE 10+ */
+    user-select: none;          /* Likely future */
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+</style>
+<slot class="label" name="label">Accordian</slot>
+<slot class="content" name="content">CONTENT</slot>`;
   }
 }
 
 customElements.define("wc-accordian", Accordian);
-
-const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
-<template id = "accordian-template">
-    <style>
-    .content {
-        display: none;
-    }
-    
-    .content.open {
-      display: block;
-    }
-
-    .label {
-      cursor: pointer;
-      -webkit-user-select: none;  /* Chrome all / Safari all */
-      -moz-user-select: none;     /* Firefox all */
-      -ms-user-select: none;      /* IE 10+ */
-      user-select: none;          /* Likely future */
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-    }
-  </style>
-    <slot class="label" name="label">Accordian</slot>
-    <slot class="content" name="content">CONTENT</slot>
-  </template >
-`);

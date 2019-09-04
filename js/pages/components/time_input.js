@@ -1,45 +1,28 @@
 import { WebComponent } from "./web_component.js";
-import { toMillis, fromMillis } from "../../utils/time_utils.js";
+import { toMillis } from "../../utils/time_utils.js";
 
 /**
  * For entering a period of time
+ *
+ * #Attributes
+ *   - millis (read only)
+ *   - unit
+ *   - amount
+ * #Events
+ *   - change
  */
 export class TimeInput extends WebComponent {
   constructor() {
-    super(TEMPLATE);
-
-    this.bind("onChange");
-  }
-  get unit() {
-    let unit = this.querySelector("#unit");
-    return unit.options[unit.selectedIndex].value;
+    super();
   }
 
-  set unit(val) {
-    let unit = this.querySelector("#unit");
-    for (let i = 0; i < unit.options.length; i++) {
-      let option = unit.options[i];
-      option.selected = option.value === val;
-    }
+  upgrades() {
+    return ["unit", "amount"];
   }
 
-  get amount() {
-    let amount = this.querySelector("#amount");
-    return parseInt(amount.value);
-  }
-
-  set amount(val) {
-    this.querySelector("#amount").value = Math.round(val * 2) / 2;
-  }
-
-  get millis() {
-    return toMillis(this.unit, this.amount);
-  }
-
-  set millis(val) {
-    let converted = fromMillis(val);
-    this.unit = converted.unit;
-    this.amount = converted.amount;
+  connected() {
+    this.addListener(this.qs("#unit"), "change", this.onChange);
+    this.addListener(this.qs("#amount"), "change", this.onChange);
   }
 
   onChange(e) {
@@ -54,23 +37,34 @@ export class TimeInput extends WebComponent {
     );
   }
 
-  connectedCallback() {
-    this._upgradeProperty("millis");
-
-    this.querySelector("#unit").addEventListener("change", this.onChange);
-    this.querySelector("#amount").addEventListener("change", this.onChange);
+  get unit() {
+    let unit = this.qs("#unit");
+    return unit.options[unit.selectedIndex].value;
   }
 
-  disconnectedCallback() {
-    this.querySelector("#unit").removeEventListener("change", this.onChange);
-    this.querySelector("#amount").removeEventListener("change", this.onChange);
+  set unit(val) {
+    let unit = this.qs("#unit");
+    for (let i = 0; i < unit.options.length; i++) {
+      let option = unit.options[i];
+      option.selected = option.value === val;
+    }
   }
-}
 
-customElements.define("wc-time-input", TimeInput);
+  get amount() {
+    let amount = this.qs("#amount");
+    return parseInt(amount.value);
+  }
 
-const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
-<template id="time-input">
+  set amount(val) {
+    this.qs("#amount").value = Math.round(val * 2) / 2;
+  }
+
+  get millis() {
+    return toMillis(this.unit, this.amount);
+  }
+
+  template() {
+    return /*html*/ `
   <style>
     select,input {
       border:none;
@@ -103,5 +97,8 @@ const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
     <option value="weeks">Weeks</option>
     <option value="years">Years</option>
   </select>
-</template>
-`);
+`;
+  }
+}
+
+customElements.define("wc-time-input", TimeInput);

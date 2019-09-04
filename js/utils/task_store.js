@@ -147,10 +147,17 @@ class Task {
 export class TaskBuilder extends Task {
   constructor(realstore, name, repeat, lastDone) {
     super({ store: () => {} }, "", name, repeat, lastDone);
+    this.clearVals = { name, repeat, lastDone };
     this.realStore = realstore;
   }
 
   create() {
     return this.realStore.add(this.name, this.repeat, this.lastDone);
+  }
+
+  clear() {
+    this.name = this.clearVals.name;
+    this.repeat = this.clearVals.repeat;
+    this.lastDone = this.clearVals.lastDone;
   }
 }

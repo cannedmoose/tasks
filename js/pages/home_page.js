@@ -1,99 +1,104 @@
-import { TaskList } from "./components/task_list.js";
 import { WebComponent } from "./components/web_component.js";
 import { Task } from "./components/task.js";
+import { TaskList } from "./components/task_list.js";
 import { TaskBuilder } from "../utils/task_store.js";
-import { toMillis, fromMillis } from "../utils/time_utils.js";
+import { toMillis } from "../utils/time_utils.js";
 
 /**
  * The home page
- *
- *
- * TODO(P2) having task open should stop other interactions (EG accordians opening)
- *    Liuttle hackey but could do this with some slick csss maybs
- * TODO(P2) make sure event handlers are cleaned up
- * TODO(P3) allow filter params to be passed in
- *
+ 
  */
 export class HomePage extends WebComponent {
   constructor(store) {
-    super(TEMPLATE);
+    super();
     this.store = store;
   }
 
-  connectedCallback() {
-    let taskDiv = this.querySelector("#tasks");
-    let overdue = new TaskList(
-      this.store.tasks,
-      this.makeFilter(Number.NEGATIVE_INFINITY, 0),
-      this.scoreComp
-    );
+  refresh() {
+    this.qs("#tasks").classList.remove("frozen");
+    this.qs("#addTask").classList.remove("interacting");
+    this.qs("#addTask").classList.remove("frozen");
+    this.qsAll("wc-task-list").forEach(el => el.refresh());
 
-    // TODO(P2) move out of function
-    let EVs = e => {
-      this.refreshTasks();
-    };
-
-    overdue.label = "Overdue";
-    overdue.id = "overdue";
-    overdue.open = true;
-    taskDiv.append(overdue);
-    overdue.addEventListener("taskchange", EVs);
-    let soon = new TaskList(
-      this.store.tasks,
-      this.makeFilter(0, 12),
-      this.timeComp
-    );
-    soon.label = "Due Soon";
-    soon.id = "soon";
-    soon.open = true;
-    soon.addEventListener("taskchange", EVs);
-    taskDiv.append(soon);
-    let later = new TaskList(
-      this.store.tasks,
-      this.makeFilter(12, 48),
-      this.timeComp
-    );
-    later.label = "Due Later";
-    later.id = "later";
-    later.open = false;
-    later.addEventListener("taskchange", EVs);
-    taskDiv.append(later);
-    let rest = new TaskList(
-      this.store.tasks,
-      this.makeFilter(48, Infinity),
-      this.timeComp
-    );
-    rest.label = "Upcoming";
-    rest.id = "rest";
-    rest.open = false;
-    rest.addEventListener("taskchange", EVs);
-    taskDiv.append(rest);
-
-    this.makeAddTask();
+    let addTask = this.qs("#addTask");
+    addTask.refresh();
   }
 
-  makeAddTask() {
-    let addTask = new Task(
-      new TaskBuilder(
-        this.store,
-        "",
-        toMillis("days", 1),
-        Date.now() - toMillis("days", 1)
-      )
-    );
-    addTask.create = true;
-    addTask.addEventListener("confirm", e => {
-      if (e.detail.task.name !== "") {
-        e.detail.task.create();
+  connected() {
+    window.setInterval(() => {
+      if (this.qs("#tasks").classList.contains("frozen")) {
+        return;
       }
-      this.refreshTasks();
-    });
-    addTask.addEventListener("remove", e => {
-      this.refreshTasks();
-    });
-    addTask.id = "add-task";
+      this.refresh();
+    }, 2000);
+    this.makeTaskList(
+      this.makeFilter(Number.NEGATIVE_INFINITY, 0),
+      this.scoreComp,
+      "Overdue",
+      true
+    );
 
-    this.querySelector("#tasks").append(addTask);
+    this.makeTaskList(this.makeFilter(0, 12), this.timeComp, "Due Soon", true);
+
+    this.makeTaskList(
+      this.makeFilter(12, 48),
+      this.timeComp,
+      "Due Later",
+      false
+    );
+
+    this.makeTaskList(
+      this.makeFilter(48, Infinity),
+      this.timeComp,
+      "Upcoming",
+      false
+    );
+
+    let addTask = this.qs("#addTask");
+    addTask.task = new TaskBuilder(
+      this.store,
+      "",
+      toMillis("days", 1),
+      Date.now() - toMillis("days", 1)
+    );
+    this.addListener(addTask, "toggle", e => {
+      if (e.detail.open) {
+        this.qs("#tasks").classList.toggle("frozen");
+        this.qs("#addTask").classList.toggle("interacting");
+        return;
+      }
+      if (!e.detail.open && addTask.task.name !== "") {
+        this.qs("#addTask").task.create();
+        this.qs("#addTask").task.clear();
+      }
+      this.refresh();
+    });
+
+    this.addListener(addTask, "change", e => {
+      if (e.detail.type === "remove") {
+        this.qs("#addTask").task.clear();
+      }
+      this.refresh();
+    });
+  }
+
+  makeTaskList(filter, comp, label, open) {
+    let taskDiv = this.qs("#tasks");
+    let listEl = new TaskList(this.store, filter, comp);
+    listEl.label = label;
+    listEl.open = open;
+    taskDiv.append(listEl);
+    this.addListener(listEl, "taskchange", this.refresh);
+    this.addListener(listEl, "tasktoggle", this.onTaskToggle);
+  }
+
+  onTaskToggle(e) {
+    this.qs("#tasks").classList.toggle("frozen");
+    this.qs("#addTask").classList.toggle("frozen");
+    e.detail.target.classList.toggle("interacting");
+    if (!e.detail.target.open) {
+      this.refresh();
+    }
   }
 
   makeFilter(from, to) {
@@ -112,7 +117,6 @@ export class HomePage extends WebComponent {
     var s2 = (time - t2.lastDone) / t2.repeat;
     var diff = s2 - s1;
 
-    // TODO(P3) Check this ordering
     return Math.abs(diff) < 0.001 ? t2.repeat - t1.repeat : diff;
   }
 
@@ -123,37 +127,23 @@ export class HomePage extends WebComponent {
     return d2 - d1;
   }
 
-  refreshTasks() {
-    let overdue = this.querySelector("#overdue");
-    let soon = this.querySelector("#soon");
-    let later = this.querySelector("#later");
-    let rest = this.querySelector("#rest");
+  template() {
+    return /*html*/ `
+<style>
 
-    overdue.tasks = this.store.tasks;
-    overdue.refreshTasks();
-    soon.tasks = this.store.tasks;
-    soon.refreshTasks();
-    later.tasks = this.store.tasks;
-    later.refreshTasks();
-    rest.tasks = this.store.tasks;
-    rest.refreshTasks();
+:host{
+  width: 100%;
+}
 
-    let addTask = this.querySelector("#add-task");
-    addTask.parentElement.removeChild(addTask);
-    this.makeAddTask();
+/* TODO(P2) rework frozen */
+.frozen {
+  pointer-events: none;
+}
+</style>
+<div id="tasks" ></div>
+<wc-task id="addTask" create ></wc-task>
+`;
   }
 }
 
 customElements.define("wc-home-page", HomePage);
-
-const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
-<template id = "home-page-template">
-    <style>
-
-    :host{
-      width: 100%;
-    }
-  </style>
-  <div id="tasks"></div>
-</template >
-`);

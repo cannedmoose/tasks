@@ -5,15 +5,12 @@ import { WebComponent } from "./components/web_component.js";
  */
 export class AdminPage extends WebComponent {
   constructor(store) {
-    super(TEMPLATE);
+    super();
     this.store = store;
-
-    this.bind("onDone");
-    this.bind("onImport");
   }
 
-  connectedCallback() {
-    let con = this.querySelector("#console");
+  refresh() {
+    let con = this.qs("#console");
     con.value = JSON.stringify(
       {
         tasks: this.store.tasks.map(tasks => tasks.values),
@@ -23,9 +20,11 @@ export class AdminPage extends WebComponent {
       null,
       2
     );
+  }
 
-    this.querySelector("#done").addEventListener("click", this.onDone);
-    this.querySelector("#import").addEventListener("click", this.onImport);
+  connected() {
+    this.addListener(this.qs("#done"), "click", this.onDone);
+    this.addListener(this.qs("#import"), "click", this.onImport);
   }
 
   onDone(e) {
@@ -42,18 +41,22 @@ export class AdminPage extends WebComponent {
 
   onImport(e) {
     e.stopPropagation();
-    this.store.import(this.querySelector("#console").value);
+    this.store.import(this.qs("#console").value);
+  }
+
+  template() {
+    return /*html*/ `
+<style>
+  #console {
+    width: 100vw;
+    height: 50vh;
+  }
+</style>
+<textarea id="console"></textarea>
+<button id="done">Done</button>
+<button id="import">Import</button>
+    `;
   }
 }
 
 customElements.define("wc-admin-page", AdminPage);
-
-const TEMPLATE = WebComponent.TEMPLATE(/*html*/ `
-<template id = "home-page-template">
-  <style>
-  </style>
-  <textarea id="console"></textarea>
-  <button id="done">Done</button>
-  <button id="import">Import</button>
-</template >
-`);

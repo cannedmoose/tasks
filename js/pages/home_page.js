@@ -33,7 +33,7 @@ export class HomePage extends WebComponent {
     }, 2000);
     this.makeTaskList(
       this.makeFilter(Number.NEGATIVE_INFINITY, 0),
-      this.scoreComp,
+      this.timeComp,
       "Overdue",
       true
     );
@@ -55,12 +55,7 @@ export class HomePage extends WebComponent {
     );
 
     let addTask = this.qs("#addTask");
-    addTask.task = new TaskBuilder(
-      this.store,
-      "",
-      toMillis("days", 1),
-      Date.now() - toMillis("days", 1)
-    );
+    addTask.task = new TaskBuilder(this.store);
     this.addListener(addTask, "toggle", e => {
       if (e.detail.open) {
         this.qs("#tasks").classList.toggle("frozen");
@@ -104,27 +99,20 @@ export class HomePage extends WebComponent {
   makeFilter(from, to) {
     return task => {
       let time = Date.now();
-      let due = task.lastDone + task.repeat;
+      let due = task.due;
+      // Make sure we have repeats left
+      if (task.repeat <= 0) {
+        return false;
+      }
       return (
         time + from * 60 * 60 * 1000 < due && time + to * 60 * 60 * 1000 > due
       );
     };
   }
 
-  scoreComp(t1, t2) {
-    let time = Date.now();
-    var s1 = (time - t1.lastDone) / t1.repeat;
-    var s2 = (time - t2.lastDone) / t2.repeat;
-    var diff = s2 - s1;
-
-    return Math.abs(diff) < 0.001 ? t2.repeat - t1.repeat : diff;
-  }
-
   timeComp(t1, t2) {
     let time = Date.now();
-    var d1 = time - t1.lastDone - t1.repeat;
-    var d2 = time - t2.lastDone - t2.repeat;
-    return d2 - d1;
+    return t1.due - t2.due;
   }
 
   template() {

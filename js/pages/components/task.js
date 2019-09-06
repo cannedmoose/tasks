@@ -29,28 +29,27 @@ export class Task extends WebComponent {
     if (!this.task) return;
     this.qs("#name").value = this.task.name;
 
-    let convertedRepeat = fromMillis(this.task.repeat);
-    this.qs("#repeat").unit = convertedRepeat.unit;
-    this.qs("#repeat").amount = convertedRepeat.amount;
+    let convertedPeriod = fromMillis(this.task.period);
+    this.qs("#period").unit = convertedPeriod.unit;
+    this.qs("#period").amount = convertedPeriod.amount;
 
-    let next = this.task.lastDone + this.task.repeat;
-    let convertedNext = fromMillis(next - Date.now());
+    let convertedNext = fromMillis(this.task.due - Date.now());
     this.qs("#next").unit = convertedNext.unit;
     this.qs("#next").amount = convertedNext.amount;
 
     this.sub(".name", this.task.name);
     if (!this.create) {
-      this.sub("#tick-icon", next >= Date.now() ? "☑" : "☐");
+      this.sub("#tick-icon", this.task.due >= Date.now() ? "☑" : "☐");
     }
   }
 
   connected() {
     this.addListener(this.qs("#accordian"), "toggle", this.onToggle);
-    this.addListener(this.qs("#repeat"), "change", e => {
-      this.task.repeat = e.detail.millis;
+    this.addListener(this.qs("#period"), "change", e => {
+      this.task.period = e.detail.millis;
     });
     this.addListener(this.qs("#next"), "change", e => {
-      this.task.lastDone = Date.now() - this.task.repeat + e.detail.millis;
+      this.task.due = Date.now() - e.detail.millis;
     });
 
     this.addListener(this.qs("#label"), "click", this.taskClick);
@@ -136,7 +135,7 @@ export class Task extends WebComponent {
       <span class="right-column"></span>
       <div class="center-column">
         <span>I should <span class="name"></span> every:</span>
-        <wc-time-input id="repeat"></wc-time-input>
+        <wc-time-input id="period"></wc-time-input>
         <span>I will next <span class="name"></span> in:</span>
         <wc-time-input id="next"></wc-time-input>
       </div>

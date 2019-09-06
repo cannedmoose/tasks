@@ -55,11 +55,7 @@ export class TaskList extends WebComponent {
   taskChange(e) {
     let kind = e.detail.type;
     if (kind === "done") {
-      e.detail.task.storage.history.push({
-        name: e.detail.task.name,
-        time: Date.now()
-      });
-      e.detail.task.lastDone = Date.now();
+      e.detail.task.do();
     } else if (kind === "remove") {
       e.detail.task.remove();
     }

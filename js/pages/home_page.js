@@ -1,5 +1,5 @@
 import { WebComponent } from "./components/web_component.js";
-import { Task } from "./components/task.js";
+import { TaskEdit } from "./components/task_edit.js";
 import { TaskList } from "./components/task_list.js";
 import { TaskBuilder } from "../utils/task_store.js";
 import { toMillis } from "../utils/time_utils.js";
@@ -12,106 +12,84 @@ export class HomePage extends WebComponent {
   constructor(store) {
     super();
     this.store = store;
+    this.editing = null;
   }
 
   refresh() {
-    this.qs("#tasks").classList.remove("frozen");
-    this.qs("#addTask").classList.remove("interacting");
-    this.qs("#addTask").classList.remove("frozen");
-    this.qsAll("wc-task-list").forEach(el => el.refresh());
+    let edit = this.qs("#edit");
+    let display = this.qs("#display");
+    if (this.editing) {
+      edit.classList.remove("hidden");
+      display.classList.add("hidden");
 
-    let addTask = this.qs("#addTask");
-    addTask.refresh();
-  }
+      edit.task = this.editing;
+      edit.refresh();
+    } else {
+      edit.classList.add("hidden");
+      display.classList.remove("hidden");
 
-  connected() {
-    window.setInterval(() => {
-      if (this.qs("#tasks").classList.contains("frozen")) {
-        return;
-      }
-      this.refresh();
-    }, 2000);
-    this.makeTaskList(
-      this.makeFilter(Number.NEGATIVE_INFINITY, 0),
-      this.timeComp,
-      "Overdue",
-      true
-    );
+      let tags = this.store.tasks
+        .map(task => task.tags[0])
+        .filter((value, index, self) => self.indexOf(value) === index);
 
-    this.makeTaskList(this.makeFilter(0, 12), this.timeComp, "Due Soon", true);
-
-    this.makeTaskList(
-      this.makeFilter(12, 48),
-      this.timeComp,
-      "Due Later",
-      false
-    );
-
-    this.makeTaskList(
-      this.makeFilter(48, Infinity),
-      this.timeComp,
-      "Upcoming",
-      false
-    );
-
-    let addTask = this.qs("#addTask");
-    addTask.task = new TaskBuilder(this.store);
-    this.addListener(addTask, "toggle", e => {
-      if (e.detail.open) {
-        this.qs("#tasks").classList.toggle("frozen");
-        this.qs("#addTask").classList.toggle("interacting");
-        return;
-      }
-      if (!e.detail.open && addTask.task.name !== "") {
-        this.qs("#addTask").task.create();
-        this.qs("#addTask").task.clear();
-      }
-      this.refresh();
-    });
-
-    this.addListener(addTask, "change", e => {
-      if (e.detail.type === "remove") {
-        this.qs("#addTask").task.clear();
-      }
-      this.refresh();
-    });
-  }
-
-  makeTaskList(filter, comp, label, open) {
-    let taskDiv = this.qs("#tasks");
-    let listEl = new TaskList(this.store, filter, comp);
-    listEl.label = label;
-    listEl.open = open;
-    taskDiv.append(listEl);
-    this.addListener(listEl, "taskchange", this.refresh);
-    this.addListener(listEl, "tasktoggle", this.onTaskToggle);
-  }
-
-  onTaskToggle(e) {
-    this.qs("#tasks").classList.toggle("frozen");
-    this.qs("#addTask").classList.toggle("frozen");
-    e.detail.target.classList.toggle("interacting");
-    if (!e.detail.target.open) {
-      this.refresh();
+      this.zip(tags, "wc-task-list", "#tasks", (tag, el) => {
+        let taskFilter = task =>
+          task.tags[0] === tag && task.repeat >= 1 && task.due < Date.now();
+        let template = new TaskBuilder(this.store, { tags: [tag] });
+        if (el) {
+          el.filter = taskFilter;
+          el.label = tag;
+          el.template = template;
+          el.refresh();
+        } else {
+          el = new TaskList(this.store, taskFilter, this.timeComp);
+          el.label = tag;
+          el.teplate = template;
+          el.open = true;
+          return el;
+        }
+      });
     }
   }
 
-  makeFilter(from, to) {
-    return task => {
-      let time = Date.now();
-      let due = task.due;
-      // Make sure we have repeats left
-      if (task.repeat <= 0) {
-        return false;
+  connected() {
+    // Set up periodic refresh
+    window.setInterval(() => {
+      if (this.qs("#display").classList.contains("hidden")) {
+        return;
       }
-      return (
-        time + from * 60 * 60 * 1000 < due && time + to * 60 * 60 * 1000 > due
-      );
-    };
+      //this.refresh();
+    }, 2000);
+    this.addListener(this.qs("#tasks"), "done", e => {
+      e.detail.task.do();
+      this.refresh();
+    });
+
+    this.addListener(this.qs("#tasks"), "edit", e => {
+      // TODO(P2) passing label isn't nice
+      // Should pass a template to the task list
+      this.editing = e.detail.task;
+      this.refresh();
+    });
+
+    this.addListener(this.qs("#edit"), "delete", e => {
+      e.detail.task.remove();
+      this.editing = null;
+      this.refresh();
+    });
+
+    this.addListener(this.qs("#edit"), "cancel", e => {
+      this.editing = null;
+      this.refresh();
+    });
+
+    this.addListener(this.qs("#edit"), "confirm", e => {
+      this.editing = null;
+      this.refresh();
+    });
   }
 
   timeComp(t1, t2) {
-    let time = Date.now();
     return t1.due - t2.due;
   }
 
@@ -123,13 +101,16 @@ export class HomePage extends WebComponent {
   width: 100%;
 }
 
-/* TODO(P2) rework frozen */
-.frozen {
-  pointer-events: none;
+.hidden {
+  display: none;
 }
+
+
 </style>
-<div id="tasks" ></div>
-<wc-task id="addTask" create ></wc-task>
+<wc-task-edit id="edit"></wc-task-edit>
+<div id="display">
+  <div id="tasks" ></div>
+</div>
 `;
   }
 }

@@ -90,13 +90,13 @@ export class TimeInput extends WebComponent {
       height: 1.5em;
     }
   </style>
-  <input id="amount" type="number" step=".5"/>
-  <select id="unit">
-    <option value="hours">Hours</option>
-    <option value="days">Days</option>
-    <option value="weeks">Weeks</option>
-    <option value="years">Years</option>
-  </select>
+    <input id="amount" type="number" step=".5"/>
+    <select id="unit">
+      <option value="hours">Hours</option>
+      <option value="days">Days</option>
+      <option value="weeks">Weeks</option>
+      <option value="years">Years</option>
+    </select>
 `;
   }
 }

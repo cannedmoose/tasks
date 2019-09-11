@@ -1,6 +1,7 @@
 import { Accordian } from "./accordian.js";
-import { Task } from "./task.js";
+import { TaskView } from "./task_view.js";
 import { WebComponent } from "./web_component.js";
+import { TaskBuilder } from "../../utils/task_store.js";
 
 /**
  * A list of tasks.
@@ -10,70 +11,53 @@ import { WebComponent } from "./web_component.js";
  * #Attributes
  *   - label
  *   - open
- * #Events
- *   - taskchange
- *   - tasktoggle
  */
 export class TaskList extends WebComponent {
-  constructor(store, filter, compare) {
+  constructor(store, filter, compare, template) {
     super();
     this.store = store;
     this.filter = filter;
     this.compare = compare;
+    this.template = template;
+  }
+
+  upgrades() {
+    return ["label", "open"];
   }
 
   refresh() {
     let filteredTasks = this.store.tasks.filter(this.filter).sort(this.compare);
-
-    this.zip(filteredTasks, this.qsAll("wc-task")).forEach(e =>
-      this.refreshTask(e[0], e[1])
-    );
+    this.zip(filteredTasks, "wc-task-view", "#content", this.refreshTask);
     this.sub("#label", this.label + " - " + filteredTasks.length);
   }
 
   refreshTask(task, el) {
     // TODO(P2) Test to make sure we aren't dropping/duping tasks
-    let content = this.qs("#content");
-    if (task && el) {
+    if (el) {
       // We have a task and an element to put it in
       el.task = task;
       // TODO(P2) figure out better way to enable interacting for single element
       el.classList.remove("interacting");
       el.refresh();
-    } else if (task) {
+    } else {
       // We have a task but no element to put it in
-      let el = new Task(task);
-      this.addListener(el, "change", this.taskChange);
-      this.addListener(el, "toggle", this.taskToggle);
-      content.append(el);
-    } else if (el) {
-      // We have an extra element, remove it
-      content.removeChild(el);
+      let el = new TaskView(task);
+      this.addListener(el, "done", this.bubble);
+      this.addListener(el, "edit", this.bubble);
+      return el;
     }
   }
 
-  taskChange(e) {
-    let kind = e.detail.type;
-    if (kind === "done") {
-      e.detail.task.do();
-    } else if (kind === "remove") {
-      e.detail.task.remove();
-    }
-    this.dispatchEvent(
-      new CustomEvent("taskchange", {
-        detail: { task: e.detail.task },
-        bubbles: true
-      })
-    );
-  }
-
-  taskToggle(e) {
-    this.dispatchEvent(
-      new CustomEvent("tasktoggle", {
-        detail: { task: e.detail.task, target: e.target },
-        bubbles: true
-      })
-    );
+  connected() {
+    this.addListener(this.qs("#add"), "click", e => {
+      e.stopPropagation();
+      this.dispatchEvent(
+        new CustomEvent("edit", {
+          detail: { task: this.template },
+          bubbles: true
+        })
+      );
+    });
   }
 
   get label() {
@@ -84,53 +68,31 @@ export class TaskList extends WebComponent {
     this.setAttribute("label", val);
   }
 
-  get open() {
-    return this.qs("#accordian").open;
-  }
-
-  set open(val) {
-    this.qs("#accordian").open = val;
-    if (val) {
-      this.setAttribute("open", "");
-    } else {
-      this.removeAttribute("open");
-    }
-  }
-
   template() {
     return /*html*/ `
 <style>
   #label {
-    border-bottom: 3px solid #ADD8E6;
     width: 100%;
     font-size: 1.5em;
   }
 
-  #accordian {
-    width: 100%;
-  }
+  .menu {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 1px;
 
-  .interacting {
-    pointer-events: all;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    border-bottom: 1px solid #ADD8E6;
+    border-top: 3px solid #ADD8E6;
+    background-color: white;
   }
 </style>
-<wc-accordian id="accordian">
-  <div id ="label" slot="label"></div>
-  <div id ="content" slot="content"></div>
-</wc-accordian>
+  <div class="menu"><div id ="label"></div><div id="add">➕</div></div>
+  <div id ="content"></div>
 `;
-  }
-
-  /**
-   * Zips a and b
-   * TODO(P3) move to a util class
-   */
-  zip(a, b) {
-    let result = [];
-    for (let i = 0; i < Math.max(a.length, b.length); i++) {
-      result.push([a[i], b[i]]);
-    }
-    return result;
   }
 }
 

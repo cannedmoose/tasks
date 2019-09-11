@@ -47,15 +47,50 @@ export class WebComponent extends HTMLElement {
   qsAll(query) {
     return this.shadowRoot.querySelectorAll(query);
   }
+  // TODO(P1) figure out why custom events don't bubble
+  bubble(e) {
+    this.dispatchEvent(
+      new CustomEvent(e.type, {
+        detail: e.detail,
+        bubbles: true
+      })
+    );
+  }
+
+  /**
+   * Zips a and b
+   * TODO(P3) move to a util class
+   */
+  zip(data, itemQS, parentQS, fn) {
+    let nodes = this.qsAll(itemQS);
+    let parent = this.qs(parentQS);
+    fn = fn.bind(this);
+    for (let i = 0; i < Math.max(data.length, nodes.length); i++) {
+      let d = data[i];
+      let node = nodes[i];
+      if (!d) {
+        parent.removeChild(node);
+      }
+      let r = fn(d, node);
+      if (!node) {
+        parent.append(r);
+      }
+    }
+  }
 
   // Webcomponent lifecycle hooks
   connectedCallback() {
     this._upgradeProperties();
-
+    let refresh = this.refresh;
+    // Make sure we don't double refresh on connect
+    this.refresh = () => {
+      throw "Don't be upsetti, have some speghetti!";
+    };
     requestAnimationFrame(() => {
       // TODO(P3) confirm that requesting frame will order this after rendering
       // (Seems to work for now...)
-      this._refresh();
+      this.refresh = refresh;
+      this.refresh();
       this.connected();
     });
   }
@@ -77,19 +112,16 @@ export class WebComponent extends HTMLElement {
     this.listeners = [];
   }
 
-  _clear() {
-    while (this.shadowRoot.firstChild) {
-      this.shadowRoot.removeChild(this.shadowRoot.firstChild);
+  _clear(el) {
+    el = el || this.shadowRoot;
+    while (el.firstChild) {
+      el.removeChild(el.firstChild);
     }
   }
 
   _render() {
     this._clear();
     this.shadowRoot.appendChild(this._template().content.cloneNode(true));
-  }
-
-  _refresh() {
-    this.refresh();
   }
 
   _template() {

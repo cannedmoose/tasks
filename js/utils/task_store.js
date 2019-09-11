@@ -42,7 +42,6 @@ export class TaskStore {
 
   add(vals) {
     let id = this.nextId();
-    console.log(id, this.lastId);
     vals.id = id;
     let task = new Task(this, vals);
     this.tasks.push(task);
@@ -63,7 +62,6 @@ export class TaskStore {
   handleUpgrade() {
     let tasks = JSON.parse(this.storage.tasks || "[]");
     let taskHistory = JSON.parse(this.storage.taskHistory || "[]");
-    console.log(tasks, taskHistory);
 
     // Prehistory versions
     if (!this.storage.version || this.storage.version < 2) {
@@ -224,8 +222,8 @@ class Task {
 }
 
 export class TaskBuilder extends Task {
-  constructor(realstore) {
-    let vals = {
+  constructor(realstore, vals) {
+    let defaults = {
       name: "",
       repeat: "Infinity",
       due: Date.now(),
@@ -233,8 +231,11 @@ export class TaskBuilder extends Task {
       tags: ["todo"],
       nextTasks: []
     };
-    super({ store: () => {} }, vals);
+    Object.assign(defaults, vals);
+    super({ store: () => {} }, defaults);
     this.realStore = realstore;
+    this.vals = {};
+    Object.assign(this.vals, vals);
   }
 
   create() {
@@ -242,7 +243,7 @@ export class TaskBuilder extends Task {
   }
 
   clear() {
-    this.values = {
+    let defaults = {
       name: "",
       repeat: "Infinity",
       due: Date.now(),
@@ -250,5 +251,7 @@ export class TaskBuilder extends Task {
       tags: ["todo"],
       nextTasks: []
     };
+    defaults.assign(this.vals);
+    this.values = defaults;
   }
 }

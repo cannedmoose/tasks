@@ -13,13 +13,18 @@ import { toMillis, fromMillis } from "../../utils/time_utils.js";
  *   - delete
  */
 export class TaskEdit extends WebComponent {
-  constructor(task) {
-    super();
+  super(task) {
     this.task = task || this.task;
+    this.storage = storage || this.storage;
   }
 
   refresh() {
     if (!this.task) return;
+    if (!this.task.id) {
+      this.qs("#delete").classList.add("hidden");
+    } else {
+      this.qs("#delete").classList.remove("hidden");
+    }
     this.qs("#name").value = this.task.name;
     this.qs("#tag").value = this.task.tags[0];
 
@@ -27,14 +32,21 @@ export class TaskEdit extends WebComponent {
     let nothingEl = document.createElement("option");
     nothingEl.textContent = "--Nothing--";
     blockedBy.append(nothingEl);
-    // TODO (P1)
-    // Fix this, need a way to have storage hear withoput relying on the task...
-    /**this.task.storage.tasks.forEach(task => {
+
+    this.task.allTasks().forEach(task => {
       let el = document.createElement("option");
       el.value = task.id;
       el.textContent = task.name;
       blockedBy.append(el);
-    });*/
+    });
+
+    let tagList = this.qs("#tags");
+    this.task.allTags().forEach(tag => {
+      let el = document.createElement("option");
+      el.value = tag;
+      el.textContent = tag;
+      tagList.append(el);
+    });
 
     /**let convertedPeriod = fromMillis(this.task.period);
     this.qs("#period").unit = convertedPeriod.unit;
@@ -81,49 +93,7 @@ export class TaskEdit extends WebComponent {
   template() {
     // TODO(P1) Styling
     return /*html*/ `
-  <span>Name</span>
-  <input id="name" type="text" placeholder="shopping"/>
-  <span>Tag</span>
-  <input id="tag" type="text" placeholder="todo"/>
-  <span>Blocked by</span>
-  <select id="blocked-by">
-  </select>
-  <span>Repeats</span>
-  <wc-tabs page="Once">
-    <div label="Once">
-      <div>Due</div>
-      <wc-time-input>
-      </wc-time-input>
-    </div>
-    <div label="Multiple">
-      <div>Times</div>
-      <input id="tag" type="number"/>
-      <div>Repeats Every</div>
-      <wc-time-input>
-      </wc-time-input>
-    </div>
-    <div label="Forever">
-      <div>Repeats Every</div>
-      <wc-time-input>
-      </wc-time-input>
-    </div>
-  </wc-tabs>
-  <div id="icons">
-    <div id="delete">🗑</div>
-    <div id="cancel">✕</div>
-    <div id="confirm">✓</div>
-  </div>
   <style>
-    input {
-      border: none;
-      /*TODO(P3) Figure out how to get inputs to get global styling */
-      font: inherit;
-    }
-
-    input[type=text] {
-      border-bottom: 1px black dotted;
-    }
-
     :host {
       display: flex;
       flex-direction: column;
@@ -133,6 +103,7 @@ export class TaskEdit extends WebComponent {
       display: flex;
       flex-direction: row;
       justify-content: space-between;
+      margin-top: 1em;
 
       cursor: pointer;
       -webkit-user-select: none;  /* Chrome all / Safari all */
@@ -140,7 +111,61 @@ export class TaskEdit extends WebComponent {
       -ms-user-select: none;      /* IE 10+ */
       user-select: none;          /* Likely future */
     }
+
+    .line-item {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      border-bottom: 1px solid #ADD8E6;
+    }
+
+    .hidden{
+      display: none;
+    }
   </style>
+  <div class="line-item">
+    <div>Name:</div>
+    <input id="name" type="text" placeholder="shopping"/>
+  </div>
+  <div class="line-item">
+    <div>Tag:</div>
+    <input id="tag" list="tags" type="text" placeholder="todo"/>
+  </div>
+  <datalist id="tags"></datalist>
+  <div class="line-item">
+    <div>After:</div>
+    <select id="blocked-by">
+  </select>
+  </div>
+  <span>Repeats</span>
+  <wc-tabs page="Once">
+    <div label="Once" class="line-item">
+      <div>Due</div>
+      <wc-time-input>
+      </wc-time-input>
+    </div>
+    <div label="Multiple">
+      <div class="line-item">
+        <div>Times</div>
+        <input id="tag" type="number"/>
+      </div>
+      <div class="line-item">
+        <div>Every</div>
+        <wc-time-input>
+        </wc-time-input>
+      </div>
+    </div>
+    <div label="Forever" class="line-item">
+      <div>Every</div>
+      <wc-time-input>
+      </wc-time-input>
+    </div>
+  </wc-tabs>
+  <div id="icons">
+    <div id="delete">🗑</div>
+    <div id="cancel">✕</div>
+    <div id="confirm">✓</div>
+  </div>
   `;
   }
 }

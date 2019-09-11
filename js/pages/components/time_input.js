@@ -66,14 +66,6 @@ export class TimeInput extends WebComponent {
   template() {
     return /*html*/ `
   <style>
-    select,input {
-      border:none;
-      border-bottom: 1px black dotted;
-      line-height: 1.5em;
-      font: inherit;
-      color: rgb(37, 37, 37);
-    }
-
     :host {
       display: flex;
       flex-direction: row;

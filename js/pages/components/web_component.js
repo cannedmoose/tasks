@@ -129,7 +129,8 @@ export class WebComponent extends HTMLElement {
     let template = document.querySelector("#" + id);
     if (!template) {
       template = document.createElement("template");
-      template.innerHTML = this.template();
+      template.innerHTML = WebComponent.CSS_RESET + this.template();
+      console.log(template.innerHTML);
       template.id = id;
       document.querySelector("head").append(template);
     }
@@ -155,3 +156,15 @@ export class WebComponent extends HTMLElement {
     return this.constructor.name;
   }
 }
+
+WebComponent.CSS_RESET = /*html*/ `
+<style>
+  select,input {
+    border:none;
+    border-bottom: 1px black dotted;
+    line-height: 1.5em;
+    font: inherit;
+    color: rgb(37, 37, 37);
+  }
+
+</style>`;

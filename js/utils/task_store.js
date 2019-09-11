@@ -98,6 +98,11 @@ export class TaskStore {
       localStorage.setItem("version", 3);
     }
   }
+  allTags() {
+    return this.tasks
+      .map(task => task.tags[0])
+      .filter((value, index, self) => self.indexOf(value) === index);
+  }
 }
 
 class Task {
@@ -152,7 +157,7 @@ class Task {
   }
 
   /**
-   * How many times left to repeat task.
+   * How many times overall to repeat task.
    */
   set repeat(val) {
     if (val === this.repeat) return;
@@ -161,6 +166,19 @@ class Task {
   }
 
   get repeat() {
+    return this.values.repeat;
+  }
+
+  /**
+   * How many times the task has been done
+   */
+  set done(val) {
+    if (val === this.done) return;
+    this.values.done = val;
+    this.storage.store();
+  }
+
+  get done() {
     return this.values.repeat;
   }
 
@@ -219,6 +237,14 @@ class Task {
   remove() {
     this.storage.remove(this);
   }
+
+  allTasks() {
+    return this.storage.tasks;
+  }
+
+  allTags() {
+    return this.storage.allTags();
+  }
 }
 
 export class TaskBuilder extends Task {
@@ -232,7 +258,7 @@ export class TaskBuilder extends Task {
       nextTasks: []
     };
     Object.assign(defaults, vals);
-    super({ store: () => {} }, defaults);
+    super({ store: () => {}, allTags: () => realstore.allTags() }, defaults);
     this.realStore = realstore;
     this.vals = {};
     Object.assign(this.vals, vals);
@@ -253,5 +279,9 @@ export class TaskBuilder extends Task {
     };
     defaults.assign(this.vals);
     this.values = defaults;
+  }
+
+  allTasks() {
+    return this.realStore.tasks;
   }
 }

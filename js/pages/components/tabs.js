@@ -27,7 +27,6 @@ export class Tabs extends WebComponent {
   }
 
   refresh() {
-    let found = false;
     this._clear(this.qs("#label"));
     for (let i = 0; i < this.children.length; i++) {
       let child = this.children[i];
@@ -42,7 +41,7 @@ export class Tabs extends WebComponent {
       });
       labelDiv.textContent = child.getAttribute("label");
       if (child.getAttribute("label") === this.page) {
-        found = true;
+        labelDiv.classList.add("open");
         child.setAttribute("slot", "content");
       } else {
         child.setAttribute("slot", "");
@@ -76,12 +75,15 @@ export class Tabs extends WebComponent {
     user-select: none;          /* Likely future */
 
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    flex-direction:center;
   }
 
   #label > div {
     border: 1px solid black;
+  }
+
+  .open {
+    background-color: lightBlue; 
   }
 </style>
 <div id="label"></div>

@@ -130,7 +130,6 @@ export class WebComponent extends HTMLElement {
     if (!template) {
       template = document.createElement("template");
       template.innerHTML = WebComponent.CSS_RESET + this.template();
-      console.log(template.innerHTML);
       template.id = id;
       document.querySelector("head").append(template);
     }
@@ -165,6 +164,14 @@ WebComponent.CSS_RESET = /*html*/ `
     line-height: 1.5em;
     font: inherit;
     color: rgb(37, 37, 37);
+  }
+
+  .button{
+    cursor: pointer;
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;      /* IE 10+ */
+    user-select: none;          /* Likely future */
   }
 
 </style>`;

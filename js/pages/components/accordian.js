@@ -62,17 +62,12 @@ export class Accordian extends WebComponent {
   }
 
   .label {
-    cursor: pointer;
-    -webkit-user-select: none;  /* Chrome all / Safari all */
-    -moz-user-select: none;     /* Firefox all */
-    -ms-user-select: none;      /* IE 10+ */
-    user-select: none;          /* Likely future */
     display: flex;
     flex-direction: row;
     justify-content: space-between;
   }
 </style>
-<slot class="label" name="label">Accordian</slot>
+<slot class="label button" name="label">Accordian</slot>
 <slot class="content" name="content">CONTENT</slot>`;
   }
 }

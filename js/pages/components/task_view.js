@@ -19,7 +19,7 @@ export class TaskView extends WebComponent {
   refresh() {
     if (!this.task) return;
     this.sub("#name", this.task.name);
-    this.sub("#tick", this.task.due >= Date.now() ? "☑" : "☐");
+    this.sub("#tick", this.task.isDue(Date.now()) ? "☐" : "☑");
   }
 
   connected() {
@@ -50,8 +50,8 @@ export class TaskView extends WebComponent {
   template() {
     // TODO(P2) add pause event
     return /*html*/ `
-  <div id="label" class="line-item">
-    <div id="tick" class="right-column">☑</div>
+  <div id="label" class="line-item button">
+    <div id="tick" class="right-column"></div>
     <div id="name" class="center-column"></div>
     <div id="edit" class="left-column">✍</div>
   </div>
@@ -62,12 +62,6 @@ export class TaskView extends WebComponent {
       flex-direction: row;
       justify-content: space-between;
       border-bottom: 1px solid #ADD8E6;
-
-      cursor: pointer;
-      -webkit-user-select: none;  /* Chrome all / Safari all */
-      -moz-user-select: none;     /* Firefox all */
-      -ms-user-select: none;      /* IE 10+ */
-      user-select: none;          /* Likely future */
     }
 
     .right-column {

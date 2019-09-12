@@ -77,8 +77,10 @@ export class TaskStore {
         task.period = task.repeat;
         task.due = task.lastDone + task.repeat;
         task.tags = ["todo"];
-        task.nextTasks = [];
         task.repeat = "Infinity";
+        task.blocked = false;
+        task.blockedBy = [];
+        task.done = 0;
         delete task["lastDone"];
       });
 
@@ -99,6 +101,9 @@ export class TaskStore {
     }
   }
   allTags() {
+    if (this.tasks.length == 0) {
+      return ["Todo"];
+    }
     return this.tasks
       .map(task => task.tags[0])
       .filter((value, index, self) => self.indexOf(value) === index);
@@ -115,19 +120,33 @@ class Task {
     if (!when) {
       when = Date.now();
     }
-    this.values.repeat = String(Number(this.values.repeat) - 1);
+    this.values.done += 1;
     this.values.due = when + this.period;
     this.storage.history.push({
       type: "done",
       id: this.id,
       time: when
     });
+    if (this.values.blockedBy.length > 0) {
+      this.values.blocked = true;
+    }
+    this.storage.tasks
+      .filter(t => t.blockedBy[0] == this.id && t.blocked)
+      .forEach(t => (t.values.blocked = false));
     this.storage.store();
   }
 
   pause(period) {
     this.values.due += period;
     this.storage.store();
+  }
+
+  isDue(now) {
+    return (
+      !this.values.blocked &&
+      this.values.due < now &&
+      this.values.done < this.values.repeat
+    );
   }
 
   /**
@@ -179,7 +198,7 @@ class Task {
   }
 
   get done() {
-    return this.values.repeat;
+    return this.values.done;
   }
 
   /**
@@ -221,17 +240,24 @@ class Task {
     return this.values.tags;
   }
 
-  /**
-   * Tasks (id) to do after this one.
-   */
-  set nextTasks(val) {
-    if (val == this.nextTasks) return;
-    this.values.nextTasks = val;
+  set blockedBy(val) {
+    if (val == this.blockedBy) return;
+    this.values.blockedBy = val;
     this.storage.store();
   }
 
-  get nextTasks() {
-    return this.values.nextTasks;
+  get blockedBy() {
+    return this.values.blockedBy;
+  }
+
+  set blocked(val) {
+    if (val == this.blocked) return;
+    this.values.blocked = val;
+    this.storage.store();
+  }
+
+  get blocked() {
+    return this.values.blocked;
   }
 
   remove() {
@@ -253,9 +279,11 @@ export class TaskBuilder extends Task {
       name: "",
       repeat: "Infinity",
       due: Date.now(),
+      done: 0,
       period: toMillis("days", 1),
       tags: ["todo"],
-      nextTasks: []
+      blockedBy: [],
+      blocked: false
     };
     Object.assign(defaults, vals);
     super({ store: () => {}, allTags: () => realstore.allTags() }, defaults);

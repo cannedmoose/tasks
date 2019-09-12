@@ -29,14 +29,20 @@ export class TaskEdit extends WebComponent {
     this.qs("#tag").value = this.task.tags[0];
 
     let blockedBy = this.qs("#blocked-by");
+    this._clear(this.qs("#blocked-by"));
     let nothingEl = document.createElement("option");
     nothingEl.textContent = "--Nothing--";
+    nothingEl.value = "";
     blockedBy.append(nothingEl);
 
     this.task.allTasks().forEach(task => {
+      if (this.task.id === task.id) {
+        return;
+      }
       let el = document.createElement("option");
       el.value = task.id;
       el.textContent = task.name;
+      el.selected = task.id === this.task.blockedBy;
       blockedBy.append(el);
     });
 
@@ -48,13 +54,27 @@ export class TaskEdit extends WebComponent {
       tagList.append(el);
     });
 
-    /**let convertedPeriod = fromMillis(this.task.period);
-    this.qs("#period").unit = convertedPeriod.unit;
-    this.qs("#period").amount = convertedPeriod.amount;
+    if (this.task.repeat == 1) {
+      this.qs("#repeats").page = "Once";
+    } else if (this.task.repeat == Infinity) {
+      this.qs("#repeats").page = "Forever";
+    } else {
+      this.qs("#repeats").page = "Multiple";
+    }
 
-    let convertedNext = fromMillis(this.task.due - Date.now());
-    this.qs("#next").unit = convertedNext.unit;
-    this.qs("#next").amount = convertedNext.amount;*/
+    this.qs("#repeat-input").value = this.task.repeat;
+
+    let convertedPeriod = fromMillis(this.task.period);
+
+    this.qs("#forever-period").unit = convertedPeriod.unit;
+    this.qs("#forever-period").amount = convertedPeriod.amount;
+
+    this.qs("#multiple-period").unit = convertedPeriod.unit;
+    this.qs("#multiple-period").amount = convertedPeriod.amount;
+
+    convertedPeriod = fromMillis(this.task.due - Date.now());
+    this.qs("#once-due").unit = convertedPeriod.unit;
+    this.qs("#once-due").amount = convertedPeriod.amount;
   }
 
   connected() {
@@ -80,7 +100,48 @@ export class TaskEdit extends WebComponent {
 
     this.addListener(this.qs("#confirm"), "click", e => {
       e.stopPropagation();
-      // TODO(P1) store values
+      // TODO(P1)
+      // Don't wanna overwrite values
+      // Should store them on the object
+      // On confirm assign them to object
+      let name = this.qs("#name").value;
+
+      let repeatPage = this.qs("#repeats").page;
+      let repeat = this.task.repeat;
+      let period = this.task.period;
+      let due = this.task.due;
+      if (repeatPage == "Once") {
+        repeat = 1;
+        due = Date.now() + period;
+        period = Math.abs(this.qs("#once-due").millis);
+      } else if (repeatPage == "Multiple") {
+        repeat = parseInt(this.qs("#repeat-input").value);
+        period = this.qs("#multiple-period").millis;
+      } else if (repeatPage == "Forever") {
+        repeat = "Infinity";
+        period = this.qs("#forever-period").millis;
+      }
+
+      let blockedBy = this.qs("#blocked-by").value
+        ? [this.qs("#blocked-by").value]
+        : [];
+      let blocked = blockedBy.length > 0;
+      let done = 0;
+
+      let tags = [this.qs("#tag").value];
+
+      this.task.values = {
+        name,
+        repeat,
+        done,
+        due,
+        period,
+        blockedBy,
+        blocked,
+        tags
+      };
+      // HMM WHERE TO GET STORE FROM
+      this.task.storage.store();
       this.dispatchEvent(
         new CustomEvent("confirm", {
           detail: { task: this.task },
@@ -104,12 +165,6 @@ export class TaskEdit extends WebComponent {
       flex-direction: row;
       justify-content: space-between;
       margin-top: 1em;
-
-      cursor: pointer;
-      -webkit-user-select: none;  /* Chrome all / Safari all */
-      -moz-user-select: none;     /* Firefox all */
-      -ms-user-select: none;      /* IE 10+ */
-      user-select: none;          /* Likely future */
     }
 
     .line-item {
@@ -135,33 +190,33 @@ export class TaskEdit extends WebComponent {
   <div class="line-item">
     <div>After:</div>
     <select id="blocked-by">
-  </select>
+    </select>
   </div>
   <span>Repeats</span>
-  <wc-tabs page="Once">
+  <wc-tabs id="repeats" page="Once">
     <div label="Once" class="line-item">
       <div>Due</div>
-      <wc-time-input>
+      <wc-time-input id="once-due">
       </wc-time-input>
     </div>
     <div label="Multiple">
       <div class="line-item">
         <div>Times</div>
-        <input id="tag" type="number"/>
+        <input id="repeat-input" type="number"/>
       </div>
       <div class="line-item">
         <div>Every</div>
-        <wc-time-input>
+        <wc-time-input id="multiple-period">
         </wc-time-input>
       </div>
     </div>
     <div label="Forever" class="line-item">
       <div>Every</div>
-      <wc-time-input>
+      <wc-time-input id="forever-period">
       </wc-time-input>
     </div>
   </wc-tabs>
-  <div id="icons">
+  <div id="icons" class="button">
     <div id="delete">🗑</div>
     <div id="cancel">✕</div>
     <div id="confirm">✓</div>

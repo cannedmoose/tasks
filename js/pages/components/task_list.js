@@ -79,7 +79,7 @@ export class TaskList extends WebComponent {
   .menu {
     position: -webkit-sticky;
     position: sticky;
-    top: 1px;
+    top: 2px;
 
     display: flex;
     flex-direction: row;
@@ -89,8 +89,17 @@ export class TaskList extends WebComponent {
     border-top: 3px solid #ADD8E6;
     background-color: white;
   }
+
+  .spacer {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0px;
+    height: 2px;
+    background-color: white;
+  }
 </style>
-  <div class="menu"><div id ="label"></div><div id="add">➕</div></div>
+  <div class="spacer"></div>
+  <div class="menu"><div id ="label"></div><div id="add" class="button">➕</div></div>
   <div id ="content"></div>
 `;
   }

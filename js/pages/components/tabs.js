@@ -60,6 +60,7 @@ export class Tabs extends WebComponent {
 
   set page(val) {
     this.setAttribute("page", val);
+    this.refresh();
     // Should toggle classlists...
   }
 
@@ -68,12 +69,6 @@ export class Tabs extends WebComponent {
 <style>
 
   #label {
-    cursor: pointer;
-    -webkit-user-select: none;  /* Chrome all / Safari all */
-    -moz-user-select: none;     /* Firefox all */
-    -ms-user-select: none;      /* IE 10+ */
-    user-select: none;          /* Likely future */
-
     display: flex;
     flex-direction:center;
   }
@@ -86,7 +81,7 @@ export class Tabs extends WebComponent {
     background-color: lightBlue; 
   }
 </style>
-<div id="label"></div>
+<div id="label" class="button"></div>
 <slot id="content" name="content"></div>`;
   }
 }

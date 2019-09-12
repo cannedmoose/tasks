@@ -28,13 +28,10 @@ export class HomePage extends WebComponent {
       edit.classList.add("hidden");
       display.classList.remove("hidden");
 
-      let tags = this.store.tasks
-        .map(task => task.tags[0])
-        .filter((value, index, self) => self.indexOf(value) === index);
+      let tags = this.store.allTags();
 
       this.zip(tags, "wc-task-list", "#tasks", (tag, el) => {
-        let taskFilter = task =>
-          task.tags[0] === tag && task.repeat >= 1 && task.due < Date.now();
+        let taskFilter = task => task.tags[0] == tag && task.isDue(Date.now());
         let template = new TaskBuilder(this.store, { tags: [tag] });
         if (el) {
           el.filter = taskFilter;
@@ -84,6 +81,9 @@ export class HomePage extends WebComponent {
     });
 
     this.addListener(this.qs("#edit"), "confirm", e => {
+      if (!this.editing.id) {
+        this.editing.create();
+      }
       this.editing = null;
       this.refresh();
     });

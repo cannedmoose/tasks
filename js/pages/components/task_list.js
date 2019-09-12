@@ -19,6 +19,7 @@ export class TaskList extends WebComponent {
     this.filter = filter;
     this.compare = compare;
     this.template = template;
+    this.showAll = false;
   }
 
   upgrades() {
@@ -26,9 +27,14 @@ export class TaskList extends WebComponent {
   }
 
   refresh() {
-    let filteredTasks = this.store.tasks.filter(this.filter).sort(this.compare);
+    let filter = this.filter;
+    if (!this.showAll) {
+      filter = task => task.isDue(Date.now()) && this.filter(task);
+    }
+    let filteredTasks = this.store.tasks.filter(filter).sort(this.compare);
     this.zip(filteredTasks, "wc-task-view", "#content", this.refreshTask);
     this.sub("#label", this.label + " - " + filteredTasks.length);
+    this.sub("#eye", this.showAll ? "○" : "◌");
   }
 
   refreshTask(task, el) {
@@ -58,6 +64,11 @@ export class TaskList extends WebComponent {
         })
       );
     });
+
+    this.addListener(this.qs("#eye"), "click", e => {
+      this.showAll = !this.showAll;
+      this.refresh();
+    });
   }
 
   get label() {
@@ -71,19 +82,31 @@ export class TaskList extends WebComponent {
   template() {
     return /*html*/ `
 <style>
-  #label {
-    width: 100%;
-    font-size: 1.5em;
+  #label,#eye,#add {
+    font-size: 1.25em;
+    flex:1;
   }
 
-  .menu {
+  #add {
+    text-align: right;
+  }
+  #eye {
+    text-align: center;
+  }
+
+  .sticky {
     position: -webkit-sticky;
     position: sticky;
-    top: 2px;
-
+    top:0px;
+  }
+  .menu {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: space-evenly;
+    align-items: center;
+    top: 2px;
+
+    padding: 0 .5em;
 
     border-bottom: 1px solid #ADD8E6;
     border-top: 3px solid #ADD8E6;
@@ -97,10 +120,18 @@ export class TaskList extends WebComponent {
     height: 2px;
     background-color: white;
   }
+
+  #content {
+    background-color: white;
+  }
 </style>
-  <div class="spacer"></div>
-  <div class="menu"><div id ="label"></div><div id="add" class="button">➕</div></div>
-  <div id ="content"></div>
+    <div class="sticky spacer"></div>
+    <div class="sticky menu">
+      <div id ="label"></div>
+      <div id="eye" class="button"></div>
+      <div id="add" class="button">+</div>
+    </div>
+    <div id ="content"></div>
 `;
   }
 }

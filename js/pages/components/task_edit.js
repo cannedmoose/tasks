@@ -20,6 +20,7 @@ export class TaskEdit extends WebComponent {
 
   refresh() {
     if (!this.task) return;
+    this.values = {};
     if (!this.task.id) {
       this.qs("#delete").classList.add("hidden");
     } else {
@@ -98,48 +99,50 @@ export class TaskEdit extends WebComponent {
       );
     });
 
+    this.addListener(this.qs("#name"), "change", e => {
+      this.values.name = this.qs("#name").value;
+    });
+
+    this.addListener(this.qs("#tags"), "change", e => {
+      this.values.tags = [this.qs("#tag").value];
+    });
+
+    this.addListener(this.qs("#blocked-by"), "change", e => {
+      this.values.blockedBy = [this.qs("#blocked-by").value];
+      this.values.blocked =
+        (this.task.blocked || !this.task.id) &&
+        this.values.blockedBy.length > 0;
+    });
+
+    this.addListener(this.qs("#repeat-input"), "change", e => {
+      this.values.repeat = parseInt(this.qs("#repeat-input").value);
+    });
+
+    this.addListener(this.qs("#once-due"), "change", e => {
+      this.values.due = parseInt(this.qs("#once-due").millis);
+    });
+
+    this.addListener(this.qs("#multiple-period"), "change", e => {
+      this.values.period = this.qs("#multiple-period").millis;
+    });
+
+    this.addListener(this.qs("#forever-period"), "change", e => {
+      this.values.period = this.qs("#forever-period").millis;
+    });
+
     this.addListener(this.qs("#confirm"), "click", e => {
       e.stopPropagation();
-      // TODO(P1)
-      // Don't wanna overwrite values
-      // Should store them on the object
-      // On confirm assign them to object
-      let name = this.qs("#name").value;
 
       let repeatPage = this.qs("#repeats").page;
-      let repeat = this.task.repeat;
-      let period = this.task.period;
-      let due = this.task.due;
       if (repeatPage == "Once") {
-        repeat = 1;
-        due = Date.now() + period;
-        period = Math.abs(this.qs("#once-due").millis);
-      } else if (repeatPage == "Multiple") {
-        repeat = parseInt(this.qs("#repeat-input").value);
-        period = this.qs("#multiple-period").millis;
+        this.values.repeat = 1;
       } else if (repeatPage == "Forever") {
-        repeat = "Infinity";
-        period = this.qs("#forever-period").millis;
+        this.values.repeat = "Infinity";
+      } else {
+        this.values.repeat = parseInt(this.qs("#repeat-input").value);
       }
 
-      let blockedBy = this.qs("#blocked-by").value
-        ? [this.qs("#blocked-by").value]
-        : [];
-      let blocked = blockedBy.length > 0;
-      let done = 0;
-
-      let tags = [this.qs("#tag").value];
-
-      this.task.values = {
-        name,
-        repeat,
-        done,
-        due,
-        period,
-        blockedBy,
-        blocked,
-        tags
-      };
+      Object.assign(this.task.values, this.values);
       // HMM WHERE TO GET STORE FROM
       this.task.storage.store();
       this.dispatchEvent(

@@ -18,6 +18,10 @@ export class TaskView extends WebComponent {
 
   refresh() {
     if (!this.task) return;
+    let counter = this.task.done + "/∞";
+    if (this.task.repeat != Infinity)
+      counter = this.task.done + "/" + this.task.repeat;
+    this.sub("#counter", counter);
     this.sub("#name", this.task.name);
     this.sub("#tick", this.task.isDue(Date.now()) ? "☐" : "☑");
   }
@@ -52,8 +56,11 @@ export class TaskView extends WebComponent {
     return /*html*/ `
   <div id="label" class="line-item button">
     <div id="tick" class="right-column"></div>
-    <div id="name" class="center-column"></div>
-    <div id="edit" class="left-column">✍</div>
+    <div id="info" class="center-column">
+      <div id="name"></div>
+      <div id=counter></div>
+    </div>
+    <div id="edit" class="left-column">...</div>
   </div>
   <style>
     .line-item {
@@ -76,6 +83,17 @@ export class TaskView extends WebComponent {
       padding-left: .5em;
       margin-right: .5em;
       padding-right: .5em;
+    }
+
+    #info {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+
+    #counter {
+      size: .75em;
+      color: lightGrey;
     }
 
     .left-column {

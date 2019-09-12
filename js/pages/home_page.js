@@ -31,7 +31,7 @@ export class HomePage extends WebComponent {
       let tags = this.store.allTags();
 
       this.zip(tags, "wc-task-list", "#tasks", (tag, el) => {
-        let taskFilter = task => task.tags[0] == tag && task.isDue(Date.now());
+        let taskFilter = task => task.tags[0] == tag;
         let template = new TaskBuilder(this.store, { tags: [tag] });
         if (el) {
           el.filter = taskFilter;

@@ -58,7 +58,7 @@ export class TaskView extends WebComponent {
     <div id="tick" class="right-column"></div>
     <div id="info" class="center-column">
       <div id="name"></div>
-      <div id=counter></div>
+      <div id="counter"></div>
     </div>
     <div id="edit" class="left-column">...</div>
   </div>
@@ -91,8 +91,13 @@ export class TaskView extends WebComponent {
       justify-content: space-between;
     }
 
+    #name {
+      white-space: nowrap;
+      overflow: hidden;
+    }
     #counter {
-      size: .75em;
+      white-space: nowrap;
+      size: .5em;
       color: lightGrey;
     }
 

@@ -43,11 +43,12 @@ export class TaskEdit extends WebComponent {
       let el = document.createElement("option");
       el.value = task.id;
       el.textContent = task.name;
-      el.selected = task.id === this.task.blockedBy;
+      el.selected = task.id == this.task.blockedBy[0];
       blockedBy.append(el);
     });
 
     let tagList = this.qs("#tags");
+    this._clear(tagList);
     this.task.allTags().forEach(tag => {
       let el = document.createElement("option");
       el.value = tag;
@@ -66,7 +67,6 @@ export class TaskEdit extends WebComponent {
     this.qs("#repeat-input").value = this.task.repeat;
 
     let convertedPeriod = fromMillis(this.task.period);
-
     this.qs("#forever-period").unit = convertedPeriod.unit;
     this.qs("#forever-period").amount = convertedPeriod.amount;
 
@@ -103,11 +103,14 @@ export class TaskEdit extends WebComponent {
       this.values.name = this.qs("#name").value;
     });
 
-    this.addListener(this.qs("#tags"), "change", e => {
+    this.addListener(this.qs("#tag"), "change", e => {
       this.values.tags = [this.qs("#tag").value];
     });
 
     this.addListener(this.qs("#blocked-by"), "change", e => {
+      if (!this.qs("#blocked-by").value) {
+        return;
+      }
       this.values.blockedBy = [this.qs("#blocked-by").value];
       this.values.blocked =
         (this.task.blocked || !this.task.id) &&
@@ -119,7 +122,9 @@ export class TaskEdit extends WebComponent {
     });
 
     this.addListener(this.qs("#once-due"), "change", e => {
-      this.values.due = parseInt(this.qs("#once-due").millis);
+      let period = parseInt(this.qs("#once-due").millis);
+      this.values.period = Math.abs(period);
+      this.values.due = Date.now() + this.values.period;
     });
 
     this.addListener(this.qs("#multiple-period"), "change", e => {
@@ -173,48 +178,62 @@ export class TaskEdit extends WebComponent {
     .line-item {
       display: flex;
       flex-direction: row;
-      justify-content: space-between;
+      justify-content: flex-start;
+      flex: 1;
+    }
+
+    .bordered {
       border-bottom: 1px solid #ADD8E6;
+      margin-right: 1em;
+      flex:1;
+    }
+
+    .bordered + *{
+      flex:2;
     }
 
     .hidden{
       display: none;
     }
+
+    input[type=text] {
+      max-width: 8em;
+    }
   </style>
   <div class="line-item">
-    <div>Name:</div>
+    <div class="bordered">Name:</div>
     <input id="name" type="text" placeholder="shopping"/>
   </div>
   <div class="line-item">
-    <div>Tag:</div>
+    <div class="bordered">Tag:</div>
     <input id="tag" list="tags" type="text" placeholder="todo"/>
   </div>
   <datalist id="tags"></datalist>
   <div class="line-item">
-    <div>After:</div>
+    <div class="bordered">After:</div>
     <select id="blocked-by">
     </select>
   </div>
-  <span>Repeats</span>
+  <span class="bordered">Repeats</span>
   <wc-tabs id="repeats" page="Once">
     <div label="Once" class="line-item">
-      <div>Due</div>
+      <div class="bordered">Due:</div>
       <wc-time-input id="once-due">
       </wc-time-input>
     </div>
     <div label="Multiple">
       <div class="line-item">
-        <div>Times</div>
+        <div class="bordered">Times:</div>
         <input id="repeat-input" type="number"/>
       </div>
       <div class="line-item">
-        <div>Every</div>
+        <div class="bordered">Every:</div>
         <wc-time-input id="multiple-period">
         </wc-time-input>
       </div>
     </div>
     <div label="Forever" class="line-item">
-      <div>Every</div>
+      <div class="bordered">Every:</div>
       <wc-time-input id="forever-period">
       </wc-time-input>
     </div>

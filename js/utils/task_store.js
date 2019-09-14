@@ -19,6 +19,8 @@ export class TaskStore {
       this.lastId = 1;
     }
     this.history = JSON.parse(this.storage.taskHistory || "[]");
+
+    this.tagState = JSON.parse(this.storage.tagState || "{}");
     this.version = this.storage.version;
   }
 
@@ -29,6 +31,7 @@ export class TaskStore {
     );
     localStorage.setItem("taskHistory", JSON.stringify(this.history));
     localStorage.setItem("version", this.version);
+    localStorage.setItem("tagState", JSON.stringify(this.tagState));
   }
 
   import(str) {
@@ -90,6 +93,7 @@ export class TaskStore {
           if (!task) return undefined;
           entry.id = task.id;
           entry.type = "done";
+          task.done += 1;
           delete entry["name"];
           return entry;
         })
@@ -131,8 +135,12 @@ class Task {
       this.values.blocked = true;
     }
     this.storage.tasks
-      .filter(t => t.blockedBy[0] == this.id && t.blocked)
-      .forEach(t => (t.values.blocked = false));
+      .filter(t => t.blockedBy.includes(this.id) && t.blocked)
+      .forEach(t => {
+        // Unblock an set due in the future.
+        t.values.blocked = false;
+        t.values.due = t.period + when;
+      });
     this.storage.store();
   }
 

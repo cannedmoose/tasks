@@ -29,20 +29,29 @@ export class HomePage extends WebComponent {
       display.classList.remove("hidden");
 
       let tags = this.store.allTags();
+      let dueTasks = this.store.tasks.filter(task => task.isDue(Date.now()));
+      let t = tags.sort((tag1, tag2) => {
+        return (
+          dueTasks.filter(task => task.tags.includes(tag2)).length -
+          dueTasks.filter(task => task.tags.includes(tag1)).length
+        );
+      });
 
-      this.zip(tags, "wc-task-list", "#tasks", (tag, el) => {
-        let taskFilter = task => task.tags[0] == tag;
+      this.zip(t, "wc-task-list", "#tasks", (tag, el) => {
+        let taskFilter = task => task.tags.includes(tag);
         let template = new TaskBuilder(this.store, { tags: [tag] });
         if (el) {
           el.filter = taskFilter;
           el.label = tag;
           el.template = template;
+          el.tag = tag;
           el.refresh();
         } else {
-          el = new TaskList(this.store, taskFilter, this.timeComp);
+          el = new TaskList(this.store, taskFilter, this.timeComp, tag);
           el.label = tag;
-          el.teplate = template;
+          el.template = template;
           el.open = true;
+          el.tag = tag;
           return el;
         }
       });
@@ -55,8 +64,8 @@ export class HomePage extends WebComponent {
       if (this.qs("#display").classList.contains("hidden")) {
         return;
       }
-      //this.refresh();
-    }, 2000);
+      this.refresh();
+    }, 3000);
     this.addListener(this.qs("#tasks"), "done", e => {
       e.detail.task.do();
       this.refresh();
@@ -103,6 +112,16 @@ export class HomePage extends WebComponent {
 
 .hidden {
   display: none;
+}
+
+#edit {
+  border: 2px dotted #ADD8E6;
+  margin: 1em;
+  padding: 1em;
+}
+
+#display {
+  margin: 0em .2em;
 }
 
 

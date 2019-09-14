@@ -74,15 +74,28 @@ export class Tabs extends WebComponent {
   }
 
   #label > div {
-    border: 1px solid black;
+    border: 1px solid #ADD8E6;
+    font-size: .75em;
+    padding: .25em .5em;
+    border-radius: 20% 20% 0% 0%;
+  }
+
+  #content {
+    border: 1px dotted #ADD8E6;
   }
 
   .open {
     background-color: lightBlue; 
   }
+
+  input[type=text] {
+    max-width: 10em;
+  }
 </style>
 <div id="label" class="button"></div>
-<slot id="content" name="content"></div>`;
+<div class="content">
+  <slot id="content" name="content"></div>
+</div>`;
   }
 }
 

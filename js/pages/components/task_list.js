@@ -10,31 +10,36 @@ import { TaskBuilder } from "../../utils/task_store.js";
  * Sorts taks by given comparator.
  * #Attributes
  *   - label
- *   - open
  */
 export class TaskList extends WebComponent {
-  constructor(store, filter, compare, template) {
+  constructor(store, filter, compare, template, tag) {
     super();
     this.store = store;
     this.filter = filter;
     this.compare = compare;
     this.template = template;
-    this.showAll = false;
+    this.tag = this.tag || tag;
   }
 
   upgrades() {
-    return ["label", "open"];
+    return ["label"];
   }
 
   refresh() {
     let filter = this.filter;
-    if (!this.showAll) {
+    let tagState = this.tag ? this.store.tagState[this.tag] || "due" : "due";
+    if (tagState == "due") {
+      this.sub("#eye", "○");
       filter = task => task.isDue(Date.now()) && this.filter(task);
+    } else if (tagState == "none") {
+      this.sub("#eye", "●");
+      filter = task => false;
+    } else {
+      this.sub("#eye", "◌");
     }
     let filteredTasks = this.store.tasks.filter(filter).sort(this.compare);
     this.zip(filteredTasks, "wc-task-view", "#content", this.refreshTask);
-    this.sub("#label", this.label + " - " + filteredTasks.length);
-    this.sub("#eye", this.showAll ? "○" : "◌");
+    this.sub("#label", this.label);
   }
 
   refreshTask(task, el) {
@@ -66,7 +71,15 @@ export class TaskList extends WebComponent {
     });
 
     this.addListener(this.qs("#eye"), "click", e => {
-      this.showAll = !this.showAll;
+      let tagState = this.store.tagState[this.tag] || "due";
+      if (tagState == "due") {
+        this.store.tagState[this.tag] = "all";
+      } else if (tagState == "none") {
+        this.store.tagState[this.tag] = "due";
+      } else {
+        this.store.tagState[this.tag] = "none";
+      }
+      this.store.store();
       this.refresh();
     });
   }
@@ -83,28 +96,34 @@ export class TaskList extends WebComponent {
     return /*html*/ `
 <style>
   #label,#eye,#add {
-    font-size: 1.25em;
+    font-size: 1em;
     flex:1;
+  }
+
+  #label {
+    white-space: nowrap;
+    text-decoration: underline;
   }
 
   #add {
     text-align: right;
   }
   #eye {
+    flex:0;
     text-align: center;
   }
 
   .sticky {
-    position: -webkit-sticky;
+    /*position: -webkit-sticky;*
     position: sticky;
-    top:0px;
+    top:0px;*/
   }
   .menu {
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
     align-items: center;
-    top: 2px;
+    top: .1em;
 
     padding: 0 .5em;
 
@@ -117,7 +136,7 @@ export class TaskList extends WebComponent {
     position: -webkit-sticky;
     position: sticky;
     top: 0px;
-    height: 2px;
+    height: .1em;
     background-color: white;
   }
 

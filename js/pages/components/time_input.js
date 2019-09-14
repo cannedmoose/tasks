@@ -75,6 +75,7 @@ export class TimeInput extends WebComponent {
     #amount {
       text-align: right;
       margin-right: .5em;
+      max-width: 5em;
     }
 
     #unit {
@@ -87,6 +88,7 @@ export class TimeInput extends WebComponent {
       <option value="hours">Hours</option>
       <option value="days">Days</option>
       <option value="weeks">Weeks</option>
+      <option value="months">Months</option>
       <option value="years">Years</option>
     </select>
 `;

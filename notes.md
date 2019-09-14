@@ -41,6 +41,62 @@ EG what does lifecycle look like from view of the parent.
 
 ---
 
+#TODO(P1) Default CSS injection registry on webcomponent
+
+# Flows
+
+- open app
+  - read history
+  - render homepage
+
+Homepage refresh:
+
+- Ensure every tag has a list
+- List refresh
+
+List Refresh:
+
+- Ensure every task has a view
+- view refresh
+
+View Refresh:
+
+- Sync data To elements
+
+Ensure every x has a y:
+
+- have a list of x
+- have list of dom nodes representing y
+- need to make sure there is exactly one dome node in y representing each x
+- need to put them in a particular order
+  Current algo should suffice:
+  sort the items, match each one to a dom node, creating if necessay
+  delete excess dom nodes
+  GENERICALLY:
+  refreshing a child looks like:
+  query for child with selector
+  updating something on the child (could have no changes or be deleted)
+  child refreshing
+  nah refresh shouldn't look like that
+  HOW TO CONVENIENTLY DO IT FOR A LIST OF THINGS
+  SHOULD IT BE AUTOMATIC ON CERTAIN PROP CHANGES?
+
+# ITS NOT ALWAYS TRIGGERED BY DIRECT PROP CHANGE
+
+    for a list of things it's triggered by something indirect
+    should just be able to call refresh
+    HOW TO STOP MULTIREFRESH
+
+# Okay we just have a function in webcomponent that:
+
+# Given a list of things and a query selector
+
+# zips list and qs all
+
+# runs given function on each pair
+
+---
+
 Creating task flow:
 Add from tag (tag filled)
 Add not from tag (tag not filled)

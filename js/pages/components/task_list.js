@@ -1,6 +1,7 @@
 import { Accordian } from "./accordian.js";
-import { Task } from "./task.js";
+import { TaskView } from "./task_view.js";
 import { WebComponent } from "./web_component.js";
+import { TaskBuilder } from "../../utils/task_store.js";
 
 /**
  * A list of tasks.
@@ -9,75 +10,78 @@ import { WebComponent } from "./web_component.js";
  * Sorts taks by given comparator.
  * #Attributes
  *   - label
- *   - open
- * #Events
- *   - taskchange
- *   - tasktoggle
  */
 export class TaskList extends WebComponent {
-  constructor(store, filter, compare) {
+  constructor(store, filter, compare, template, tag) {
     super();
     this.store = store;
     this.filter = filter;
     this.compare = compare;
+    this.template = template;
+    this.tag = this.tag || tag;
+  }
+
+  upgrades() {
+    return ["label"];
   }
 
   refresh() {
-    let filteredTasks = this.store.tasks.filter(this.filter).sort(this.compare);
-
-    this.zip(filteredTasks, this.qsAll("wc-task")).forEach(e =>
-      this.refreshTask(e[0], e[1])
-    );
-    this.sub("#label", this.label + " - " + filteredTasks.length);
+    let filter = this.filter;
+    let tagState = this.tag ? this.store.tagState[this.tag] || "due" : "due";
+    if (tagState == "due") {
+      this.sub("#eye", "○");
+      filter = task => task.isDue(Date.now()) && this.filter(task);
+    } else if (tagState == "none") {
+      this.sub("#eye", "●");
+      filter = task => false;
+    } else {
+      this.sub("#eye", "◌");
+    }
+    let filteredTasks = this.store.tasks.filter(filter).sort(this.compare);
+    this.zip(filteredTasks, "wc-task-view", "#content", this.refreshTask);
+    this.sub("#label", this.label);
   }
 
   refreshTask(task, el) {
     // TODO(P2) Test to make sure we aren't dropping/duping tasks
-    let content = this.qs("#content");
-    if (task && el) {
+    if (el) {
       // We have a task and an element to put it in
       el.task = task;
       // TODO(P2) figure out better way to enable interacting for single element
       el.classList.remove("interacting");
       el.refresh();
-    } else if (task) {
+    } else {
       // We have a task but no element to put it in
-      let el = new Task(task);
-      this.addListener(el, "change", this.taskChange);
-      this.addListener(el, "toggle", this.taskToggle);
-      content.append(el);
-    } else if (el) {
-      // We have an extra element, remove it
-      content.removeChild(el);
+      let el = new TaskView(task);
+      this.addListener(el, "done", this.bubble);
+      this.addListener(el, "edit", this.bubble);
+      return el;
     }
   }
 
-  taskChange(e) {
-    let kind = e.detail.type;
-    if (kind === "done") {
-      e.detail.task.storage.history.push({
-        name: e.detail.task.name,
-        time: Date.now()
-      });
-      e.detail.task.lastDone = Date.now();
-    } else if (kind === "remove") {
-      e.detail.task.remove();
-    }
-    this.dispatchEvent(
-      new CustomEvent("taskchange", {
-        detail: { task: e.detail.task },
-        bubbles: true
-      })
-    );
-  }
+  connected() {
+    this.addListener(this.qs("#add"), "click", e => {
+      e.stopPropagation();
+      this.dispatchEvent(
+        new CustomEvent("edit", {
+          detail: { task: this.template },
+          bubbles: true
+        })
+      );
+    });
 
-  taskToggle(e) {
-    this.dispatchEvent(
-      new CustomEvent("tasktoggle", {
-        detail: { task: e.detail.task, target: e.target },
-        bubbles: true
-      })
-    );
+    this.addListener(this.qs("#eye"), "click", e => {
+      let tagState = this.store.tagState[this.tag] || "due";
+      if (tagState == "due") {
+        this.store.tagState[this.tag] = "all";
+      } else if (tagState == "none") {
+        this.store.tagState[this.tag] = "due";
+      } else {
+        this.store.tagState[this.tag] = "none";
+      }
+      this.store.store();
+      this.refresh();
+    });
   }
 
   get label() {
@@ -88,53 +92,66 @@ export class TaskList extends WebComponent {
     this.setAttribute("label", val);
   }
 
-  get open() {
-    return this.qs("#accordian").open;
-  }
-
-  set open(val) {
-    this.qs("#accordian").open = val;
-    if (val) {
-      this.setAttribute("open", "");
-    } else {
-      this.removeAttribute("open");
-    }
-  }
-
   template() {
     return /*html*/ `
 <style>
+  #label,#eye,#add {
+    font-size: 1em;
+    flex:1;
+  }
+
   #label {
-    border-bottom: 3px solid #ADD8E6;
-    width: 100%;
-    font-size: 1.5em;
+    white-space: nowrap;
+    text-decoration: underline;
   }
 
-  #accordian {
-    width: 100%;
+  #add {
+    text-align: right;
+  }
+  #eye {
+    flex:0;
+    text-align: center;
   }
 
-  .interacting {
-    pointer-events: all;
+  .sticky {
+    /*position: -webkit-sticky;*
+    position: sticky;
+    top:0px;*/
+  }
+  .menu {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    top: .1em;
+
+    padding: 0 .5em;
+
+    border-bottom: 1px solid #ADD8E6;
+    border-top: 3px solid #ADD8E6;
+    background-color: white;
+  }
+
+  .spacer {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0px;
+    height: .1em;
+    background-color: white;
+  }
+
+  #content {
+    background-color: white;
   }
 </style>
-<wc-accordian id="accordian">
-  <div id ="label" slot="label"></div>
-  <div id ="content" slot="content"></div>
-</wc-accordian>
+    <div class="sticky spacer"></div>
+    <div class="sticky menu">
+      <div id ="label"></div>
+      <div id="eye" class="button"></div>
+      <div id="add" class="button">+</div>
+    </div>
+    <div id ="content"></div>
 `;
-  }
-
-  /**
-   * Zips a and b
-   * TODO(P3) move to a util class
-   */
-  zip(a, b) {
-    let result = [];
-    for (let i = 0; i < Math.max(a.length, b.length); i++) {
-      result.push([a[i], b[i]]);
-    }
-    return result;
   }
 }
 

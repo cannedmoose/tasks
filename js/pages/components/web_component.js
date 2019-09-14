@@ -47,15 +47,50 @@ export class WebComponent extends HTMLElement {
   qsAll(query) {
     return this.shadowRoot.querySelectorAll(query);
   }
+  // TODO(P1) figure out why custom events don't bubble
+  bubble(e) {
+    this.dispatchEvent(
+      new CustomEvent(e.type, {
+        detail: e.detail,
+        bubbles: true
+      })
+    );
+  }
+
+  /**
+   * Zips a and b
+   * TODO(P3) move to a util class
+   */
+  zip(data, itemQS, parentQS, fn) {
+    let nodes = this.qsAll(itemQS);
+    let parent = this.qs(parentQS);
+    fn = fn.bind(this);
+    for (let i = 0; i < Math.max(data.length, nodes.length); i++) {
+      let d = data[i];
+      let node = nodes[i];
+      if (!d) {
+        parent.removeChild(node);
+      }
+      let r = fn(d, node);
+      if (!node) {
+        parent.append(r);
+      }
+    }
+  }
 
   // Webcomponent lifecycle hooks
   connectedCallback() {
     this._upgradeProperties();
-
+    let refresh = this.refresh;
+    // Make sure we don't double refresh on connect
+    this.refresh = () => {
+      throw "Don't be upsetti, have some speghetti!";
+    };
     requestAnimationFrame(() => {
       // TODO(P3) confirm that requesting frame will order this after rendering
       // (Seems to work for now...)
-      this._refresh();
+      this.refresh = refresh;
+      this.refresh();
       this.connected();
     });
   }
@@ -77,9 +112,10 @@ export class WebComponent extends HTMLElement {
     this.listeners = [];
   }
 
-  _clear() {
-    while (this.shadowRoot.firstChild) {
-      this.shadowRoot.removeChild(this.shadowRoot.firstChild);
+  _clear(el) {
+    el = el || this.shadowRoot;
+    while (el.firstChild) {
+      el.removeChild(el.firstChild);
     }
   }
 
@@ -88,16 +124,12 @@ export class WebComponent extends HTMLElement {
     this.shadowRoot.appendChild(this._template().content.cloneNode(true));
   }
 
-  _refresh() {
-    this.refresh();
-  }
-
   _template() {
     let id = this.id() + "-template";
     let template = document.querySelector("#" + id);
     if (!template) {
       template = document.createElement("template");
-      template.innerHTML = this.template();
+      template.innerHTML = WebComponent.CSS_RESET + this.template();
       template.id = id;
       document.querySelector("head").append(template);
     }
@@ -123,3 +155,23 @@ export class WebComponent extends HTMLElement {
     return this.constructor.name;
   }
 }
+
+WebComponent.CSS_RESET = /*html*/ `
+<style>
+  select,input {
+    border:none;
+    border-bottom: 1px black dotted;
+    line-height: 1.5em;
+    font: inherit;
+    color: rgb(37, 37, 37);
+  }
+
+  .button{
+    cursor: pointer;
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;      /* IE 10+ */
+    user-select: none;          /* Likely future */
+  }
+
+</style>`;

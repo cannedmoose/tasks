@@ -103,6 +103,15 @@ export class TaskStore {
       localStorage.setItem("taskHistory", JSON.stringify(taskHistory));
       localStorage.setItem("version", 3);
     }
+
+    if (this.storage.version == 3) {
+      tasks.forEach(task => {
+        task.blockedBy = task.blockedBy.map(b => parseInt(b));
+      });
+
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+      localStorage.setItem("version", 4);
+    }
   }
   allTags() {
     if (this.tasks.length == 0) {

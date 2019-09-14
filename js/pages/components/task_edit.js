@@ -111,7 +111,7 @@ export class TaskEdit extends WebComponent {
       if (!this.qs("#blocked-by").value) {
         return;
       }
-      this.values.blockedBy = [this.qs("#blocked-by").value];
+      this.values.blockedBy = [ParseInt(this.qs("#blocked-by").value)];
       this.values.blocked =
         (this.task.blocked || !this.task.id) &&
         this.values.blockedBy.length > 0;

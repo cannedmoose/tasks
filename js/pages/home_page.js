@@ -31,10 +31,17 @@ export class HomePage extends WebComponent {
       let tags = this.store.allTags();
       let dueTasks = this.store.tasks.filter(task => task.isDue(Date.now()));
       let t = tags.sort((tag1, tag2) => {
-        return (
-          dueTasks.filter(task => task.tags.includes(tag2)).length -
-          dueTasks.filter(task => task.tags.includes(tag1)).length
-        );
+        let due1 = dueTasks
+          .filter(task => task.tags.includes(tag1))
+          .sort((t1, t2) => t2.due - t1.due);
+        let due2 = dueTasks
+          .filter(task => task.tags.includes(tag2))
+          .sort((t1, t2) => t2.due - t1.due);
+        let lengthDiff = due2.length - due1.length;
+        if (lengthDiff == 0) {
+          lengthDiff = due1.length > 0 ? due2[0].due - due1[0].due : 0;
+        }
+        return lengthDiff;
       });
 
       this.zip(t, "wc-task-list", "#tasks", (tag, el) => {

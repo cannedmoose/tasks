@@ -11,6 +11,8 @@ import { toMillis, fromMillis } from "../../utils/time_utils.js";
  *   - confirm
  *   - cancel
  *   - delete
+ *
+ * TODO(P1) Cleanup template and CSS
  */
 export class TaskEdit extends WebComponent {
   super(task) {
@@ -111,7 +113,7 @@ export class TaskEdit extends WebComponent {
       if (!this.qs("#blocked-by").value) {
         return;
       }
-      this.values.blockedBy = [this.qs("#blocked-by").value];
+      this.values.blockedBy = [ParseInt(this.qs("#blocked-by").value)];
       this.values.blocked =
         (this.task.blocked || !this.task.id) &&
         this.values.blockedBy.length > 0;
@@ -160,7 +162,7 @@ export class TaskEdit extends WebComponent {
   }
 
   template() {
-    // TODO(P1) Styling
+    // TODO(P1) Styling fixes
     return /*html*/ `
   <style>
     :host {

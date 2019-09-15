@@ -58,8 +58,11 @@ export class WebComponent extends HTMLElement {
   }
 
   /**
-   * Zips a and b
-   * TODO(P3) move to a util class
+   * Finds all nodes that match iitemQS
+   * Zips node with data
+   *  if no node run FN to create one
+   *  if no data delete node
+   *  otherwise fill node with data
    */
   zip(data, itemQS, parentQS, fn) {
     let nodes = this.qsAll(itemQS);
@@ -87,8 +90,6 @@ export class WebComponent extends HTMLElement {
       throw "Don't be upsetti, have some speghetti!";
     };
     requestAnimationFrame(() => {
-      // TODO(P3) confirm that requesting frame will order this after rendering
-      // (Seems to work for now...)
       this.refresh = refresh;
       this.refresh();
       this.connected();
@@ -156,6 +157,7 @@ export class WebComponent extends HTMLElement {
   }
 }
 
+// TODO(P1) Expand and document how this is used.
 WebComponent.CSS_RESET = /*html*/ `
 <style>
   select,input {

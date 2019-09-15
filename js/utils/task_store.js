@@ -103,6 +103,15 @@ export class TaskStore {
       localStorage.setItem("taskHistory", JSON.stringify(taskHistory));
       localStorage.setItem("version", 3);
     }
+
+    if (this.storage.version == 3) {
+      tasks.forEach(task => {
+        task.blockedBy = task.blockedBy.map(b => parseInt(b));
+      });
+
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+      localStorage.setItem("version", 4);
+    }
   }
   allTags() {
     if (this.tasks.length == 0) {
@@ -115,6 +124,7 @@ export class TaskStore {
 }
 
 class Task {
+  // TODO(P1) Clean up and document schema.
   constructor(storage, values) {
     this.storage = storage;
     this.values = values;

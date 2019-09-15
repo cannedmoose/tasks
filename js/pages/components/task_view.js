@@ -18,7 +18,7 @@ export class TaskView extends WebComponent {
 
   refresh() {
     if (!this.task) return;
-    let counter = this.task.done + "/∞";
+    let counter = "" + this.task.done + "/∞";
     if (this.task.repeat != Infinity)
       counter = this.task.done + "/" + this.task.repeat;
     this.sub("#counter", counter);
@@ -52,8 +52,49 @@ export class TaskView extends WebComponent {
   }
 
   template() {
-    // TODO(P2) add pause event
+    // TODO(P2) add button/event
     return /*html*/ `
+  <style>
+    .line-item {
+      display: flex;
+      flex-direction: row;
+      border-bottom: 1px solid #ADD8E6;
+    }
+
+    .left-column, .right-column {
+      flex: 1;
+      text-align: center;
+    }
+
+    .left-column {
+      border-left: 1px dotted #ADD8E6;
+    }
+
+    .right-column {
+       border-right: 1px solid #ADD8E6;
+    }
+
+    .center-column {
+      flex: 5;
+      padding:0 .25em;
+    }
+
+    #info {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    #name, #counter {
+      white-space: nowrap;
+    }
+
+    #counter {
+      font-size: .5em;
+      color: lightGrey;
+    }
+  </style>
   <div id="label" class="line-item button">
     <div id="tick" class="right-column"></div>
     <div id="info" class="center-column">
@@ -62,51 +103,6 @@ export class TaskView extends WebComponent {
     </div>
     <div id="edit" class="left-column">...</div>
   </div>
-  <style>
-    .line-item {
-      width: 100%;
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      border-bottom: 1px solid #ADD8E6;
-    }
-
-    .right-column {
-      flex: 1;
-      border-right: 1px solid #ADD8E6;
-      text-align: center;
-    }
-
-    .center-column {
-      flex: 5;
-      margin-left: .5em;
-      padding-left: .5em;
-      margin-right: .5em;
-      padding-right: .5em;
-    }
-
-    #info {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-    }
-
-    #name {
-      white-space: nowrap;
-      overflow: hidden;
-    }
-    #counter {
-      white-space: nowrap;
-      size: .5em;
-      color: lightGrey;
-    }
-
-    .left-column {
-      flex: 1;
-      text-align: center;
-      border-left: 1px dotted #ADD8E6;
-    }
-  </style>
   `;
   }
 }

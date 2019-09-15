@@ -43,12 +43,9 @@ export class TaskList extends WebComponent {
   }
 
   refreshTask(task, el) {
-    // TODO(P2) Test to make sure we aren't dropping/duping tasks
     if (el) {
       // We have a task and an element to put it in
       el.task = task;
-      // TODO(P2) figure out better way to enable interacting for single element
-      el.classList.remove("interacting");
       el.refresh();
     } else {
       // We have a task but no element to put it in
@@ -71,6 +68,7 @@ export class TaskList extends WebComponent {
     });
 
     this.addListener(this.qs("#eye"), "click", e => {
+      // TODO(P1) properly store tagstate
       let tagState = this.store.tagState[this.tag] || "due";
       if (tagState == "due") {
         this.store.tagState[this.tag] = "all";
@@ -95,58 +93,35 @@ export class TaskList extends WebComponent {
   template() {
     return /*html*/ `
 <style>
-  #label,#eye,#add {
-    font-size: 1em;
-    flex:1;
+  :host {
+    background-color: white;
   }
 
-  #label {
-    white-space: nowrap;
-    text-decoration: underline;
-  }
-
-  #add {
-    text-align: right;
-  }
-  #eye {
-    flex:0;
-    text-align: center;
-  }
-
-  .sticky {
-    /*position: -webkit-sticky;*
-    position: sticky;
-    top:0px;*/
-  }
   .menu {
     display: flex;
     flex-direction: row;
-    justify-content: space-evenly;
+    justify-content: space-between;
     align-items: center;
-    top: .1em;
 
     padding: 0 .5em;
 
     border-bottom: 1px solid #ADD8E6;
     border-top: 3px solid #ADD8E6;
-    background-color: white;
   }
 
-  .spacer {
-    position: -webkit-sticky;
-    position: sticky;
-    top: 0px;
-    height: .1em;
-    background-color: white;
+  .menu > * {
+    flex:0;
+    padding:0 .5em;
+    white-space: nowrap;
   }
 
-  #content {
-    background-color: white;
+  #label {
+    text-decoration: underline;
+    cursor: default;
   }
 </style>
-    <div class="sticky spacer"></div>
-    <div class="sticky menu">
-      <div id ="label"></div>
+    <div class="menu">
+      <div id ="label" class="button"></div>
       <div id="eye" class="button"></div>
       <div id="add" class="button">+</div>
     </div>

@@ -124,6 +124,7 @@ export class TaskStore {
 }
 
 class Task {
+  // TODO(P1) Clean up and document schema.
   constructor(storage, values) {
     this.storage = storage;
     this.values = values;

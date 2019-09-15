@@ -50,11 +50,28 @@ export class AdminPage extends WebComponent {
   #console {
     width: 100vw;
     height: 50vh;
+    font-size: .5em;
+  }
+  #done {
+    height: 10vh;
+    width: 10vw;
+  }
+  #import {
+    height: 10vh;
+    width: 10vw;
+  }
+  #buttons {
+    padding-top: 5vh;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
   }
 </style>
-<textarea id="console"></textarea>
-<button id="done">Done</button>
-<button id="import">Import</button>
+  <textarea id="console"></textarea>
+  <div id="buttons">
+  <button id="done">Done</button>
+  <button id="import">Import</button>
+</div>
     `;
   }
 }

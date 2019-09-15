@@ -12,10 +12,10 @@ import { WebComponent } from "./web_component.js";
  *   - Each child treated as a page
  *   - Children should
  *
- * TODO
- * HMMMHMHM
- * OKAY SO just base it off childrens
- * Change a childs slot based on the page..
+ * TODO(P1) This is kinda a mess need to clean up
+ *   - Want on change event
+ *   - Want label to be configurable (maybe let it be passed?)
+ *    - So we can have Repeat: Label on same line
  */
 export class Tabs extends WebComponent {
   constructor() {
@@ -49,10 +49,7 @@ export class Tabs extends WebComponent {
     }
   }
 
-  connected() {
-    // TODO(P1)
-    // Add onclick for label
-  }
+  connected() {}
 
   get page() {
     return this.getAttribute("page");

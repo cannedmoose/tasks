@@ -11,6 +11,8 @@ import { toMillis, fromMillis } from "../../utils/time_utils.js";
  *   - confirm
  *   - cancel
  *   - delete
+ *
+ * TODO(P1) Cleanup template and CSS
  */
 export class TaskEdit extends WebComponent {
   super(task) {
@@ -160,7 +162,7 @@ export class TaskEdit extends WebComponent {
   }
 
   template() {
-    // TODO(P1) Styling
+    // TODO(P1) Styling fixes
     return /*html*/ `
   <style>
     :host {

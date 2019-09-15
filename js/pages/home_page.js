@@ -79,8 +79,6 @@ export class HomePage extends WebComponent {
     });
 
     this.addListener(this.qs("#tasks"), "edit", e => {
-      // TODO(P2) passing label isn't nice
-      // Should pass a template to the task list
       this.editing = e.detail.task;
       this.refresh();
     });

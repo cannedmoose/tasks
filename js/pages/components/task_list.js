@@ -30,10 +30,8 @@ export class TaskList extends WebComponent {
     let tagState = this.tag ? this.store.tagState[this.tag] || "due" : "due";
     if (tagState == "due") {
       this.sub("#eye", "○");
-      filter = task => task.isDue(Date.now()) && this.filter(task);
     } else if (tagState == "none") {
       this.sub("#eye", "●");
-      filter = task => false;
     } else {
       this.sub("#eye", "◌");
     }
@@ -78,7 +76,13 @@ export class TaskList extends WebComponent {
         this.store.tagState[this.tag] = "none";
       }
       this.store.store();
-      this.refresh();
+      // TODO(P1) trigger refresh in a nicer way
+      this.dispatchEvent(
+        new CustomEvent("done", {
+          detail: { task: { do: () => {} } },
+          bubbles: true
+        })
+      );
     });
   }
 
@@ -110,9 +114,18 @@ export class TaskList extends WebComponent {
   }
 
   .menu > * {
-    flex:0;
-    padding:0 .5em;
+    text-align: center;
+    flex:1;
+    flex-shrink: 0;
     white-space: nowrap;
+  }
+
+  .menu > :first-child {
+    text-align: left;
+  }
+
+  .menu > :last-child {
+    text-align: right;
   }
 
   #label {

@@ -28,14 +28,47 @@ export class HomePage extends WebComponent {
       edit.classList.add("hidden");
       display.classList.remove("hidden");
 
+      let globalFilter = task => {
+        let period = this.qs("#timeperiod").value;
+        if (period == "0") {
+          period = 0;
+        }
+        if (period == "12h") {
+          period = toMillis("hours", 12);
+        }
+        if (period == "2d") {
+          period = toMillis("days", 2);
+        }
+        if (period == "1w") {
+          period = toMillis("weeks", 1);
+        }
+        if (period == "all") {
+          period = -Infinity;
+        }
+        let containsSearch = task.name
+          .toLowerCase()
+          .includes(this.qs("#search").value.toLowerCase());
+
+        return containsSearch && task.isDue(Date.now() + period);
+      };
+
+      let tagFilter = tag => {
+        return task => {
+          let tagState = this.store.tagState[tag] || "due";
+          return (
+            task.tags.includes(tag) && (tagState == "all" || tagState == "due")
+          );
+        };
+      };
+
       let tags = this.store.allTags();
-      let dueTasks = this.store.tasks.filter(task => task.isDue(Date.now()));
+      let dueTasks = this.store.tasks.filter(globalFilter);
       let t = tags.sort((tag1, tag2) => {
         let due1 = dueTasks
-          .filter(task => task.tags.includes(tag1))
+          .filter(task => tagFilter(tag1)(task))
           .sort((t1, t2) => t2.due - t1.due);
         let due2 = dueTasks
-          .filter(task => task.tags.includes(tag2))
+          .filter(task => tagFilter(tag2)(task))
           .sort((t1, t2) => t2.due - t1.due);
         let lengthDiff = due2.length - due1.length;
         if (lengthDiff == 0) {
@@ -45,7 +78,7 @@ export class HomePage extends WebComponent {
       });
 
       this.zip(t, "wc-task-list", "#tasks", (tag, el) => {
-        let taskFilter = task => task.tags.includes(tag);
+        let taskFilter = task => tagFilter(tag)(task) && globalFilter(task);
         let template = new TaskBuilder(this.store, { tags: [tag] });
         if (el) {
           el.filter = taskFilter;
@@ -101,6 +134,14 @@ export class HomePage extends WebComponent {
       this.editing = null;
       this.refresh();
     });
+
+    this.addListener(this.qs("#timeperiod"), "change", e => {
+      this.refresh();
+    });
+
+    this.addListener(this.qs("#search"), "input", e => {
+      this.refresh();
+    });
   }
 
   timeComp(t1, t2) {
@@ -129,11 +170,37 @@ export class HomePage extends WebComponent {
   margin: 0em .2em;
 }
 
+#menu {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0px;
+
+  background-color: white;
+  border-bottom: 1px solid #ADD8E6;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  font-size: .75em;
+  padding: .1em 0em;
+}
+
 
 </style>
 <wc-task-edit id="edit"></wc-task-edit>
 <div id="display">
-  <div id="tasks" ></div>
+  <div id="menu">
+    <input id="search" type="search"/>
+    <select id="timeperiod">
+      <option value="0">Now</option>
+      <option value="12h" selected>12 Hours</option>
+      <option value="2d">2 Days</option>
+      <option value="1w">1 Week</option>
+      <option value="all">All</option>
+    </select>
+  </div>
+  <div id="tasks"></div>
 </div>
 `;
   }

@@ -101,7 +101,7 @@ select {
 }
 
 html {
-  font: 4em/1.5 "Quicksand";
+  font: 1.5em/1.5 "Quicksand";
   color: rgb(37, 37, 37);
   font-weight: medium;
 }

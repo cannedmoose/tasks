@@ -12,7 +12,6 @@ import { toMillis, fromMillis } from "../../utils/time_utils.js";
  *   - cancel
  *   - delete
  *
- * TODO(P1) Cleanup template and CSS
  */
 export class TaskEdit extends WebComponent {
   super(task) {
@@ -30,23 +29,19 @@ export class TaskEdit extends WebComponent {
     }
     this.qs("#name").value = this.task.name;
     this.qs("#tag").value = this.task.tags[0];
+    if (this.task.blockedBy.length > 0) {
+      this.qs("#blocked-by").value = this.task.blockedBy[0];
+    } else {
+      this.qs("#blocked-by").value = "";
+    }
 
-    let blockedBy = this.qs("#blocked-by");
-    this._clear(this.qs("#blocked-by"));
-    let nothingEl = document.createElement("option");
-    nothingEl.textContent = "--Nothing--";
-    nothingEl.value = "";
-    blockedBy.append(nothingEl);
-
+    let taskList = this.qs("#tasks");
+    this._clear(taskList);
     this.task.allTasks().forEach(task => {
-      if (this.task.id === task.id) {
-        return;
-      }
       let el = document.createElement("option");
       el.value = task.id;
       el.textContent = task.name;
-      el.selected = task.id == this.task.blockedBy[0];
-      blockedBy.append(el);
+      taskList.append(el);
     });
 
     let tagList = this.qs("#tags");
@@ -58,15 +53,18 @@ export class TaskEdit extends WebComponent {
       tagList.append(el);
     });
 
-    if (this.task.repeat == 1) {
-      this.qs("#repeats").page = "Once";
-    } else if (this.task.repeat == Infinity) {
+    if (this.task.repeat == Infinity) {
       this.qs("#repeats").page = "Forever";
     } else {
       this.qs("#repeats").page = "Multiple";
     }
 
-    this.qs("#repeat-input").value = this.task.repeat;
+    if (this.task.repeat != Infinity) {
+      this.qs("#repeat-input").value = this.task.repeat;
+    } else {
+      this.qs("#repeat-input").value = 10;
+    }
+    //this.qs("#repeat-count").value = this.task.done;
 
     let convertedPeriod = fromMillis(this.task.period);
     this.qs("#forever-period").unit = convertedPeriod.unit;
@@ -74,10 +72,6 @@ export class TaskEdit extends WebComponent {
 
     this.qs("#multiple-period").unit = convertedPeriod.unit;
     this.qs("#multiple-period").amount = convertedPeriod.amount;
-
-    convertedPeriod = fromMillis(this.task.due - Date.now());
-    this.qs("#once-due").unit = convertedPeriod.unit;
-    this.qs("#once-due").amount = convertedPeriod.amount;
   }
 
   connected() {
@@ -113,7 +107,7 @@ export class TaskEdit extends WebComponent {
       if (!this.qs("#blocked-by").value) {
         return;
       }
-      this.values.blockedBy = [ParseInt(this.qs("#blocked-by").value)];
+      this.values.blockedBy = [parseInt(this.qs("#blocked-by").value)];
       this.values.blocked =
         (this.task.blocked || !this.task.id) &&
         this.values.blockedBy.length > 0;
@@ -121,12 +115,6 @@ export class TaskEdit extends WebComponent {
 
     this.addListener(this.qs("#repeat-input"), "change", e => {
       this.values.repeat = parseInt(this.qs("#repeat-input").value);
-    });
-
-    this.addListener(this.qs("#once-due"), "change", e => {
-      let period = parseInt(this.qs("#once-due").millis);
-      this.values.period = Math.abs(period);
-      this.values.due = Date.now() + this.values.period;
     });
 
     this.addListener(this.qs("#multiple-period"), "change", e => {
@@ -141,16 +129,14 @@ export class TaskEdit extends WebComponent {
       e.stopPropagation();
 
       let repeatPage = this.qs("#repeats").page;
-      if (repeatPage == "Once") {
-        this.values.repeat = 1;
-      } else if (repeatPage == "Forever") {
+      if (repeatPage == "Forever") {
         this.values.repeat = "Infinity";
       } else {
         this.values.repeat = parseInt(this.qs("#repeat-input").value);
       }
 
       Object.assign(this.task.values, this.values);
-      // HMM WHERE TO GET STORE FROM
+      // TODO(P2) HMM WHERE TO GET STORE FROM
       this.task.storage.store();
       this.dispatchEvent(
         new CustomEvent("confirm", {
@@ -162,7 +148,7 @@ export class TaskEdit extends WebComponent {
   }
 
   template() {
-    // TODO(P1) Styling fixes
+    // TODO(P2) Styling fixes
     return /*html*/ `
   <style>
     :host {
@@ -181,12 +167,14 @@ export class TaskEdit extends WebComponent {
       display: flex;
       flex-direction: row;
       justify-content: flex-start;
-      flex: 1;
+			flex: 1;
+			align-items: center;
     }
 
     .bordered {
-      border-bottom: 1px solid #ADD8E6;
-      margin-right: 1em;
+      /*border-bottom: 1px solid #ADD8E6;*/
+			margin-right: 1em;
+			font-size: .5em;
       flex:1;
     }
 
@@ -198,13 +186,24 @@ export class TaskEdit extends WebComponent {
       display: none;
     }
 
-    input[type=text] {
-      max-width: 8em;
-    }
+    input {
+			max-width: 10em;
+			font-size: .75em;
+		}
+
+		#forever-period {
+			max-width: 10em;
+			min-width: 10em;
+			font-size: .75em;
+		}
+
+		#repeats {
+			margin-top: .5em;
+		}
   </style>
   <div class="line-item">
     <div class="bordered">Name:</div>
-    <input id="name" type="text" placeholder="shopping"/>
+    <input id="name" type="text" placeholder="Exercise"/>
   </div>
   <div class="line-item">
     <div class="bordered">Tag:</div>
@@ -213,25 +212,30 @@ export class TaskEdit extends WebComponent {
   <datalist id="tags"></datalist>
   <div class="line-item">
     <div class="bordered">After:</div>
-    <select id="blocked-by">
-    </select>
-  </div>
-  <span class="bordered">Repeats</span>
-  <wc-tabs id="repeats" page="Once">
-    <div label="Once" class="line-item">
-      <div class="bordered">Due:</div>
-      <wc-time-input id="once-due">
-      </wc-time-input>
-    </div>
-    <div label="Multiple">
-      <div class="line-item">
-        <div class="bordered">Times:</div>
-        <input id="repeat-input" type="number"/>
-      </div>
-      <div class="line-item">
+    <input id="blocked-by" list="tasks" type="text" placeholder="nothing"/>
+	</div>
+	<datalist id="tasks"></datalist>
+	<!---
+	TODO(P2) add these back in 
+	<div class="line-item">
+    <div class="bordered">Blocked:</div>
+    <input type="checkbox" id="blocked" />
+	</div>
+	<div class="line-item">
+    <div class="bordered">Done:</div>
+    <input type="number" id="repeat-count" />
+	</div>
+	--->
+  <wc-tabs id="repeats" page="Forever">
+		<div label="Multiple">
+			<div class="line-item">
         <div class="bordered">Every:</div>
         <wc-time-input id="multiple-period">
         </wc-time-input>
+      </div>
+      <div class="line-item">
+        <div class="bordered">Times:</div>
+        <input id="repeat-input" type="number"/>
       </div>
     </div>
     <div label="Forever" class="line-item">

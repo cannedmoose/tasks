@@ -25,6 +25,8 @@ export class AdminPage extends WebComponent {
   connected() {
     this.addListener(this.qs("#done"), "click", this.onDone);
     this.addListener(this.qs("#import"), "click", this.onImport);
+    this.addListener(this.qs("#copy"), "click", this.onCopy);
+    this.addListener(this.qs("#select"), "click", this.onSelect);
   }
 
   onDone(e) {
@@ -44,22 +46,33 @@ export class AdminPage extends WebComponent {
     this.store.import(this.qs("#console").value);
   }
 
+  onCopy(e) {
+    e.stopPropagation();
+    var copyText = this.qs("#console");
+    copyText.select();
+    document.execCommand("copy");
+  }
+
+  onSelect(e) {
+    e.stopPropagation();
+    var pasteText = this.qs("#console");
+    pasteText.select();
+  }
+
   template() {
     return /*html*/ `
 <style>
   #console {
-    width: 100vw;
-    height: 50vh;
+		width: 100%;
+		height: 50vh;
     font-size: .5em;
   }
-  #done {
-    height: 10vh;
-    width: 10vw;
-  }
-  #import {
-    height: 10vh;
-    width: 10vw;
-  }
+  button {
+		height: 10vh;
+		width: 100%;
+		font-size: 1em;
+	}
+	
   #buttons {
     padding-top: 5vh;
     display: flex;
@@ -69,9 +82,11 @@ export class AdminPage extends WebComponent {
 </style>
   <textarea id="console"></textarea>
   <div id="buttons">
-  <button id="done">Done</button>
-  <button id="import">Import</button>
-</div>
+		<button id="done">Done</button>
+		<button id="copy">Copy</button>
+		<button id="select">Select</button>
+		<button id="import">Import</button>
+	</div>
     `;
   }
 }

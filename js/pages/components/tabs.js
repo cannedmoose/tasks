@@ -12,7 +12,7 @@ import { WebComponent } from "./web_component.js";
  *   - Each child treated as a page
  *   - Children should
  *
- * TODO(P1) This is kinda a mess need to clean up
+ * TODO(P2) This is kinda a mess need to clean up
  *   - Want on change event
  *   - Want label to be configurable (maybe let it be passed?)
  *    - So we can have Repeat: Label on same line
@@ -37,7 +37,6 @@ export class Tabs extends WebComponent {
       this.qs("#label").append(labelDiv);
       this.addListener(labelDiv, "click", e => {
         this.page = labelDiv.textContent;
-        this.refresh();
       });
       labelDiv.textContent = child.getAttribute("label");
       if (child.getAttribute("label") === this.page) {
@@ -57,7 +56,7 @@ export class Tabs extends WebComponent {
 
   set page(val) {
     this.setAttribute("page", val);
-    this.refresh();
+    this.requestRefresh();
     // Should toggle classlists...
   }
 

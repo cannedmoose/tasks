@@ -47,7 +47,7 @@ export class WebComponent extends HTMLElement {
   qsAll(query) {
     return this.shadowRoot.querySelectorAll(query);
   }
-  // TODO(P1) figure out why custom events don't bubble
+  // TODO(P2) figure out why custom events don't bubble
   bubble(e) {
     this.dispatchEvent(
       new CustomEvent(e.type, {
@@ -68,32 +68,56 @@ export class WebComponent extends HTMLElement {
     let nodes = this.qsAll(itemQS);
     let parent = this.qs(parentQS);
     fn = fn.bind(this);
-    for (let i = 0; i < Math.max(data.length, nodes.length); i++) {
-      let d = data[i];
+
+    // Map nodes to ids
+    let nodeMap = new Map();
+    for (let i = 0; i < nodes.length; i++) {
       let node = nodes[i];
-      if (!d) {
+      nodeMap.set(node.getAttribute("zip-id"), node);
+    }
+
+    // Map data to nodes
+    let usedIds = new Set();
+    for (let i = 0; i < data.length; i++) {
+      let d = data[i];
+      // TODO(P3) Should enforce id is a string...
+      let node = nodeMap.get(String(d.id));
+      usedIds.add(String(d.id));
+      node = fn(d, node);
+      // Ensure that node order matches
+      parent.appendChild(node);
+      node.setAttribute("zip-id", d.id);
+    }
+
+    // Remove nodes
+    nodeMap.forEach((node, id) => {
+      if (!usedIds.has(id)) {
         parent.removeChild(node);
       }
-      let r = fn(d, node);
-      if (!node) {
-        parent.append(r);
-      }
-    }
+    });
   }
 
   // Webcomponent lifecycle hooks
   connectedCallback() {
     this._upgradeProperties();
-    let refresh = this.refresh;
-    // Make sure we don't double refresh on connect
-    this.refresh = () => {
-      throw "Don't be upsetti, have some speghetti!";
-    };
-    requestAnimationFrame(() => {
-      this.refresh = refresh;
-      this.refresh();
-      this.connected();
-    });
+    this.connected();
+    this.requestRefresh();
+  }
+
+  // To be called instead of refresh directly.
+  // Ensures one refresh call per animation frame
+  requestRefresh() {
+    if (this.refresh) {
+      let refresh = this.refresh;
+      this.refresh = undefined;
+      requestAnimationFrame(() => {
+        this.refresh = refresh;
+        this.refresh();
+      });
+    } else {
+      // TODO(P2) figure out why these happen with taskView...
+      console.log("Double refresh: " + this.id());
+    }
   }
 
   adoptedCallback() {
@@ -157,7 +181,7 @@ export class WebComponent extends HTMLElement {
   }
 }
 
-// TODO(P1) Expand and document how this is used.
+// TODO(P2) Expand and document how this is used.
 WebComponent.CSS_RESET = /*html*/ `
 <style>
   select,input {

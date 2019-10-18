@@ -75,7 +75,7 @@ export class TimeInput extends WebComponent {
     #amount {
       text-align: right;
       margin-right: .5em;
-      max-width: 5em;
+      max-width: 3em;
     }
 
     #unit {

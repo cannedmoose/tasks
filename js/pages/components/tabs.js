@@ -37,7 +37,7 @@ export class Tabs extends WebComponent {
       this.qs("#label").append(labelDiv);
       this.addListener(labelDiv, "click", e => {
         this.page = labelDiv.textContent;
-        this.refresh();
+        this.requestRefresh();
       });
       labelDiv.textContent = child.getAttribute("label");
       if (child.getAttribute("label") === this.page) {
@@ -57,7 +57,7 @@ export class Tabs extends WebComponent {
 
   set page(val) {
     this.setAttribute("page", val);
-    this.refresh();
+    this.requestRefresh();
     // Should toggle classlists...
   }
 

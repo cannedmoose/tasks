@@ -58,15 +58,14 @@ export class TaskEdit extends WebComponent {
       tagList.append(el);
     });
 
-    if (this.task.repeat == 1) {
-      this.qs("#repeats").page = "Once";
-    } else if (this.task.repeat == Infinity) {
+    if (this.task.repeat == Infinity) {
       this.qs("#repeats").page = "Forever";
     } else {
       this.qs("#repeats").page = "Multiple";
     }
 
     this.qs("#repeat-input").value = this.task.repeat;
+    this.qs("#repeat-count").value = this.task.done;
 
     let convertedPeriod = fromMillis(this.task.period);
     this.qs("#forever-period").unit = convertedPeriod.unit;
@@ -74,10 +73,6 @@ export class TaskEdit extends WebComponent {
 
     this.qs("#multiple-period").unit = convertedPeriod.unit;
     this.qs("#multiple-period").amount = convertedPeriod.amount;
-
-    convertedPeriod = fromMillis(this.task.due - Date.now());
-    this.qs("#once-due").unit = convertedPeriod.unit;
-    this.qs("#once-due").amount = convertedPeriod.amount;
   }
 
   connected() {
@@ -121,12 +116,6 @@ export class TaskEdit extends WebComponent {
 
     this.addListener(this.qs("#repeat-input"), "change", e => {
       this.values.repeat = parseInt(this.qs("#repeat-input").value);
-    });
-
-    this.addListener(this.qs("#once-due"), "change", e => {
-      let period = parseInt(this.qs("#once-due").millis);
-      this.values.period = Math.abs(period);
-      this.values.due = Date.now() + this.values.period;
     });
 
     this.addListener(this.qs("#multiple-period"), "change", e => {
@@ -215,14 +204,17 @@ export class TaskEdit extends WebComponent {
     <div class="bordered">After:</div>
     <select id="blocked-by">
     </select>
-  </div>
+	</div>
+	<div class="line-item">
+    <div class="bordered">Blocked:</div>
+    <input type="checkbox" id="blocked" />
+	</div>
+	<div class="line-item">
+    <div class="bordered">Done:</div>
+    <input type="number" id="repeat-count" />
+	</div>
   <span class="bordered">Repeats</span>
-  <wc-tabs id="repeats" page="Once">
-    <div label="Once" class="line-item">
-      <div class="bordered">Due:</div>
-      <wc-time-input id="once-due">
-      </wc-time-input>
-    </div>
+  <wc-tabs id="repeats" page="Multiple">
     <div label="Multiple">
       <div class="line-item">
         <div class="bordered">Times:</div>

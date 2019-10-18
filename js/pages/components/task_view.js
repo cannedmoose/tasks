@@ -1,4 +1,5 @@
 import { WebComponent } from "./web_component.js";
+import { toMillis } from "../../utils/time_utils.js";
 
 /**
  * Task view
@@ -18,12 +19,15 @@ export class TaskView extends WebComponent {
 
   refresh() {
     if (!this.task) return;
-    let counter = "" + this.task.done + "/∞";
-    if (this.task.repeat != Infinity)
-      counter = this.task.done + "/" + this.task.repeat;
-    this.sub("#counter", counter);
+    this.sub("#tag", this.task.tags[0]);
     this.sub("#name", this.task.name);
-    this.sub("#tick", this.task.isDue(Date.now()) ? "☐" : "☑");
+
+    if (this.task.isDue(Date.now() + toMillis("hours", 12))) {
+      this.qs("#name").classList.remove("done");
+    } else {
+      this.qs("#name").classList.add("done");
+    }
+    // TODO(P1) Strikethrough name if done
   }
 
   connected() {
@@ -58,16 +62,14 @@ export class TaskView extends WebComponent {
     .line-item {
       display: flex;
       flex-direction: row;
-      border-bottom: 1px solid #ADD8E6;
+			border-bottom: .5px solid #ADD8E6;
+			border-top: .5px solid #ADD8E6;
+			background-color: white;
     }
 
-    .left-column, .right-column {
+    .right-column {
       flex: 1;
       text-align: center;
-    }
-
-    .left-column {
-      border-left: 1px dotted #ADD8E6;
     }
 
     .right-column {
@@ -86,22 +88,32 @@ export class TaskView extends WebComponent {
       justify-content: space-between;
     }
 
-    #name, #counter {
+    #name, #tag {
       white-space: nowrap;
     }
 
-    #counter {
+    #tag {
       font-size: .5em;
       color: lightGrey;
-    }
+		}
+
+		@keyframes strike {
+			from { text-decoration-color: transparent; }
+			to { text-decoration-color: auto; }
+		}
+
+		.done {
+			text-decoration: line-through;
+			animation: strike .05s linear;
+		}
+		
   </style>
-  <div id="label" class="line-item button">
-    <div id="tick" class="right-column"></div>
+	<div id="label" class="line-item button">
+		<div id="edit" class="right-column">...</div>
     <div id="info" class="center-column">
       <div id="name"></div>
-      <div id="counter"></div>
+      <div id="tag"></div>
     </div>
-    <div id="edit" class="left-column">...</div>
   </div>
   `;
   }

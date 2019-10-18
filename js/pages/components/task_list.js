@@ -12,46 +12,73 @@ import { TaskBuilder } from "../../utils/task_store.js";
  *   - label
  */
 export class TaskList extends WebComponent {
-  constructor(store, filter, compare, template, tag) {
+  constructor(store, filter, compare) {
     super();
     this.store = store;
     this.filter = filter;
     this.compare = compare;
-    this.template = template;
-    this.tag = this.tag || tag;
+    this.prevBoxes = new Map();
   }
 
+  // TODO(P2) pretty sure we don't need the upgrade, test to make sure
   upgrades() {
-    return ["label"];
+    return ["store", "filter", "compare", "pastFilter"];
+  }
+
+  willRefresh() {
+    this.prevBoxes = new Map();
+    this.qsAll(".task-view").forEach(node => {
+      this.prevBoxes.set(
+        node.getAttribute("zip-id"),
+        node.getBoundingClientRect()
+      );
+    });
   }
 
   refresh() {
-    let filter = this.filter;
-    let tagState = this.tag ? this.store.tagState[this.tag] || "due" : "due";
-    if (tagState == "due") {
-      this.sub("#eye", "○");
-    } else if (tagState == "none") {
-      this.sub("#eye", "●");
-    } else {
-      this.sub("#eye", "◌");
-    }
-    let filteredTasks = this.store.tasks.filter(filter).sort(this.compare);
-    this.zip(filteredTasks, "wc-task-view", "#content", this.refreshTask);
-    this.sub("#label", this.label);
+    let filteredTasks = this.store.tasks.filter(this.filter).sort(this.compare);
+    // SOOO we're basically recreating react
+    // We need to make sure elements have ID's so we can match them right
+    this.zip(filteredTasks, ".task-view", "#content", this.refreshTask);
+    // EVERYTHING HAS BEEN UPDATED
+    this.qsAll(".task-view").forEach(node => {
+      let prevBox = this.prevBoxes.get(node.getAttribute("zip-id"));
+      if (!prevBox) {
+        return;
+      }
+      let newBox = node.getBoundingClientRect();
+
+      let deltaX = prevBox.left - newBox.left;
+      let deltaY = prevBox.top - newBox.top;
+      node.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+      node.style.transition = "transform 0s";
+      // Do cool list animation
+      requestAnimationFrame(() => {
+        node.style.transform = "";
+        node.style.transition = "transform 1s";
+      });
+    });
   }
 
   refreshTask(task, el) {
     if (el) {
       // We have a task and an element to put it in
-      el.task = task;
-      el.refresh();
+      el.firstElementChild.task = task;
+      el.firstElementChild.requestRefresh();
     } else {
       // We have a task but no element to put it in
-      let el = new TaskView(task);
-      this.addListener(el, "done", this.bubble);
-      this.addListener(el, "edit", this.bubble);
-      return el;
+      // TODO(P2) Figure out a way to apply css transforms
+      // to webcomponent without extra div
+      el = document.createElement("div");
+      el.classList.add("task-view");
+      //el.style.animation = "slide-up .5s ease";
+      let ts = new TaskView(task);
+      el.appendChild(ts);
+      this.addListener(ts, "done", this.bubble);
+      this.addListener(ts, "edit", this.bubble);
     }
+
+    return el;
   }
 
   connected() {
@@ -60,26 +87,6 @@ export class TaskList extends WebComponent {
       this.dispatchEvent(
         new CustomEvent("edit", {
           detail: { task: this.template },
-          bubbles: true
-        })
-      );
-    });
-
-    this.addListener(this.qs("#eye"), "click", e => {
-      // TODO(P1) properly store tagstate
-      let tagState = this.store.tagState[this.tag] || "due";
-      if (tagState == "due") {
-        this.store.tagState[this.tag] = "all";
-      } else if (tagState == "none") {
-        this.store.tagState[this.tag] = "due";
-      } else {
-        this.store.tagState[this.tag] = "none";
-      }
-      this.store.store();
-      // TODO(P1) trigger refresh in a nicer way
-      this.dispatchEvent(
-        new CustomEvent("done", {
-          detail: { task: { do: () => {} } },
           bubbles: true
         })
       );
@@ -99,7 +106,21 @@ export class TaskList extends WebComponent {
 <style>
   :host {
     background-color: white;
-  }
+	}
+	
+	@keyframes slide-up {
+    0% {
+        opacity: 0;
+        transform: translateY(50%);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+	}
+
+	.task-view {
+	}
 
   .menu {
     display: flex;

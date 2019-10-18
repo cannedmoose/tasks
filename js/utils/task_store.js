@@ -19,8 +19,6 @@ export class TaskStore {
       this.lastId = 1;
     }
     this.history = JSON.parse(this.storage.taskHistory || "[]");
-
-    this.tagState = JSON.parse(this.storage.tagState || "{}");
     this.version = this.storage.version;
   }
 
@@ -31,7 +29,6 @@ export class TaskStore {
     );
     localStorage.setItem("taskHistory", JSON.stringify(this.history));
     localStorage.setItem("version", this.version);
-    localStorage.setItem("tagState", JSON.stringify(this.tagState));
   }
 
   import(str) {
@@ -112,6 +109,20 @@ export class TaskStore {
       localStorage.setItem("tasks", JSON.stringify(tasks));
       localStorage.setItem("version", 4);
     }
+
+    if (this.storage.version == 4) {
+      tasks.forEach(task => {
+        let l = taskHistory.find(h => h.id == task.id);
+        if (l) {
+          task.lastDone = l.time;
+        } else {
+          task.lastDone = 0;
+        }
+      });
+
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+      localStorage.setItem("version", 5);
+    }
   }
   allTags() {
     if (this.tasks.length == 0) {
@@ -136,6 +147,7 @@ class Task {
     }
     this.values.done += 1;
     this.values.due = when + this.period;
+    this.lastDone = when;
     this.storage.history.push({
       type: "done",
       id: this.id,
@@ -217,6 +229,19 @@ class Task {
 
   get done() {
     return this.values.done;
+  }
+
+  /**
+   * When the task was lastDone.
+   */
+  set lastDone(val) {
+    if (val === this.lastDone) return;
+    this.values.lastDone = val;
+    this.storage.store();
+  }
+
+  get lastDone() {
+    return this.values.lastDone;
   }
 
   /**

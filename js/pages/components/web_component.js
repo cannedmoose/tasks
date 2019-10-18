@@ -68,33 +68,62 @@ export class WebComponent extends HTMLElement {
     let nodes = this.qsAll(itemQS);
     let parent = this.qs(parentQS);
     fn = fn.bind(this);
-    for (let i = 0; i < Math.max(data.length, nodes.length); i++) {
-      let d = data[i];
+
+    // Map nodes to ids
+    let nodeMap = new Map();
+    for (let i = 0; i < nodes.length; i++) {
       let node = nodes[i];
-      if (!d) {
+      nodeMap.set(node.getAttribute("zip-id"), node);
+    }
+
+    // Map data to nodes
+    let usedIds = new Set();
+    for (let i = 0; i < data.length; i++) {
+      let d = data[i];
+      // TODO(P2) Should just consistently assume id is a string...
+      let node = nodeMap.get(String(d.id));
+      usedIds.add(String(d.id));
+      node = fn(d, node);
+      // Ensure that node order matches
+      parent.appendChild(node);
+      node.setAttribute("zip-id", d.id);
+    }
+
+    // Remove nodes
+    nodeMap.forEach((node, id) => {
+      if (!usedIds.has(id)) {
         parent.removeChild(node);
       }
-      let r = fn(d, node);
-      if (!node) {
-        parent.append(r);
-      }
-    }
+    });
   }
 
   // Webcomponent lifecycle hooks
   connectedCallback() {
     this._upgradeProperties();
-    let refresh = this.refresh;
-    // Make sure we don't double refresh on connect
-    this.refresh = () => {
-      throw "Don't be upsetti, have some speghetti!";
-    };
-    requestAnimationFrame(() => {
-      this.refresh = refresh;
-      this.refresh();
-      this.connected();
-    });
+    this.connected();
+    this.requestRefresh();
   }
+
+  // TODO(P2) document this.
+  // CALL INSTEAD OF REFRESH
+  // ENSURE ONLY HAPPENS ONCE EVERY ANIMATION CYCLE
+  requestRefresh() {
+    if (this.refresh) {
+      let refresh = this.refresh;
+      this.refresh = undefined;
+      // TODO(P2) maybe call this no matter what
+      this.willRefresh();
+      requestAnimationFrame(() => {
+        this.refresh = refresh;
+        this.refresh();
+      });
+    } else {
+      // TODO(P2) figure out why these happen with taskView...
+      //console.log("Double refresh: " + this.id());
+    }
+  }
+
+  willRefresh() {}
 
   adoptedCallback() {
     console.log(this.id() + " adopted");

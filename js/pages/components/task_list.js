@@ -10,6 +10,9 @@ import { TaskBuilder } from "../../utils/task_store.js";
  * Sorts taks by given comparator.
  * #Attributes
  *   - label
+ *
+ * TODO(P2) pull menu into its own component, don't use it in here
+ *  this should just be for displaying a list of tasks
  */
 export class TaskList extends WebComponent {
   constructor(store, filter, compare) {
@@ -20,12 +23,8 @@ export class TaskList extends WebComponent {
     this.prevBoxes = new Map();
   }
 
-  // TODO(P2) pretty sure we don't need the upgrade, test to make sure
-  upgrades() {
-    return ["store", "filter", "compare", "pastFilter"];
-  }
-
-  willRefresh() {
+  refresh() {
+    // Store positions before updating
     this.prevBoxes = new Map();
     this.qsAll(".task-view").forEach(node => {
       this.prevBoxes.set(
@@ -33,14 +32,12 @@ export class TaskList extends WebComponent {
         node.getBoundingClientRect()
       );
     });
-  }
 
-  refresh() {
     let filteredTasks = this.store.tasks.filter(this.filter).sort(this.compare);
-    // SOOO we're basically recreating react
-    // We need to make sure elements have ID's so we can match them right
+    // Match tasks with their elements
     this.zip(filteredTasks, ".task-view", "#content", this.refreshTask);
-    // EVERYTHING HAS BEEN UPDATED
+
+    // Everything is updated, animate transitions based on old positoins
     this.qsAll(".task-view").forEach(node => {
       let prevBox = this.prevBoxes.get(node.getAttribute("zip-id"));
       if (!prevBox) {
@@ -64,7 +61,7 @@ export class TaskList extends WebComponent {
     if (el) {
       // We have a task and an element to put it in
       el.firstElementChild.task = task;
-      el.firstElementChild.requestRefresh();
+      //el.firstElementChild.requestRefresh();
     } else {
       // We have a task but no element to put it in
       // TODO(P2) Figure out a way to apply css transforms
@@ -86,7 +83,7 @@ export class TaskList extends WebComponent {
       e.stopPropagation();
       this.dispatchEvent(
         new CustomEvent("edit", {
-          detail: { task: this.template },
+          detail: { task: new TaskBuilder(this.store, {}) },
           bubbles: true
         })
       );

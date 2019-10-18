@@ -1,5 +1,56 @@
 import { toMillis } from "./time_utils.js";
 
+function init_config() {
+  return `{
+  "tasks": [
+    {
+      "id": 3,
+      "name": "Do a task",
+      "repeat": "1",
+      "period": 2419200000,
+      "due": 0,
+      "tags": [
+        "todo"
+      ],
+      "blocked": false,
+      "blockedBy": [],
+      "done": 0,
+      "lastDone": 0
+    },
+    {
+      "id": 4,
+      "name": "Create a task",
+      "repeat": "1",
+      "period": 2419200000,
+      "due": 0,
+      "tags": [
+        "todo"
+      ],
+      "blocked": false,
+      "blockedBy": [],
+      "done": 0,
+      "lastDone": 0
+    },
+    {
+      "id": 5,
+      "name": "Edit a task",
+      "repeat": "1",
+      "period": 2419200000,
+      "due": 0,
+      "tags": [
+        "todo"
+      ],
+      "blocked": false,
+      "blockedBy": [],
+      "done": 0,
+      "lastDone": 0
+    }
+  ],
+  "taskHistory": [],
+  "version": "5"
+}`;
+}
+
 export class TaskStore {
   constructor(storage) {
     this.storage = storage;
@@ -32,7 +83,7 @@ export class TaskStore {
   }
 
   import(str) {
-    // TODO(P2) Merge store + import
+    // TODO(P3) Merge store + import
     let vals = JSON.parse(str);
     localStorage.setItem("tasks", JSON.stringify(vals.tasks));
     localStorage.setItem("taskHistory", JSON.stringify(vals.taskHistory));
@@ -65,9 +116,7 @@ export class TaskStore {
 
     // Prehistory versions
     if (!this.storage.version || this.storage.version < 2) {
-      localStorage.setItem("tasks", "[]");
-      localStorage.setItem("taskHistory", "[]");
-      localStorage.setItem("version", 3);
+      this.import(init_config());
     }
 
     // Change to schema
@@ -111,6 +160,7 @@ export class TaskStore {
     }
 
     if (this.storage.version == 4) {
+      taskHistory.reverse();
       tasks.forEach(task => {
         let l = taskHistory.find(h => h.id == task.id);
         if (l) {
@@ -119,6 +169,7 @@ export class TaskStore {
           task.lastDone = 0;
         }
       });
+      taskHistory.reverse();
 
       localStorage.setItem("tasks", JSON.stringify(tasks));
       localStorage.setItem("version", 5);
@@ -135,7 +186,7 @@ export class TaskStore {
 }
 
 class Task {
-  // TODO(P1) Clean up and document schema.
+  // TODO(P3) Clean up and document schema.
   constructor(storage, values) {
     this.storage = storage;
     this.values = values;
@@ -326,7 +377,8 @@ export class TaskBuilder extends Task {
       period: toMillis("days", 1),
       tags: ["todo"],
       blockedBy: [],
-      blocked: false
+      blocked: false,
+      lastDone: 0
     };
     Object.assign(defaults, vals);
     super({ store: () => {}, allTags: () => realstore.allTags() }, defaults);

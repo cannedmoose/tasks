@@ -13,8 +13,7 @@ import { toMillis } from "../../utils/time_utils.js";
 export class TaskView extends WebComponent {
   constructor(task) {
     super();
-    // TODO(P2) Does upgrading fix this?
-    this.task = task || this.task;
+    this.task = task;
   }
 
   refresh() {
@@ -22,12 +21,12 @@ export class TaskView extends WebComponent {
     this.sub("#tag", this.task.tags[0]);
     this.sub("#name", this.task.name);
 
+    // TODO(P2) do this in a nicer way, should probably decide in tasklist whether to strike
     if (this.task.isDue(Date.now() + toMillis("hours", 12))) {
       this.qs("#name").classList.remove("done");
     } else {
       this.qs("#name").classList.add("done");
     }
-    // TODO(P1) Strikethrough name if done
   }
 
   connected() {
@@ -56,7 +55,6 @@ export class TaskView extends WebComponent {
   }
 
   template() {
-    // TODO(P2) add button/event
     return /*html*/ `
   <style>
     .line-item {

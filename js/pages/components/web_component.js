@@ -47,7 +47,7 @@ export class WebComponent extends HTMLElement {
   qsAll(query) {
     return this.shadowRoot.querySelectorAll(query);
   }
-  // TODO(P1) figure out why custom events don't bubble
+  // TODO(P2) figure out why custom events don't bubble
   bubble(e) {
     this.dispatchEvent(
       new CustomEvent(e.type, {
@@ -80,7 +80,7 @@ export class WebComponent extends HTMLElement {
     let usedIds = new Set();
     for (let i = 0; i < data.length; i++) {
       let d = data[i];
-      // TODO(P2) Should just consistently assume id is a string...
+      // TODO(P3) Should enforce id is a string...
       let node = nodeMap.get(String(d.id));
       usedIds.add(String(d.id));
       node = fn(d, node);
@@ -104,26 +104,21 @@ export class WebComponent extends HTMLElement {
     this.requestRefresh();
   }
 
-  // TODO(P2) document this.
-  // CALL INSTEAD OF REFRESH
-  // ENSURE ONLY HAPPENS ONCE EVERY ANIMATION CYCLE
+  // To be called instead of refresh directly.
+  // Ensures one refresh call per animation frame
   requestRefresh() {
     if (this.refresh) {
       let refresh = this.refresh;
       this.refresh = undefined;
-      // TODO(P2) maybe call this no matter what
-      this.willRefresh();
       requestAnimationFrame(() => {
         this.refresh = refresh;
         this.refresh();
       });
     } else {
       // TODO(P2) figure out why these happen with taskView...
-      //console.log("Double refresh: " + this.id());
+      console.log("Double refresh: " + this.id());
     }
   }
-
-  willRefresh() {}
 
   adoptedCallback() {
     console.log(this.id() + " adopted");
@@ -186,7 +181,7 @@ export class WebComponent extends HTMLElement {
   }
 }
 
-// TODO(P1) Expand and document how this is used.
+// TODO(P2) Expand and document how this is used.
 WebComponent.CSS_RESET = /*html*/ `
 <style>
   select,input {

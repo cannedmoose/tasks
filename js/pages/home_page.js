@@ -28,8 +28,8 @@ export class HomePage extends WebComponent {
       edit.classList.add("hidden");
       display.classList.remove("hidden");
 
-      // TODO(P2) Tasklist is being constructed via template
-      // Want some way to set it's shit during refresh AND connection
+      // TODO(P3) Figure out a nice way to set props on templated web component
+      // in connected AND refresh
       taskList.filter = this.globalFilter;
       taskList.compare = this.timeComp;
       taskList.store = this.store;
@@ -105,8 +105,8 @@ export class HomePage extends WebComponent {
 
 #edit {
   border: 2px dotted #ADD8E6;
-  margin: 1em;
-  padding: 1em;
+  margin: .5em;
+  padding: .5em;
 }
 
 #display {
@@ -115,7 +115,9 @@ export class HomePage extends WebComponent {
 
 
 </style>
-<wc-task-edit id="edit"></wc-task-edit>
+<div id="editdiv">
+	<wc-task-edit id="edit"></wc-task-edit>
+</div>
 <div id="display">
   <wc-task-list id="tasks"></wc-task-list>
 </div>

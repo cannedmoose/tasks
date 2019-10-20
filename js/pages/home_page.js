@@ -56,7 +56,9 @@ export class HomePage extends WebComponent {
       if (this.qs("#display").classList.contains("hidden")) {
         return;
       }
-      this.requestRefresh();
+      // TODO(P2) this is causing flickering on task list
+      // Figure out why and remove.
+      //this.requestRefresh();
     }, 3000);
 
     this.addListener(this.qs("#eye"), "click", e => {

@@ -12,6 +12,8 @@ export class HomePage extends WebComponent {
     super();
     this.store = store;
     this.editing = null;
+    this.allTasks = false;
+    this.globalFilter = this.globalFilter.bind(this);
   }
 
   refresh() {
@@ -35,6 +37,12 @@ export class HomePage extends WebComponent {
       taskList.store = this.store;
       taskList.requestRefresh();
     }
+
+    if (this.allTasks) {
+      this.sub("#eye", "○");
+    } else {
+      this.sub("#eye", "◌");
+    }
   }
 
   connected() {
@@ -50,6 +58,11 @@ export class HomePage extends WebComponent {
       }
       this.requestRefresh();
     }, 3000);
+
+    this.addListener(this.qs("#eye"), "click", e => {
+      this.allTasks = !this.allTasks;
+      this.requestRefresh();
+    });
 
     this.addListener(this.qs("#add"), "click", e => {
       this.editing = new TaskBuilder(this.store, {});
@@ -92,6 +105,9 @@ export class HomePage extends WebComponent {
 
   // look for tasks 12 hours ahead or done within last 12 hours
   globalFilter(task) {
+    if (this.allTasks) {
+      return true;
+    }
     let now = Date.now();
     let period = toMillis("hours", 12);
     return task.isDue(now + period) || task.lastDone > now - period;
@@ -159,7 +175,7 @@ export class HomePage extends WebComponent {
 <div id="display">
 	<div class="menu">
 		<div></div>
-		<div id="eye" class="button">o</div>
+		<div id="eye" class="button"></div>
 		<div id="add" class="button">+</div>
 	</div>
   <wc-task-list id="tasks"></wc-task-list>

@@ -6,6 +6,8 @@ import { toMillis } from "../utils/time_utils.js";
 
 /**
  * The home page
+ *
+ * TODO(P2) Add menifest so we can access offline.
  */
 export class HomePage extends WebComponent {
   constructor(store) {

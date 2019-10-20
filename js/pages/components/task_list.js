@@ -78,26 +78,6 @@ export class TaskList extends WebComponent {
     return el;
   }
 
-  connected() {
-    this.addListener(this.qs("#add"), "click", e => {
-      e.stopPropagation();
-      this.dispatchEvent(
-        new CustomEvent("edit", {
-          detail: { task: new TaskBuilder(this.store, {}) },
-          bubbles: true
-        })
-      );
-    });
-  }
-
-  get label() {
-    return this.getAttribute("label");
-  }
-
-  set label(val) {
-    this.setAttribute("label", val);
-  }
-
   template() {
     return /*html*/ `
 <style>
@@ -118,45 +98,8 @@ export class TaskList extends WebComponent {
 
 	.task-view {
 	}
-
-  .menu {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-
-    padding: 0 .5em;
-
-    border-bottom: 1px solid #ADD8E6;
-    border-top: 3px solid #ADD8E6;
-  }
-
-  .menu > * {
-    text-align: center;
-    flex:1;
-    flex-shrink: 0;
-    white-space: nowrap;
-  }
-
-  .menu > :first-child {
-    text-align: left;
-  }
-
-  .menu > :last-child {
-    text-align: right;
-  }
-
-  #label {
-    text-decoration: underline;
-    cursor: default;
-  }
 </style>
-    <div class="menu">
-      <div id ="label" class="button"></div>
-      <div id="eye" class="button"></div>
-      <div id="add" class="button">+</div>
-    </div>
-    <div id ="content"></div>
+<div id ="content"></div>
 `;
   }
 }

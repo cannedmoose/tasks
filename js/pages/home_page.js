@@ -12,6 +12,8 @@ export class HomePage extends WebComponent {
     super();
     this.store = store;
     this.editing = null;
+    this.allTasks = false;
+    this.globalFilter = this.globalFilter.bind(this);
   }
 
   refresh() {
@@ -35,6 +37,12 @@ export class HomePage extends WebComponent {
       taskList.store = this.store;
       taskList.requestRefresh();
     }
+
+    if (this.allTasks) {
+      this.sub("#eye", "○");
+    } else {
+      this.sub("#eye", "◌");
+    }
   }
 
   connected() {
@@ -48,8 +56,19 @@ export class HomePage extends WebComponent {
       if (this.qs("#display").classList.contains("hidden")) {
         return;
       }
-      //this.requestRefresh();
+      this.requestRefresh();
     }, 3000);
+
+    this.addListener(this.qs("#eye"), "click", e => {
+      this.allTasks = !this.allTasks;
+      this.requestRefresh();
+    });
+
+    this.addListener(this.qs("#add"), "click", e => {
+      this.editing = new TaskBuilder(this.store, {});
+      this.requestRefresh();
+    });
+
     this.addListener(this.qs("#tasks"), "done", e => {
       e.detail.task.do();
       this.requestRefresh();
@@ -86,6 +105,9 @@ export class HomePage extends WebComponent {
 
   // look for tasks 12 hours ahead or done within last 12 hours
   globalFilter(task) {
+    if (this.allTasks) {
+      return true;
+    }
     let now = Date.now();
     let period = toMillis("hours", 12);
     return task.isDue(now + period) || task.lastDone > now - period;
@@ -113,12 +135,49 @@ export class HomePage extends WebComponent {
   margin: 0em .2em;
 }
 
+.menu {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+
+	padding: 0 .5em;
+
+	border-bottom: 1px solid #ADD8E6;
+	border-top: 3px solid #ADD8E6;
+}
+
+.menu > * {
+	text-align: center;
+	flex:1;
+	flex-shrink: 0;
+	white-space: nowrap;
+}
+
+.menu > :first-child {
+	text-align: left;
+}
+
+.menu > :last-child {
+	text-align: right;
+}
+
+#label {
+	text-decoration: underline;
+	cursor: default;
+}
+
 
 </style>
 <div id="editdiv">
 	<wc-task-edit id="edit"></wc-task-edit>
 </div>
 <div id="display">
+	<div class="menu">
+		<div></div>
+		<div id="eye" class="button"></div>
+		<div id="add" class="button">+</div>
+	</div>
   <wc-task-list id="tasks"></wc-task-list>
 </div>
 `;

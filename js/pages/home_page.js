@@ -48,8 +48,14 @@ export class HomePage extends WebComponent {
       if (this.qs("#display").classList.contains("hidden")) {
         return;
       }
-      //this.requestRefresh();
+      this.requestRefresh();
     }, 3000);
+
+    this.addListener(this.qs("#add"), "click", e => {
+      this.editing = new TaskBuilder(this.store, {});
+      this.requestRefresh();
+    });
+
     this.addListener(this.qs("#tasks"), "done", e => {
       e.detail.task.do();
       this.requestRefresh();
@@ -113,12 +119,49 @@ export class HomePage extends WebComponent {
   margin: 0em .2em;
 }
 
+.menu {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+
+	padding: 0 .5em;
+
+	border-bottom: 1px solid #ADD8E6;
+	border-top: 3px solid #ADD8E6;
+}
+
+.menu > * {
+	text-align: center;
+	flex:1;
+	flex-shrink: 0;
+	white-space: nowrap;
+}
+
+.menu > :first-child {
+	text-align: left;
+}
+
+.menu > :last-child {
+	text-align: right;
+}
+
+#label {
+	text-decoration: underline;
+	cursor: default;
+}
+
 
 </style>
 <div id="editdiv">
 	<wc-task-edit id="edit"></wc-task-edit>
 </div>
 <div id="display">
+	<div class="menu">
+		<div></div>
+		<div id="eye" class="button">o</div>
+		<div id="add" class="button">+</div>
+	</div>
   <wc-task-list id="tasks"></wc-task-list>
 </div>
 `;
